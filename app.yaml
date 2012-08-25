@@ -1,0 +1,16 @@
+application: chat
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+libraries:
+- name: jinja2
+  version: latest
+
+inbound_services:
+- channel_presence
+
+handlers:
+- url: /.*
+  script: main.app
