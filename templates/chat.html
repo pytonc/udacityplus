@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chat</title>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
+  <!-- Custom CSS -->
+  <style type="text/css">
+    /* Some clever person who knows bootstrap can fix this later */
+    .nomargin {
+      margin-left: 0px;
+      margin-top: 0px;
+    }
+    
+    #whole-chatbox {
+      background-color: #fff;
+      margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+      -webkit-border-radius: 0 0 6px 6px;
+         -moz-border-radius: 0 0 6px 6px;
+              border-radius: 0 0 6px 6px;
+      -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+              box-shadow: 0 1px 2px rgba(0,0,0,.15);
+      width: 960px;
+      border: 1px solid;
+    }
+    
+    #chatclient {
+      width: 960px;      
+    }
+    
+    #channelpanes {
+      margin-top: -20px;
+      height: 540px;
+    }
+    
+    #chatarea {
+      width: 709px; /* 75%-2*5px padding-1px border */
+      height: 540px;
+      overflow-y: scroll;
+      padding: 5px;
+      border-right: 1px solid #DDDDDD;
+    }
+    
+    #userarea {
+      width: 230px; /* 25%-2*5px padding */
+      height: 540px;
+      padding: 5px;
+    }
+    
+    div#inputs {
+      height: auto;
+    }
+    
+    div#textinput {
+      width: 709px; /* 75%-2*5px padding-1px border */
+      padding: 5px;
+      border-top: 1px solid #DDDDDD;
+      border-right: 1px solid #DDDDDD;
+      height: auto;
+    }
+    
+    div#spare {
+      width: 230px; /* 25%-2*5px padding */
+      border-top: 1px solid #DDDDDD;
+      padding: 5px;
+      height: auto;
+    }
+    
+    input#chatinput {
+      width: 694px;
+    }
+    
+  </style><!-- End CSS -->
+</head>
+<body>
+  <div class="hero-unit">
+    <h1>UdacityPlus Chat Client</h1><br/>
+    <div class="row nomargin" id="whole-chatbox">
+      <div class="span12 nomargin" id="chatclient">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#">!server</a></li>
+        </ul>
+        <div class="row nomargin" id="channelpanes">
+          <div class="span9 nomargin" id="chatarea">
+          </div> 
+          <div class="span3 nomargin" id="userarea">
+          </div>  
+        </div> <!-- channelpanes -->
+        <div class="row nomargin" id="inputs">
+          <div class="span9 nomargin" id="textinput">
+            <input type="text" name="chatinput" id="chatinput">
+          </div>
+          <div class="span9 nomargin" id="spare">
+            Press enter to send chat msg
+          </div>
+        </div>
+      </div> <!-- #chatclient -->
+    </div> <!-- #whole-chatbox -->
+  </div> <!-- End hero unit -->
+  
+  <!-- Begin JS -->
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
+  <script src='/_ah/channel/jsapi'></script>
+  <script type="text/javascript">
+    // Begin dealing with communications
+    var username = '{{ username }}';
+    var token = '{{ token }}';
+    var channels = {'!server': {'text': '', 'users': ['!server', username]}};
+    var users = {}; // Users the user is in communication with
+    var activeEntity = '!server'; // Could be #channel or @user
+    
+    openChannel = function() {
+      var token = '{{ token }}';
+      var channel = new goog.appengine.Channel(token);
+      var handler = {
+        'onopen': onOpen,
+        'onmessage': onMessage,
+        'onerror': onError,
+        'onclose': onClose
+      };
+      var socket = channel.open(handler);
+      socket.onopen = onOpen;
+      socket.onmessage = onMessage;
+      onMessage("NOTICE Initiated connection to server");
+    }
+    setTimeout(openChannel, 100);
+    
+    sendMessage = function(message) {
+      message = encodeURIComponent(message); // Escape URI characters
+      var path = "/communication?message="+message;
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', path, true);
+      xhr.send();
+    };    
+    onOpen = function() {
+      
+    }    
+    onMessage = function(message) {
+      // Received a message from the server
+      var command = message.split(' ')[0];
+      switch(command) {
+      case "PRIVMSG":
+        // Message from another @user
+        // Format: PRIVMSG SENDER message text
+        var sender = message.split(' ')[1];
+        // Retrieve the message
+        message = message.substring(message.indexOf(' ',
+          message.indexOf(' ')+1)+1);
+        if (sender in users) {
+          channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
+          updateEntity(sender);
+        } else {
+          // New conversation
+        
+        }
+        break;
+      case "CHANNELMSG":
+        // Message sent to a #channel user is in
+        // Format: CHANNELMSG CHANNEL SENDER message text
+        var channel = message.split(' ')[1];
+        var sender = message.split(' ')[2]; 
+        // Retrieve the message
+        message = message.substring(message.indexOf(' ',
+          message.indexOf(' ',message.indexOf(' ')+1)+1)+1);
+        if (channel in channels) {
+          // Source is a channel user is in
+          channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
+          updateEntity(channel);
+        } else {
+          /* Shouldn't happen, how would we get messages for a channel user is not in?
+             Probably because a delay before a channel leave message is processed by server */
+        }
+        break;
+        case "NOTICE":
+        alert(message);
+          // Message from server
+          // Format: NOTICE notice text
+          message = message.substring(message.indexOf(' ')+1);
+          channels["!server"]["text"] += message+"<br/>";
+          updateEntity("!server");
+          break;
+      }
+    }    
+    onError = function() {
+    
+    }    
+    onClose = function() {
+    
+    }
+    
+    changeActiveEntity = function(channelName) {
+    
+    }
+    
+    updateEntity = function(updatedEntity) {
+      if (updatedEntity === activeEntity) {
+        // Active entity was updated so update chat and users
+        /* Technically, depending on message, only one of these 
+           needs to be updated, but this is easier */
+        if (activeEntity in channels ) {
+          // activeEntity is a #channel
+          $("div#chatarea").html(channels[activeEntity]["text"]);
+          var userList = "Users in "+activeEntity+":";
+          for (user in channels[activeEntity]["users"].sort()) {
+            userList += "<br/>"+channels[activeEntity]["users"][user];
+          }
+          $("div#userarea").html(userList);
+        } else {
+          // activeEntity is a @user
+        }
+      } else {
+        // Inactive entity was updated, so make that tab flash
+      }
+    }
+    
+  </script>  
+</body>
+</html>

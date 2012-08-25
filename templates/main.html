@@ -4,114 +4,28 @@
   <meta charset="utf-8">
   <title>Chat</title>
   <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
-  <!-- Custom CSS -->
-  <style type="text/css">
-    /* Some clever person who knows bootstrap can fix this later */
-    .nomargin {
-      margin-left: 0px;
-      margin-top: 0px;
-    }
-    
-    #whole-chatbox {
-      background-color: #fff;
-      margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
-      -webkit-border-radius: 0 0 6px 6px;
-         -moz-border-radius: 0 0 6px 6px;
-              border-radius: 0 0 6px 6px;
-      -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-              box-shadow: 0 1px 2px rgba(0,0,0,.15);
-      width: 960px;
-      border: 1px solid;
-    }
-    
-    #chatclient {
-      width: 960px;      
-    }
-    
-    #channelpanes {
-      margin-top: -20px;
-      height: 540px;
-    }
-    
-    #chatarea {
-      width: 709px; /* 75%-2*5px padding-1px border */
-      height: 540px;
-      overflow-y: scroll;
-      padding: 5px;
-      border-right: 1px solid #DDDDDD;
-    }
-    
-    #userarea {
-      width: 230px; /* 25%-2*5px padding */
-      height: 540px;
-      padding: 5px;
-    }
-    
-    div#inputs {
-      height: auto;
-    }
-    
-    div#textinput {
-      width: 709px; /* 75%-2*5px padding-1px border */
-      padding: 5px;
-      border-top: 1px solid #DDDDDD;
-      border-right: 1px solid #DDDDDD;
-      height: auto;
-    }
-    
-    div#spare {
-      width: 230px; /* 25%-2*5px padding */
-      border-top: 1px solid #DDDDDD;
-      padding: 5px;
-      height: auto;
-    }
-    
-    input#chatinput {
-      width: 694px;
-    }
-    
-  </style><!-- End CSS -->
 </head>
 <body>
   <div class="hero-unit">
     <h1>UdacityPlus Chat Client</h1><br/>
-    <div class="row nomargin" id="whole-chatbox">
-      <div class="span12 nomargin" id="chatclient">
-        <ul class="nav nav-tabs">
-          <li><a href="#">!Server</a></li>
-          <li><a href="#">#Udacity</a></li>
-          <li class="active"><a href="#">#UdacityPlus</a></li>
-          <li><a href="#">@Anthony</a></li>
-        </ul>
-        <div class="row nomargin" id="channelpanes">
-          <div class="span9 nomargin" id="chatarea">
-2012/08/25 09:43 Welcome to #UdacityPlus<br/>
-2012/08/25 09:43 This is a topic and by the way, this channel is being logged.<br/>
-2012/08/25 09:44 &lt;@Anthony&gt; Hi Jin_Koo<br/>
-2012/08/25 09:44 &lt;@Jin_Koo&gt; Yo<br/>
-2012/08/25 09:44 &lt;@Jin_Koo&gt; Reallyreallyreallylong line of text 
-to see how wrapping and stuff works. Yes this line is still going on and on.
-Lorem ipsum and all that as well, yeah.<br/>
-          </div> 
-          <div class="span3 nomargin" id="userarea">
-            Users:<br/>
-            !@Anthony<br/>
-            +@mark_up<br/>
-            @Arslan<br/>
-            @Jin_Koo
-          </div>  
-        </div> <!-- channelpanes -->
-        <div class="row nomargin" id="inputs">
-          <div class="span9 nomargin" id="textinput">
-            <input type="text" name="chatinput" id="chatinput">
-          </div>
-          <div class="span9 nomargin" id="spare">
-            Press enter to send chat msg
-          </div>
+    <form method="post">
+      <div class="row">
+        <div class="span2">Username</div>
+        <div class="span2">
+          <input type="text" name="username" value="Spez"/>
         </div>
-      </div> <!-- #chatclient -->
-    </div> <!-- #whole-chatbox -->
+      </div>
+      <div class="row">
+        <div class="span2">Default Channel (optional)</div>
+        <div class="span2">
+          <input type="text" name="channel"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span2 offset2">
+          <input type="submit" value="Connect"/>
+        </div>
+    </form>
   </div> <!-- End hero unit -->
 </body>
 <footer>
