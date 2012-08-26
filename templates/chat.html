@@ -78,8 +78,9 @@
     <h1>UdacityPlus Chat Client</h1><br/>
     <div class="row nomargin" id="whole-chatbox">
       <div class="span12 nomargin" id="chatclient">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#">!server</a></li>
+        <ul class="nav nav-tabs" id="chattabs">
+          <!-- Tabs will be dynamically added -->
+          <!--<li class="active"><a href="#">!server</a></li>-->
         </ul>
         <div class="row nomargin" id="channelpanes">
           <div class="span9 nomargin" id="chatarea">
@@ -102,119 +103,214 @@
   <!-- Begin JS -->
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
-  <script src='/_ah/channel/jsapi'></script>
+  <script src="/_ah/channel/jsapi"></script>
   <script type="text/javascript">
-    // Begin dealing with communications
-    var username = '{{ username }}';
-    var token = '{{ token }}';
-    var channels = {'!server': {'text': '', 'users': ['!server', username]}};
-    var users = {}; // Users the user is in communication with
-    var activeEntity = '!server'; // Could be #channel or @user
-    
-    openChannel = function() {
-      var token = '{{ token }}';
-      var channel = new goog.appengine.Channel(token);
-      var handler = {
-        'onopen': onOpen,
-        'onmessage': onMessage,
-        'onerror': onError,
-        'onclose': onClose
-      };
-      var socket = channel.open(handler);
-      socket.onopen = onOpen;
-      socket.onmessage = onMessage;
-      onMessage("NOTICE Initiated connection to server");
-    }
-    setTimeout(openChannel, 100);
-    
-    sendMessage = function(message) {
-      message = encodeURIComponent(message); // Escape URI characters
-      var path = "/communication?message="+message;
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', path, true);
-      xhr.send();
-    };    
-    onOpen = function() {
+    $(document).ready(function() {
+      // Begin dealing with communications
+      var username = "{{ username }}";
+      var token = "{{ token }}";
+      var server = "{{ server }}";
+      var identifier = "{{ identifier }}";
+      var channels = { }; // Channels the user is in
+      var users = { }; // Users the user is in communication with
+      var activeEntity = server; // Could be #channel or @user
       
-    }    
-    onMessage = function(message) {
-      // Received a message from the server
-      var command = message.split(' ')[0];
-      switch(command) {
-      case "PRIVMSG":
-        // Message from another @user
-        // Format: PRIVMSG SENDER message text
-        var sender = message.split(' ')[1];
-        // Retrieve the message
-        message = message.substring(message.indexOf(' ',
-          message.indexOf(' ')+1)+1);
-        if (sender in users) {
-          channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
-          updateEntity(sender);
-        } else {
-          // New conversation
-        
-        }
-        break;
-      case "CHANNELMSG":
-        // Message sent to a #channel user is in
-        // Format: CHANNELMSG CHANNEL SENDER message text
-        var channel = message.split(' ')[1];
-        var sender = message.split(' ')[2]; 
-        // Retrieve the message
-        message = message.substring(message.indexOf(' ',
-          message.indexOf(' ',message.indexOf(' ')+1)+1)+1);
-        if (channel in channels) {
-          // Source is a channel user is in
-          channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
-          updateEntity(channel);
-        } else {
-          /* Shouldn't happen, how would we get messages for a channel user is not in?
-             Probably because a delay before a channel leave message is processed by server */
-        }
-        break;
+// Suite of test code:
+addChannel("#testChannel");
+addUsernameToChannel("Jimmy", "#testChannel");
+addUsernameToChannel("Billy", "#testChannel");
+addUsernameToChannel("Tommy", "#testChannel");
+// End test code      
+      
+      // Opens a Google API Channel to receive messages from the server
+      function openChannel() {
+        $("#chatarea").html($("#chatarea").html()+"Connecting to server<br/>");
+        var channel = new goog.appengine.Channel(token);
+        var handler = {
+          "onopen": onOpen,
+          "onmessage": onMessage,
+          "onerror": onError,
+          "onclose": onClose
+        };
+        var socket = channel.open(handler);
+        socket.onopen = onOpen;
+        socket.onmessage = onMessage;
+        socket.onerror = onError;
+        socket.onclose = onClose;
+      }
+      setTimeout(openChannel, 100);
+      
+      function onOpen() {
+        addChannel(server);      
+        onMessage({data: "NOTICE Connected to server"});
+sendMessage("Why, hello there?!");
+      }    
+      
+      function onMessage(message) {
+        message = message.data;
+        // Received a message from the server
+        var command = message.split(' ')[0];
+        switch(command) {
+        case "PRIVMSG":
+          // Message from another @user
+          // Format: PRIVMSG SENDER message text
+          var sender = message.split(' ')[1];
+          // Retrieve the message
+          message = message.substring(message.indexOf(' ',
+            message.indexOf(' ')+1)+1);
+          if (sender in users) {
+            channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
+            updateEntity(sender);
+          } else {
+            // New conversation
+          
+          }
+          break;
+        case "CHANNELMSG":
+          // Message sent to a #channel user is in
+          // Format: CHANNELMSG CHANNEL SENDER message text
+          var channel = message.split(' ')[1];
+          var sender = message.split(' ')[2]; 
+          // Retrieve the message
+          message = message.substring(message.indexOf(' ',
+            message.indexOf(' ',message.indexOf(' ')+1)+1)+1);
+          if (channel in channels) {
+            // Source is a channel user is in
+            channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
+            updateEntity(channel);
+          } else {
+            /* Shouldn't happen, how would we get messages for a channel user is not in?
+               Probably because a delay before a channel leave message is processed by server */
+          }
+          break;
         case "NOTICE":
-        alert(message);
           // Message from server
           // Format: NOTICE notice text
           message = message.substring(message.indexOf(' ')+1);
-          channels["!server"]["text"] += message+"<br/>";
-          updateEntity("!server");
+          channels[server]["text"] += message+"<br/>";
+          updateEntity(server);
           break;
-      }
-    }    
-    onError = function() {
-    
-    }    
-    onClose = function() {
-    
-    }
-    
-    changeActiveEntity = function(channelName) {
-    
-    }
-    
-    updateEntity = function(updatedEntity) {
-      if (updatedEntity === activeEntity) {
-        // Active entity was updated so update chat and users
-        /* Technically, depending on message, only one of these 
-           needs to be updated, but this is easier */
-        if (activeEntity in channels ) {
-          // activeEntity is a #channel
-          $("div#chatarea").html(channels[activeEntity]["text"]);
-          var userList = "Users in "+activeEntity+":";
-          for (user in channels[activeEntity]["users"].sort()) {
-            userList += "<br/>"+channels[activeEntity]["users"][user];
-          }
-          $("div#userarea").html(userList);
-        } else {
-          // activeEntity is a @user
+        case "JOINED":
+          // Format: JOINED username channel
+          break;
+        case "LEFT":
+          // Format: LEFT username channel
+          break;
+        case "QUIT":
+          // User QUIT chat, so remove from all channels
+          // Format: QUIT username
+          break;
+        case "ALIAS":
+          // Format: ALIAS oldname newname
+          break;
+        case "PING":
+          // Format: PING response text
+          sendMessage("PONG "+message.substring(message.indexOf(' ')+1));
+          break;
         }
-      } else {
-        // Inactive entity was updated, so make that tab flash
+      }    
+      function onError() {
+        // Could be caused by a timeout after 120 minutes, try reconnecting
+        onMessage("NOTICE An error occurred with the server connection");
+      }    
+      function onClose() { 
+        // Could be caused by a timeout after 120 minutes, try reconnecting
+        onMessage("NOTICE Disconnected from server"); 
       }
-    }
-    
+      
+      // Sends messages to the server via XHR
+      function sendMessage(message) {
+        message = encodeURIComponent(message); // Escape URI characters
+        var path = "/communication?username="+username+"&identifier="+identifier+"&message="+message;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", path, true);
+        xhr.send();
+      };  
+      
+      // Adds a username to a channel that is being listened to
+      function addUsernameToChannel(newUsername, channel) {
+        if (!("users" in channels[channel])) {
+          channels[channel]["users"] = [ ];
+        }
+        channels[channel]["users"].push(newUsername);
+        updateEntity(channel);
+      }
+      
+      // Add a channel to be listened to, adds tab as well
+      function addChannel(channel) {
+        /* channels = {"!server": {"text": "", "users": ["!server", username]}} */
+        channels[channel] = {"text": "", "users": [username ]}; // Wipes history on leave/rejoin
+        addTab(channel);
+      }
+      
+      // Add a user for private conversation
+      function addUser(newUsername) {
+        /* users  = {"username": "chattext"} // No need for an array of users */
+        users[newUsername] = "";
+        addTab(newUsername);
+      }
+      
+      // Add a tab
+      function addTab(tabName) {
+        var newTab = jQuery('<li class="active" id="'+tabName+'">'+
+          '<a href="#'+tabName+'">'+tabName+'</a></li>');  
+        $("li", $("ul#chattabs")).removeClass("active");
+        $("ul#chattabs").append(newTab);
+        activeEntity = tabName;
+        updateEntity(tabName);
+        // Handle click events for newtab
+        newTab.click(function(event) {
+          var clickedTab = $(this);
+          event.preventDefault();
+          // Inactivate currently active tab
+          $("li", $("ul#chattabs")).removeClass("active");
+          clickedTab.removeClass("highlighted");
+          clickedTab.addClass("active");
+          activeEntity = clickedTab.attr("id");
+          updateEntity(activeEntity);
+        });
+      }
+      
+      function updateEntity(updatedEntity) {
+        if (updatedEntity === activeEntity) {
+          // Active entity was updated so update chat and users
+          /* Technically, depending on message, only one of these 
+             needs to be updated, but this is easier */
+          if (activeEntity in channels ) {
+            // activeEntity is a #channel
+            $("div#chatarea").html(channels[activeEntity]["text"]);
+            var userList = "Users in "+activeEntity+":";
+            for (user in channels[activeEntity]["users"].sort()) {
+              userList += "<br/>"+channels[activeEntity]["users"][user];
+            }
+            $("div#userarea").html(userList);
+          } else {
+            // activeEntity is a @user
+            $("div#chatarea").html(users[activeEntity]);
+            var userlist = [activeEntity, username].sort().join("<br/>");
+            $("div#userarea").html(userlist);
+          }
+        } else {
+          // Inactive entity was updated, so make that tab flash/highlight
+        }
+      }
+      
+      // Client stuff      
+      $("#chatinput").keyup(function(event) {
+        if(event.keyCode == 13 || event.which == 13){ // Enter is pressed
+          var enteredText = $(this).val();
+          $(this).val(""); // Clear the box
+          // Testcode here
+          sendMessage(enteredText);
+        }
+      });
+      // Have to use keydown for TAB, otherwise textbox loses focus
+      $("#chatinput").keydown(function(event) {
+        if(event.keyCode == 9 || event.which == 9){
+          // Tab completion
+        }
+      });
+    }); /* document.ready() */  
   </script>  
 </body>
 </html>

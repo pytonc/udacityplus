@@ -7,10 +7,14 @@ threadsafe: true
 libraries:
 - name: jinja2
   version: latest
+  
+builtins:
+- appstats: on
 
 inbound_services:
 - channel_presence
 
 handlers:
 - url: /.*
+  secure: always
   script: main.app

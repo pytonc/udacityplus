@@ -1,8 +1,13 @@
 import os
+import hashlib
+import urllib
+import logging
 
 import webapp2
 import jinja2
 from google.appengine.api import channel
+from google.appengine.ext import db
+from google.appengine.api import memcache
 
 # This section will eventually get moved to a Handler class
 template_dir = os.path.join(
@@ -21,12 +26,37 @@ def render(template, **kw):
     return(render_str(template, **kw))
 # End Handler
 
+class ChatUser(db.Model):
+    '''A user'''
+    # username is the key
+    joined = db.DateTimeProperty(auto_now_add = True)
+    connected = db.BooleanProperty(required = True)
+    identifier = db.StringProperty(required = True) # Session specific
+
+class ChatChannel(db.Model):
+    '''A chat channel'''
+
+    pass
+
 class Communication(webapp2.RequestHandler):
     '''Deals with chat traffic'''
     def post(self):
-        message = self.request.get('message')
-        if not message:
+        # How do we authenticate that the message is coming from the user?
+        # Send each user a key when rendering the page which they use in all communication
+        message = urllib.unquote(self.request.get('message'))
+        username = urllib.unquote(self.request.get('username'))
+        identifier = urllib.unquote(self.request.get('identifier'))
+        if not (message and username and identifier): 
             return
+        channel.send_message(username, "NOTICE Server got this message from you: "+message) # Echo, for testing
+
+class Connect(webapp2.RequestHandler):
+    def post(self):
+        client_id = self.request.get('from')
+
+class Disconnect(webapp2.RequestHandler):
+    def post(self):
+        client_id = self.request.get('from')
 
 class Main(webapp2.RequestHandler):
     def get(self):
@@ -40,11 +70,16 @@ class Main(webapp2.RequestHandler):
             self.response.out.write(render("main.html"))
         else:
             channel_name = self.request.get('channel')
-            token = channel.create_channel(username)
+            token = channel.create_channel(username) # Expires after 120 minutes
+            identifier = os.urandom(16).encode('hex')
             self.response.out.write(render("chat.html", token=token,
-                                           username=username))            
+                                           username=username,
+                                           identifier=identifier,
+                                           server="!AwesomeServer"))            
 
 app = webapp2.WSGIApplication([
                                ('/', Main),
-                               ('/communication', Communication)
+                               ('/communication', Communication),
+                               ('/_ah/channel/connected', Connect),
+                               ('/_ah/channel/disconnected', Disconnect)
                                ], debug=True)
