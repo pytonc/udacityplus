@@ -114,11 +114,6 @@
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
   <script src="/_ah/channel/jsapi"></script>
   <script type="text/javascript">
-    /*Todo:
-      - Including # in entity names is a really bad idea for jQuery/CSS (as is the case for most special characters)
-        Currently the only manifestation of this problem is that jQuery is unable to find the entity for highlighting if it is not active and has been updated.
-    */
-  
     $(document).ready(function() {
       // Clear the chattextbox if it is clicked into and default text is in it
       $("#chatinput").focus(function(event) {
@@ -141,15 +136,19 @@
       var username = "{{ username }}";
       var token = "{{ token }}";
       var server = "{{ server }}";
-      var identifier = "{{ identifier }}";
+      var identifier = "{{ identifier }}";      
       var channels = { }; // Channels the user is in
+                          // Format: {"channelname": {
+                          // "text": text, "user": [user1, user2], "tab": jQueryTab
+                          // } }
       var users = { }; // Users the user is in communication with
+                       // Format: {"username": text}
       var activeEntity = server; // Could be #channel or @user
       
 // Suite of test code:
-/*
+
 username = "Spez";
-server = "Server";
+server = "!Server";
 addChannel(server);
 onMessage({data:"PRIVMSG Jimmy Hi mate"});
 onMessage({data:"CHANNELMSG #randomChannel TestSender You've been randomly added to this channel to see if it works"});
@@ -164,7 +163,7 @@ onMessage({data:"JOINED Quitter #testChannel"});
 onMessage({data:"PRIVMSG Quitter I am going now, lol"});
 onMessage({data:"LEFT ThisUserShouldBeGone #testChannel"});
 onMessage({data:"PRIVMSG Paulo I AM AWESOME"});
-onMessage({data:"QUIT Quitter"});*/
+onMessage({data:"QUIT Quitter"});
 // End test code
       
       // Opens a Google API Channel to receive messages from the server
@@ -366,9 +365,8 @@ sendMessage("Why, hello there?!");
       
       // Add a channel to be listened to, adds tab as well
       function addChannel(channel) {
-        /* channels = {"!server": {"text": "", "users": ["!server", username]}} */
-        channels[channel] = {"text": "", "users": [username ]}; // Wipes history on leave/rejoin
-        addTab(channel);
+        // NB: Wipes history on leave/rejoin
+        channels[channel] = {"text": "", "users": [username], "tab": addTab(channel)}; 
       }
       
       // Add a user for private conversation
@@ -380,8 +378,10 @@ sendMessage("Why, hello there?!");
       
       // Add a tab
       function addTab(tabName) {
-        var newTab = jQuery('<li id="'+tabName+'">'+
-          '<a href="#'+tabName+'">'+tabName+'</a></li>');        
+        var identifer = (tabName in users) ?
+          tabName : tabName.substring(1)+".c"; // Trim leading # or ! and append trailing .
+        var newTab = jQuery('<li id="'+identifer+'">'+
+          '<a href="#'+identifer+'">'+tabName+'</a></li>');        
         $("ul#chattabs").append(newTab);
         // Only go to tab if it is not a user message
         if (!(tabName in users)) {
@@ -398,9 +398,10 @@ sendMessage("Why, hello there?!");
           $("li", $("ul#chattabs")).removeClass("active");
           clickedTab.removeClass("highlighted");
           clickedTab.addClass("active");
-          activeEntity = clickedTab.attr("id");
+          activeEntity = $("a", clickedTab).html();
           updateEntity(activeEntity);
         });
+        return newTab;
       }
       
       function updateEntity(updatedEntity) {
@@ -411,6 +412,7 @@ sendMessage("Why, hello there?!");
           // Scroll state
           var scrolledToBottom = chatScrollBottom();
           if (activeEntity in channels) {
+console.log("updated a channel");
             // activeEntity is a #channel
             $("div#chatarea").html(channels[activeEntity]["text"]);            
             var userList = "Users in "+activeEntity+":";
@@ -435,8 +437,15 @@ sendMessage("Why, hello there?!");
             $("#spare").html("Scroll down to read new messages.");
           }
         } else {
-          // Inactive entity was updated, so make that tab flash/highlight
-          $("#"+updatedEntity).addClass("highlighted");
+          // Inactive entity was updated, so make that tab flash/highlight          
+          if (updatedEntity in users) {
+            // If it is a user, just add the class
+            $("#"+updatedEntity).addClass("highlighted");
+          } else {
+            // If it is server or channel, it will be preceeded by ! or #
+            // Luckily we can reference the tab directly
+            $(channels[updatedEntity]["tab"]).addClass("highlighted");
+          }
         }
       }
       
@@ -475,7 +484,6 @@ sendMessage(enteredText);
       });
       
       function slashCommand(command, arg){
-console.log(command, arg);
         switch(command.toUpperCase()) {
         case "HELP":
           onMessage({data: "NOTICE The following commands are supported:"});
@@ -508,6 +516,7 @@ console.log(command, arg);
           arg = arg.length <= 0 ? activeEntity : arg.split(" ")[0];
           if (arg in channels && arg !== server) {
             sendMessage("LEAVE "+arg);
+            // Handle leave on local end!
           } else {
             onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
           }
