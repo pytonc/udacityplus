@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Chat</title>
+  <title>UdacityPlus Chat</title>
   <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
   <!-- Custom CSS -->
   <style type="text/css">
@@ -71,6 +71,15 @@
       width: 694px;
     }
     
+    input.virgin-textinput {
+      color: #A0A0A0;
+    }
+    
+    li.highlighted a {
+      color: #FF1010;
+      background-color: #60FF60;
+    }
+    
   </style><!-- End CSS -->
 </head>
 <body>
@@ -90,10 +99,10 @@
         </div> <!-- channelpanes -->
         <div class="row nomargin" id="inputs">
           <div class="span9 nomargin" id="textinput">
-            <input type="text" name="chatinput" id="chatinput">
+            <input class="virgin-textinput" type="text" name="chatinput" value="Type chat messages here and press enter" id="chatinput">
           </div>
           <div class="span9 nomargin" id="spare">
-            Press enter to send chat msg
+            Try entering "/help".
           </div>
         </div>
       </div> <!-- #chatclient -->
@@ -105,7 +114,29 @@
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
   <script src="/_ah/channel/jsapi"></script>
   <script type="text/javascript">
+    /*Todo:
+      - Including # in entity names is a really bad idea for jQuery/CSS (as is the case for most special characters)
+        Currently the only manifestation of this problem is that jQuery is unable to find the entity for highlighting if it is not active and has been updated.
+    */
+  
     $(document).ready(function() {
+      // Clear the chattextbox if it is clicked into and default text is in it
+      $("#chatinput").focus(function(event) {
+        if ($(this).hasClass("virgin-textinput")) {
+          $(this).removeClass("virgin-textinput");
+          $(this).val("");
+        }
+      });
+      
+      function chatScrollBottom() {
+        var height = $("div#chatarea").outerHeight(); // Height of the div
+        var totalheight = $("div#chatarea")[0].scrollHeight; // Total height of content
+        var scrolltop = $("div#chatarea").scrollTop(); // Top of the scrolled part (varies by scrolling)
+        /* When at the bottom, totalheight = height+scrolltop */
+        return totalheight <= height+scrolltop;
+        //return scrollheight == height;
+      }
+    
       // Begin dealing with communications
       var username = "{{ username }}";
       var token = "{{ token }}";
@@ -116,15 +147,28 @@
       var activeEntity = server; // Could be #channel or @user
       
 // Suite of test code:
+/*
+username = "Spez";
+server = "Server";
+addChannel(server);
+onMessage({data:"PRIVMSG Jimmy Hi mate"});
+onMessage({data:"CHANNELMSG #randomChannel TestSender You've been randomly added to this channel to see if it works"});
 addChannel("#testChannel");
-addUsernameToChannel("Jimmy", "#testChannel");
-addUsernameToChannel("Billy", "#testChannel");
-addUsernameToChannel("Tommy", "#testChannel");
-// End test code      
+onMessage({data:"USERS #testChannel Billy Jimmy ThisUserShouldBeGone Tommy"});
+onMessage({data:"CHANNELMSG #randomChannel TestSender You've been randomly added to this channel to see if it works"});
+onMessage({data:"CHANNELMSG #testChannel Jimmy Oh look, it's "+username});
+onMessage({data:"NOTICE Server had something to say to you"});
+onMessage({data:"JOINED NewUser #randomChannel"});
+onMessage({data:"JOINED Quitter #randomChannel"});
+onMessage({data:"JOINED Quitter #testChannel"});
+onMessage({data:"PRIVMSG Quitter I am going now, lol"});
+onMessage({data:"LEFT ThisUserShouldBeGone #testChannel"});
+onMessage({data:"PRIVMSG Paulo I AM AWESOME"});
+onMessage({data:"QUIT Quitter"});*/
+// End test code
       
       // Opens a Google API Channel to receive messages from the server
       function openChannel() {
-        $("#chatarea").html($("#chatarea").html()+"Connecting to server<br/>");
         var channel = new goog.appengine.Channel(token);
         var handler = {
           "onopen": onOpen,
@@ -150,76 +194,96 @@ sendMessage("Why, hello there?!");
         message = message.data;
         // Received a message from the server
         var command = message.split(' ')[0];
+        var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
         case "PRIVMSG":
           // Message from another @user
           // Format: PRIVMSG SENDER message text
-          var sender = message.split(' ')[1];
+          var sender = arg.split(' ')[0];
           // Retrieve the message
-          message = message.substring(message.indexOf(' ',
-            message.indexOf(' ')+1)+1);
-          if (sender in users) {
-            channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
-            updateEntity(sender);
-          } else {
-            // New conversation
-          
-          }
+          arg = arg.substring(arg.indexOf(' ')+1);
+          var content = createTimestamp()+" <"+sender+"> "+arg;
+          addUserContent(sender, content);
           break;
         case "CHANNELMSG":
           // Message sent to a #channel user is in
           // Format: CHANNELMSG CHANNEL SENDER message text
-          var channel = message.split(' ')[1];
-          var sender = message.split(' ')[2]; 
+          var channel = arg.split(' ')[0];
+          var sender = arg.split(' ')[1]; 
           // Retrieve the message
-          message = message.substring(message.indexOf(' ',
-            message.indexOf(' ',message.indexOf(' ')+1)+1)+1);
-          if (channel in channels) {
-            // Source is a channel user is in
-            channels[channel]["text"] += "&lt;"+sender+"&gt; "+message+"<br/>";
-            updateEntity(channel);
-          } else {
-            /* Shouldn't happen, how would we get messages for a channel user is not in?
-               Probably because a delay before a channel leave message is processed by server */
-          }
+          arg = arg.substring(arg.indexOf(' ',
+            arg.indexOf(' ')+1)+1);          
+          var content = createTimestamp()+" <"+sender+"> "+arg;
+          addChannelContent(channel, content);
+          break;
+        case "NOTICEINDENT":
+          // Not sure if we want to support this, seems gimicky
+          addChannelContent(server, createTimestamp()+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+arg, true);
           break;
         case "NOTICE":
           // Message from server
           // Format: NOTICE notice text
-          message = message.substring(message.indexOf(' ')+1);
-          channels[server]["text"] += message+"<br/>";
-          updateEntity(server);
+          addChannelContent(server, createTimestamp()+" "+arg);
+          break;
+        case "USERS":
+          // Format: USERS channel username1 username2 username3
+          var channel = arg.split(' ')[0];
+          var usersInChannel = arg.substring(arg.indexOf(' ')+1).split(' ')
+          for (var u in usersInChannel) {
+            addUsernameToChannel(usersInChannel[u], channel);
+          }
           break;
         case "JOINED":
           // Format: JOINED username channel
+          var u = arg.split(' ')[0];
+          var channel = arg.split(' ')[1];
+          if (addUsernameToChannel(u, channel)) {
+            addChannelContent(channel, createTimestamp()+" "+u+" joined");
+          }
           break;
         case "LEFT":
           // Format: LEFT username channel
+          var u = arg.split(' ')[0];
+          var channel = arg.split(' ')[1];
+          removeUsernameFromChannel(u, channel);
+          addChannelContent(channel, createTimestamp()+" "+u+" left");
           break;
         case "QUIT":
           // User QUIT chat, so remove from all channels
           // Format: QUIT username
+          var u = arg.split(' ')[0];
+          for (var c in channels) {
+            if (removeUsernameFromChannel(u, c)) {
+              addChannelContent(c, createTimestamp()+" "+u+" quit");
+            }
+          }
+          if (u in users) {
+            // Was talking to this user
+            addUserContent(u, createTimestamp()+" "+u+" quit");
+          }
           break;
         case "ALIAS":
           // Format: ALIAS oldname newname
+          // Not included during launch
           break;
         case "PING":
           // Format: PING response text
-          sendMessage("PONG "+message.substring(message.indexOf(' ')+1));
+          sendMessage("PONG "+arg);
           break;
         }
       }    
       function onError() {
         // Could be caused by a timeout after 120 minutes, try reconnecting
-        onMessage("NOTICE An error occurred with the server connection");
+        onMessage({data: "NOTICE An error occurred with the server connection"});
       }    
       function onClose() { 
         // Could be caused by a timeout after 120 minutes, try reconnecting
-        onMessage("NOTICE Disconnected from server"); 
+        onMessage({data: "NOTICE Disconnected from server"}); 
       }
       
       // Sends messages to the server via XHR
-      function sendMessage(message) {
+      // Could potentially replace with jQuery's .ajax()
+      function sendMessage(message) {        
         message = encodeURIComponent(message); // Escape URI characters
         var path = "/communication?username="+username+"&identifier="+identifier+"&message="+message;
         var xhr = new XMLHttpRequest();
@@ -227,13 +291,77 @@ sendMessage("Why, hello there?!");
         xhr.send();
       };  
       
+      // Return a string of the timestamp "YYYY/MM/DD HH:mm" - local time!
+      function createTimestamp() {
+        var d = new Date();
+        var year = d.getFullYear().toString();
+        var month = d.getMonth()+1;
+        month = month < 10 ? "0"+month.toString() : month.toString();
+        var day = d.getDate();
+        day = day < 10 ? "0"+day.toString() : day.toString();
+        var hour = d.getHours();
+        hour = hour < 10 ? "0"+hour.toString() : hour.toString();
+        var minute = d.getMinutes();
+        minute = minute < 10? "0"+minute.toString() : minute.toString();
+        return year+"/"+month+"/"+day+" "+hour+":"+minute;
+      }
+      
       // Adds a username to a channel that is being listened to
       function addUsernameToChannel(newUsername, channel) {
         if (!("users" in channels[channel])) {
           channels[channel]["users"] = [ ];
         }
-        channels[channel]["users"].push(newUsername);
+        if (channels[channel]["users"].indexOf(newUsername) === -1) {
+          channels[channel]["users"].push(newUsername);
+          updateEntity(channel);
+          return true;
+        } else {
+          return false;
+        }
+      }
+      
+      function removeUsernameFromChannel(removedUsername, channel) {        
+        if (channels[channel]["users"].indexOf(removedUsername) !== -1) {
+          channels[channel]["users"].splice(channels[channel]["users"].indexOf(removedUsername), 1);
+          updateEntity(channel);    
+          return true;
+        } else { return false; } // User is not in the channel
+      }
+      
+      // Escape, markup and otherwise edit content
+      // Customise this at will
+      function markupContent(content, escape) {
+        if (typeof(escape) === 'undefined' || escape === false) {
+          // Escape HTML, by creating a jQuery element, inserting text, then pulling out HTML
+          content = $("<div/>").text(content).html();
+        }
+        // Add newline at the end
+        content += "<br/>";
+        return content;
+      }
+      
+      // Adds content to a channel tab
+      function addChannelContent(channel, content, escape) {
+        if (typeof(escape) === 'undefined')
+          escape = false;
+        content = markupContent(content, escape);
+        if (!(channel in channels)) {
+          // New Channel (that the user presumably joined)
+          addChannel(channel)
+        }
+        channels[channel]["text"] += content;
         updateEntity(channel);
+      }
+      
+      // Adds content to a user's tab
+      function addUserContent(user, content) {
+        content = markupContent(content);
+        if (!(user in users)) {
+          // New conversation with this user
+          addUser(user);
+        }
+        users[user] += content;
+        updateEntity(user);
       }
       
       // Add a channel to be listened to, adds tab as well
@@ -252,12 +380,16 @@ sendMessage("Why, hello there?!");
       
       // Add a tab
       function addTab(tabName) {
-        var newTab = jQuery('<li class="active" id="'+tabName+'">'+
-          '<a href="#'+tabName+'">'+tabName+'</a></li>');  
-        $("li", $("ul#chattabs")).removeClass("active");
+        var newTab = jQuery('<li id="'+tabName+'">'+
+          '<a href="#'+tabName+'">'+tabName+'</a></li>');        
         $("ul#chattabs").append(newTab);
-        activeEntity = tabName;
-        updateEntity(tabName);
+        // Only go to tab if it is not a user message
+        if (!(tabName in users)) {
+          $("li", $("ul#chattabs")).removeClass("active");
+          newTab.addClass("active");
+          activeEntity = tabName;
+          updateEntity(tabName);
+        }
         // Handle click events for newtab
         newTab.click(function(event) {
           var clickedTab = $(this);
@@ -274,11 +406,13 @@ sendMessage("Why, hello there?!");
       function updateEntity(updatedEntity) {
         if (updatedEntity === activeEntity) {
           // Active entity was updated so update chat and users
-          /* Technically, depending on message, only one of these 
+          /* Technically, depending on message, only chat or users
              needs to be updated, but this is easier */
-          if (activeEntity in channels ) {
+          // Scroll state
+          var scrolledToBottom = chatScrollBottom();
+          if (activeEntity in channels) {
             // activeEntity is a #channel
-            $("div#chatarea").html(channels[activeEntity]["text"]);
+            $("div#chatarea").html(channels[activeEntity]["text"]);            
             var userList = "Users in "+activeEntity+":";
             for (user in channels[activeEntity]["users"].sort()) {
               userList += "<br/>"+channels[activeEntity]["users"][user];
@@ -290,8 +424,19 @@ sendMessage("Why, hello there?!");
             var userlist = [activeEntity, username].sort().join("<br/>");
             $("div#userarea").html(userlist);
           }
+          // Implement scrolling
+          // If previously scrolled to bottom, then scroll to new content
+          if (scrolledToBottom) {
+            // Scroll to bottom of the div when getting 
+            $("div#chatarea").scrollTop($("div#chatarea")[0].scrollHeight);    
+            $("#spare").html(helpMessages());            
+          } else {
+            // Don't scroll to allow user to continue reading
+            $("#spare").html("Scroll down to read new messages.");
+          }
         } else {
           // Inactive entity was updated, so make that tab flash/highlight
+          $("#"+updatedEntity).addClass("highlighted");
         }
       }
       
@@ -300,8 +445,26 @@ sendMessage("Why, hello there?!");
         if(event.keyCode == 13 || event.which == 13){ // Enter is pressed
           var enteredText = $(this).val();
           $(this).val(""); // Clear the box
-          // Testcode here
-          sendMessage(enteredText);
+          if (enteredText.charAt(0) == "/") {
+            // User entered a /COMMAND
+            var command = enteredText.split(" ")[0].substring(1);
+            var arg = enteredText.indexOf(" ") < 0 ? "": 
+              enteredText.substring(enteredText.indexOf(" ")+1);
+            slashCommand(command, arg);
+          } else {
+            if (activeEntity === server) {
+              // What do we do if someone talks to the server?
+            
+            } else if (activeEntity in channels) {
+              // Talk in channel
+              sendMessage("CHANNELMSG "+activeEntity+" "+enteredText);
+            } else {
+              // Talking to a user
+              sendMessage("PRIVMSG "+activeEntity+" "+enteredText);
+            }
+// Test code            
+sendMessage(enteredText);
+          }
         }
       });
       // Have to use keydown for TAB, otherwise textbox loses focus
@@ -310,6 +473,57 @@ sendMessage("Why, hello there?!");
           // Tab completion
         }
       });
+      
+      function slashCommand(command, arg){
+console.log(command, arg);
+        switch(command.toUpperCase()) {
+        case "HELP":
+          onMessage({data: "NOTICE The following commands are supported:"});
+          onMessage({data: "NOTICE optional arguments are in square brackets: [channelname]"});
+          onMessage({data: "NOTICE only arguments ending in ... can contain spaces: message..."});
+          onMessage({data: "NOTICEINDENT /join channelname -- Joins the indicated channel"});
+          onMessage({data: "NOTICEINDENT /msg recipient message... -- Sends a private message to the recipient, can also use /w"});
+          onMessage({data: "NOTICEINDENT /leave [channelname] -- Leaves the indicated channel, or the current channel if channelname is blank"});
+          onMessage({data: "NOTICEINDENT /quit -- End your chat session"});
+          break;
+        case "W":
+        case "MSG":
+          if (arg.length <= 0 || arg.indexOf(" ") < 0) {
+            // Either recipient or message is missing, or not properly space separated
+            onMessage({data: "NOTICE Correct format: /msg recipient message"});
+          } else {
+            var recipient = arg.split(" ")[0];
+            var message = arg.substring(arg.indexOf(" ")+1);
+            sendMessage("PRIVMSG "+recipient+" "+message);
+          }
+          break;
+        case "JOIN":
+          if (arg.length <= 0) {
+            onMessage({data: "NOTICE Correct format: /join channelname"});
+          } else {
+            sendMessage("JOIN "+arg.split(' ')[0]);
+          }
+          break;
+        case "LEAVE":
+          arg = arg.length <= 0 ? activeEntity : arg.split(" ")[0];
+          if (arg in channels && arg !== server) {
+            sendMessage("LEAVE "+arg);
+          } else {
+            onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
+          }
+          break;
+        case "QUIT":
+          sendMessage("QUIT");
+          break;
+        default:
+          onMessage({data: "NOTICE /"+command+" is not supported."});
+        }
+      }
+      
+      function helpMessages() {
+        var messages = ["Try entering /help.", "Automatically scrolling to new messages."];
+        return messages[Math.floor(Math.random() * messages.length)];
+      }
     }); /* document.ready() */  
   </script>  
 </body>
