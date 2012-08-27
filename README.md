@@ -1,4 +1,9 @@
-#UdacityPlus Chat
+upluschat
+=========
+
+Collaborative Social Network Realtime Chat
+
+#Readme
 This is a realtime chat server and client designed to run on Google App Engine.
 This is part of the collaborative Udacity Plus project.
 
