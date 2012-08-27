@@ -14,14 +14,14 @@
         <div class="span4">
           <input type="text" name="username" value="{{username}}" />
         </div>
-        <div class="span6">{{ error }}</div>
+        <div class="span6">{{ usernameerror }}</div>
       </div>
       <div class="row">
         <div class="span2">Default Channel (optional)</div>
         <div class="span4">
-          <input type="text" name="channel"/>
+          <input type="text" name="channel" value="{{ channel }}"/>
         </div>
-        <div class="span6">(Currently does nothing)</div>
+        <div class="span6">{{ channelerror }}</div>
       </div>
       <div class="row">
         <div class="span4 offset2">

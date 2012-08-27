@@ -7,7 +7,7 @@ import json
 
 import webapp2
 import jinja2
-from google.appengine.api import channel
+from google.appengine.api import channel as channel_api # 'channel' is kind of ambiguous in context
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
@@ -34,33 +34,43 @@ class ChatUser(db.Model):
     username = db.StringProperty(required = True) # case SeNsItIvE
     joined = db.DateTimeProperty(auto_now_add = True)
     identifier = db.StringProperty(required = True) # Session specific
+    startingchannel = db.TextProperty(required = False)
     channels = db.TextProperty(required = True) # JSON array
-    contacts = db.TextProperty(required = True) # JSON array    
+    contacts = db.TextProperty(required = True) # JSON array
+    connected = db.BooleanProperty(default = False)
     def store(self):
         '''Store in memcache and datastore'''
         memcache.set(user_key(self.key().name()), self)
         self.put()
     def get_contact_names(self):
+        '''Get the usernames of this user's contacts'''
         return json.loads(self.contacts)
     def add_contact(self, contactname):
+        '''Add a username to this user's contacts'''
         contacts = json.loads(self.contacts)
-        contacts.append(contactname)
-        self.contacts = json.dumps(contacts)
-        self.store()
+        if contactname not in contacts:
+            contacts.append(contactname)
+            self.contacts = json.dumps(contacts)
+            self.store()
     def remove_contact(self, contactname):
+        '''Remove a username from this user's contacts'''
         contacts = json.loads(self.contacts)
         if contactname in contacts:
             contacts.remove(contactname)
             self.contacts = json.dumps(contacts)
             self.store()
     def get_channel_names(self):
+        '''Returns a list of the names of all channels this user is in'''
         return json.loads(self.channels)
     def add_channel(self, channelname):
+        '''Adds a channel to this user's channel list'''
         channels = json.loads(self.channels)
-        channels.append(channelname)
-        self.channels = json.dumps(channels)
-        self.store()
+        if channelname not in channels:
+            channels.append(channelname)
+            self.channels = json.dumps(channels)
+            self.store()
     def remove_channel(self, channelname):
+        '''Removes a channel from this user's channel list'''
         channels = json.loads(self.channels)
         if channelname in channels:
             channels.remove(channelname)
@@ -75,16 +85,20 @@ class ChatChannel(db.Model):
     users = db.TextProperty(required = False) # JSON array
     def store(self):
         '''Store in memcache and datastore'''
-        memcache.set(channel_key(self.key().name()), self)
+        memcache.set(channelkey(self.key().name()), self)
         self.put()
     def get_user_names(self):
+        '''Returns a list of all the users in this channel'''
         return json.loads(self.users)
     def add_user(self, username):
+        '''Adds a username to this channel's user list'''
         users = json.loads(self.users)
-        users.append(username)
-        self.users = json.dumps(users)
-        self.store()
+        if username not in users:
+            users.append(username)
+            self.users = json.dumps(users)
+            self.store()
     def remove_user(self, username):
+        '''Removes a username from this channel's user list'''
         users = json.loads(self.users)
         if username in users:
             users.remove(username)
@@ -94,14 +108,16 @@ class ChatChannel(db.Model):
 class Communication(webapp2.RequestHandler):
     '''Deals with chat traffic'''
     def post(self):
-        # Client MUST ENFORCE correct syntax for commands 
+        # Client MUST ENFORCE correct syntax for commands, and ensure usernames and channelnames exist
+        # Perhaps that's a dangerous statement?
         message = urllib.unquote(self.request.get('message'))
         username = urllib.unquote(self.request.get('username'))
         identifier = urllib.unquote(self.request.get('identifier'))
+        logging.info("Username: "+username+" Message: "+message)
         if not (message and username and identifier): 
             return
         user = get_user(username)
-        if identifier != user.identifier:
+        if not user or (user and identifier != user.identifier):
             return
         COMMANDS = {"JOIN": user_join,
                     "LEAVE": user_leave,
@@ -111,48 +127,138 @@ class Communication(webapp2.RequestHandler):
                     "PING": user_ping,
                     "PONG": user_pong
                     }
-        command = message.split(' ')[0]
+        command = message.split(' ')[0].upper()
         arg = '' if ' ' not in message else message[message.index(' ')+1:]
         if command in COMMANDS:
             COMMANDS[command](username, arg)
         else:
-            channel.send_message(username, "NOTICE Command not supported by server: "+message) # Echo, for testing
+            channel_api.send_message(username, "NOTICE Command not supported by server: "+message) # Echo, for testing
 
 def user_join(username, channelname):
-    pass
+    user = get_user(username)
+    username = user.username # Use actual name
+    channel = get_channel(channelname)
+    if not channel:
+        
+        if channelname and not re.compile(r'^#[\w]{3,20}$').match(channelname):
+            channelerror="Channel must consist of 3-20 alpha_numeric characters and start with a #"
+            channel_api.send_message(username, "NOTICE "+channelerror)
+            return
+        channel = ChatChannel(key_name=channelname.lower(),
+                              channelname=channelname,
+                              users=json.dumps([ ])
+                              )
+    channelname = channel.channelname # Use actual name
+    channel.add_user(username)
+    user.add_channel(channelname)
+    userlist = ' '.join(channel.get_user_names())
+    channel_api.send_message(username, "USERS "+channelname+" "+userlist) # Tell the user who is in the channel
+    for u in channel.get_user_names():
+        # Tell the individual channel members that the new user joined
+        channel_api.send_message(u, "JOINED "+username+" "+channelname)
 
 def user_leave(username, channelname):
-    pass
-
-def user_privmsg(username, args):
-    pass
-
-def user_channelmsg(username, args):
-    pass
+    user = get_user(username)
+    username = user.username # Use actual name
+    channel = get_channel(channelname)
+    channelname = channel.channelname # Use actual name
+    channel.remove_user(username)
+    # Do we inform the user they have successfully left?
+    # If we do, then that may cause a closed tab to reopen, better for client to handle that
+    for u in channel.get_user_names():
+        channel_api.send_message(u, "LEFT "+username+" "+channelname)
 
 def user_quit(username, args):
-    pass
+    '''User has quit'''
+    # This may take a while to execute
+    user = get_user(username)
+    username = user.username # Use actual name
+    for channelname in user.get_channel_names():
+        # Remove the user from channel
+        channel = get_channel(channelname)
+        channel.remove_user(username)
+        for u in channel.get_user_names():
+            # Let the people in the channel know
+            channel_api.send_message(u, "QUIT "+username+" "+channelname)
+            contact = get_user(u)
+            contact.remove_contact(username)
+    for contactname in user.get_contact_names():
+        # Remove user from their contacts' contact lists
+        # Possible double-handling, but that's ok because remove_contact checks for that
+        contact = get_user(contact)
+        contact.remove_contact(username)
+    try:
+        channel_api.send_message(username, "NOTICE You have quit")
+    except:
+        # POKEMON!
+        # Not really needed since send_message does not throw exceptions
+        pass
+    user.connected = False
+    # Let the disconnect handler deal with clearing the user object
+
+def user_privmsg(username, args):
+    '''Private message from one user to another'''
+    recipientname = args.split(' ')[0]
+    message = args[args.index(' ')+1:]
+    recipient = get_user(recipientname)
+    user = get_user(username)
+    username = user.username # Use actual name
+    if recipient and user:
+        recipientname = recipient.username # Use actual name
+        channel_api.send_message(recipientname, "PRIVMSG "+username+" "+message)
+        # Add sender and recipient to each other's contact lists to inform of e.g. quittage
+        recipient.add_contact(username)
+        user.add_contact(recipientname)
+    else:
+        channel_api.send_message(username, "NOTICE "+recipientname+" is not a valid user. Maybe they disconnected "+
+                                 "or maybe you need to check your spelling")
+
+def user_channelmsg(username, args):
+    channelname = args.split(' ')[0]
+    message = args[args.index(' ')+1:]
+    channel = get_channel(channelname)
+    user = get_user(username)
+    username = user.username # Use actual name
+    channelname = channel.channelname # Use actual name
+    if channel and username in channel.get_user_names():
+        for u in channel.get_user_names():
+            # Send message to all the users in the channel
+            channel_api.send_message(u, "CHANNELMSG "+channelname+" "+username+" "+message)
+    else:
+        channel_api.send_message(username, "NOTICE "+channelname+" does not appear to be a channel "+
+                                 +"(or it is a channel, and you're not in it, somehow).")
 
 def user_ping(username, args):
-    pass
+    user = get_user(username)
+    username = user.username # Use actual name
+    channel_api.send_message(username, "PONG "+args)
 
 def user_pong(username, args):
+    # Do nothing, since we have not yet implemented PING/PONG
     pass
 
 class Connect(webapp2.RequestHandler):
     def post(self):
-        client_id = self.request.get('from')
-        logging.info("Connected: "+client_id)
+        username = self.request.get('from')
+        user = get_user(username)
+        if user and user.startingchannel:
+            user_join(username, user.startingchannel) # Join default channel
+        user.connected = True
+        logging.info("Connected: "+username)
 
 class Disconnect(webapp2.RequestHandler):
     def post(self):
         # Have to propagate to all the channels the user was in
-        client_id = self.request.get('from')
-        logging.info("Disconnected: "+client_id)
-        clear_user(client_id)
+        username = self.request.get('from')
+        user = get_user(username)
+        if user.connected:
+            user_quit(username, "")
+            user.connected = False
+        clear_user(username)
+        logging.info("Disconnected: "+username)
 
 def user_key(username):
-    '''For consistency'''
+    '''user_key function is for key consistency'''
     return "user/"+username.lower()
 
 def get_user(username):
@@ -176,13 +282,13 @@ def clear_user(username):
         memcache.set(user_key(username), "placeholder to reduce memcache misses")
         logging.info("Removed "+username)
 
-def channel_key(channelname):
+def channelkey(channelname):
     '''For consistency'''
     return "channel/"+channelname.lower()
 
 def get_channel(channelname):
     '''Get a channel from memcache or datastore, returns None if channel does not exist'''
-    key = channel_key(channelname)
+    key = channelkey(channelname)
     channel = memcache.get(key)
     if not channel:
         channel = ChatChannel.get_by_key_name(channelname.lower())
@@ -198,34 +304,40 @@ def clear_channel(channelname):
     channel = get_channel(channelname)
     if channel:
         channel.delete()
-        memcache.set(channel_key(channelname), "placeholder to reduce memcache misses")
+        memcache.set(channelkey(channelname), "placeholder to reduce memcache misses")
 
 class Main(webapp2.RequestHandler):
     def get(self):
         '''Show connection page'''
-        self.response.out.write(render("main.html", error=""))
+        self.response.out.write(render("main.html"))
 
     def post(self):
         '''Displays chat UI'''
         username = self.request.get('username')
-        error = ""
+        channelname = self.request.get('channel')
+        usernameerror = ""
         if not username:
-            error="Please enter a username"
+            usernameerror="Please enter a username"
         elif not re.compile(r'^[a-zA-Z0-9_-]{3,20}$').match(username):
-            error = "Username must consist of 3-20 alphanumeric characters."
+            usernameerror = "Username must consist of 3-20 alphanumeric characters."
         elif get_user(username):
-            error="Username already in use"
-        if len(error) > 0:
+            usernameerror="Username already in use"
+        channelerror = ""
+        if channelname and not re.compile(r'^#[\w]{3,20}$').match(channelname):
+            channelerror="Channel must consist of 3-20 alpha_numeric characters and start with a #"
+        if len(usernameerror+channelerror) > 0:
             self.response.out.write(render("main.html",
                                            username=username,
-                                           error=error))
+                                           usernameerror=usernameerror,
+                                           channel=channelname,
+                                           channelerror=channelerror))
         else:
-            channel_name = self.request.get('channel') # Not like we're doing anything with this, for now
-            token = channel.create_channel(username) # Expires after 120 minutes
+            token = channel_api.create_channel(username) # Expires after 120 minutes
             identifier = os.urandom(16).encode('hex')
             user = ChatUser(key_name=username.lower(),
                             username=username,
                             identifier=identifier,
+                            startingchannel=channelname,
                             contacts=json.dumps([ ]),
                             channels=json.dumps([ ]))
             user.store()

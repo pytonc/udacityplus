@@ -146,7 +146,7 @@
       var activeEntity = server; // Could be #channel or @user
       
 // Suite of test code:
-
+/*
 username = "Spez";
 server = "!Server";
 addChannel(server);
@@ -163,7 +163,7 @@ onMessage({data:"JOINED Quitter #testChannel"});
 onMessage({data:"PRIVMSG Quitter I am going now, lol"});
 onMessage({data:"LEFT ThisUserShouldBeGone #testChannel"});
 onMessage({data:"PRIVMSG Paulo I AM AWESOME"});
-onMessage({data:"QUIT Quitter"});
+onMessage({data:"QUIT Quitter"});*/
 // End test code
       
       // Opens a Google API Channel to receive messages from the server
@@ -186,12 +186,12 @@ onMessage({data:"QUIT Quitter"});
       function onOpen() {
         addChannel(server);      
         onMessage({data: "NOTICE Connected to server"});
-sendMessage("Why, hello there?!");
       }    
       
       function onMessage(message) {
         message = message.data;
         // Received a message from the server
+console.log("Server message: "+message);
         var command = message.split(' ')[0];
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
@@ -227,6 +227,9 @@ sendMessage("Why, hello there?!");
         case "USERS":
           // Format: USERS channel username1 username2 username3
           var channel = arg.split(' ')[0];
+          if (!(channel in channels)) {
+            addChannel(channel);
+          }
           var usersInChannel = arg.substring(arg.indexOf(' ')+1).split(' ')
           for (var u in usersInChannel) {
             addUsernameToChannel(usersInChannel[u], channel);
@@ -235,10 +238,9 @@ sendMessage("Why, hello there?!");
         case "JOINED":
           // Format: JOINED username channel
           var u = arg.split(' ')[0];
-          var channel = arg.split(' ')[1];
-          if (addUsernameToChannel(u, channel)) {
-            addChannelContent(channel, createTimestamp()+" "+u+" joined");
-          }
+          var channel = arg.split(' ')[1];          
+          addUsernameToChannel(u, channel);
+          addChannelContent(channel, createTimestamp()+" "+u+" joined "+channel);
           break;
         case "LEFT":
           // Format: LEFT username channel
@@ -412,7 +414,6 @@ sendMessage("Why, hello there?!");
           // Scroll state
           var scrolledToBottom = chatScrollBottom();
           if (activeEntity in channels) {
-console.log("updated a channel");
             // activeEntity is a #channel
             $("div#chatarea").html(channels[activeEntity]["text"]);            
             var userList = "Users in "+activeEntity+":";
@@ -471,8 +472,6 @@ console.log("updated a channel");
               // Talking to a user
               sendMessage("PRIVMSG "+activeEntity+" "+enteredText);
             }
-// Test code            
-sendMessage(enteredText);
           }
         }
       });
