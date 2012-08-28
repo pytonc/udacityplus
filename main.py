@@ -44,6 +44,18 @@ class ChatUser(db.Model):
         self.put()
     def get_contact_names(self):
         '''Get the usernames of this user's contacts'''
+        # Remove nonexistent contacts
+##        contactnames = json.loads(self.contacts)
+##        changed = False
+##        for contactname in contactnames:
+##            contact = get_user(contactname)
+##            if not contact:
+##                contactnames = [c for c in contactnames if c != contactname]
+##                changed = True
+##        if changed:
+##            self.contacts = json.dumps(contactnames)
+##            self.store()
+##        return contactnames
         return json.loads(self.contacts)
     def add_contact(self, contactname):
         '''Add a username to this user's contacts'''
@@ -56,7 +68,7 @@ class ChatUser(db.Model):
         '''Remove a username from this user's contacts'''
         contacts = json.loads(self.contacts)
         if contactname in contacts:
-            contacts.remove(contactname)
+            contacts.remove(contactname) # Should only ever be one contactname
             self.contacts = json.dumps(contacts)
             self.store()
     def get_channel_names(self):
@@ -64,6 +76,7 @@ class ChatUser(db.Model):
         return json.loads(self.channels)
     def add_channel(self, channelname):
         '''Adds a channel to this user's channel list'''
+        logging.info("user: %s joined channel %s"%(self.username, channelname))
         channels = json.loads(self.channels)
         if channelname not in channels:
             channels.append(channelname)
@@ -138,8 +151,7 @@ def user_join(username, channelname):
     user = get_user(username)
     username = user.username # Use actual name
     channel = get_channel(channelname)
-    if not channel:
-        
+    if not channel:        
         if channelname and not re.compile(r'^#[\w]{3,20}$').match(channelname):
             channelerror="Channel must consist of 3-20 alpha_numeric characters and start with a #"
             channel_api.send_message(username, "NOTICE "+channelerror)
@@ -156,6 +168,7 @@ def user_join(username, channelname):
     for u in channel.get_user_names():
         # Tell the individual channel members that the new user joined
         channel_api.send_message(u, "JOINED "+username+" "+channelname)
+    logging.warning("End of JOIN, %s's channels are: "%username+', '.join(get_user(username).get_channel_names()))
 
 def user_leave(username, channelname):
     user = get_user(username)
@@ -173,27 +186,27 @@ def user_quit(username, args):
     # This may take a while to execute
     user = get_user(username)
     username = user.username # Use actual name
+    user.connected = False
     for channelname in user.get_channel_names():
         # Remove the user from channel
         channel = get_channel(channelname)
-        channel.remove_user(username)
+        channel.remove_user(username) # Do this first to prevent infinite loops
         for u in channel.get_user_names():
             # Let the people in the channel know
             channel_api.send_message(u, "QUIT "+username+" "+channelname)
-            contact = get_user(u)
-            contact.remove_contact(username)
     for contactname in user.get_contact_names():
         # Remove user from their contacts' contact lists
         # Possible double-handling, but that's ok because remove_contact checks for that
         contact = get_user(contact)
-        contact.remove_contact(username)
+        if contact:
+            contact.remove_contact(username)
     try:
         channel_api.send_message(username, "NOTICE You have quit")
     except:
-        # POKEMON!
+        # POKEMON exception!
         # Not really needed since send_message does not throw exceptions
         pass
-    user.connected = False
+    user.store()
     # Let the disconnect handler deal with clearing the user object
 
 def user_privmsg(username, args):
@@ -226,7 +239,7 @@ def user_channelmsg(username, args):
             channel_api.send_message(u, "CHANNELMSG "+channelname+" "+username+" "+message)
     else:
         channel_api.send_message(username, "NOTICE "+channelname+" does not appear to be a channel "+
-                                 +"(or it is a channel, and you're not in it, somehow).")
+                                 "(or it is a channel, and you're not in it, somehow).")
 
 def user_ping(username, args):
     user = get_user(username)
@@ -239,21 +252,24 @@ def user_pong(username, args):
 
 class Connect(webapp2.RequestHandler):
     def post(self):
+        # Not everything causes a proper disconnect
         username = self.request.get('from')
         user = get_user(username)
         if user and user.startingchannel:
             user_join(username, user.startingchannel) # Join default channel
+        user = get_user(username) # To prevent overwriting
         user.connected = True
+        user.store()
         logging.info("Connected: "+username)
+        logging.warning("End of CONNECT, %s's channels are: "%username+', '.join(get_user(username).get_channel_names()))
 
 class Disconnect(webapp2.RequestHandler):
     def post(self):
         # Have to propagate to all the channels the user was in
-        username = self.request.get('from')
+        username = self.request.get("from")
         user = get_user(username)
         if user.connected:
             user_quit(username, "")
-            user.connected = False
         clear_user(username)
         logging.info("Disconnected: "+username)
 
@@ -309,7 +325,7 @@ def clear_channel(channelname):
 class Main(webapp2.RequestHandler):
     def get(self):
         '''Show connection page'''
-        self.response.out.write(render("main.html"))
+        self.response.out.write(render("main.html", channel="#udacity"))
 
     def post(self):
         '''Displays chat UI'''
@@ -338,6 +354,7 @@ class Main(webapp2.RequestHandler):
                             username=username,
                             identifier=identifier,
                             startingchannel=channelname,
+                            connected=True,
                             contacts=json.dumps([ ]),
                             channels=json.dumps([ ]))
             user.store()
