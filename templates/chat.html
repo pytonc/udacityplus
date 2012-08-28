@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>UdacityPlus Chat</title>
-  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
   <!-- Custom CSS -->
   <style type="text/css">
     /* Some clever person who knows bootstrap can fix this later */
@@ -110,8 +110,8 @@
   </div> <!-- End hero unit -->
   
   <!-- Begin JS -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>
   <script src="/_ah/channel/jsapi"></script>
   <script type="text/javascript">
     $(document).ready(function() {
@@ -185,13 +185,22 @@ onMessage({data:"QUIT Quitter"});*/
       
       function onOpen() {
         addChannel(server);      
-        onMessage({data: "NOTICE Connected to server"});
+        onMessage({data: "NOTICE Connected to server"});          
       }    
+      
+      window.onbeforeunload = onExit;
+      
+      function onExit() {
+        // If user leaves page, try to send a quit message
+        // Just in case the /_ah/channel/disconnected/ page isn't hit
+        sendMessage("QUIT");
+        alert("left page");
+      }
       
       function onMessage(message) {
         message = message.data;
         // Received a message from the server
-console.log("Server message: "+message);
+/*console.log("Server message: "+message);*/
         var command = message.split(' ')[0];
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
@@ -455,7 +464,9 @@ console.log("Server message: "+message);
         if(event.keyCode == 13 || event.which == 13){ // Enter is pressed
           var enteredText = $(this).val();
           $(this).val(""); // Clear the box
-          if (enteredText.charAt(0) == "/") {
+          if (enteredText.length <= 0) {
+            // Do nothing
+          } else if (enteredText.charAt(0) == "/") {
             // User entered a /COMMAND
             var command = enteredText.split(" ")[0].substring(1);
             var arg = enteredText.indexOf(" ") < 0 ? "": 
