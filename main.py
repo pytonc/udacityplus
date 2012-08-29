@@ -1,12 +1,15 @@
 import webapp2
-from controllers.home import HomePage
-from controllers.signup import SignUpPage
-from controllers.login import LoginPage
-from controllers.logout import LogoutPage
+from controllers.home      import HomePage
+from controllers.signup    import SignUpPage
+from controllers.login     import LoginPage
+from controllers.logout    import LogoutPage
+from controllers.forbidden import Forbidden
 
 app = webapp2.WSGIApplication([
         ('/', HomePage),
         ('/signup', SignUpPage),
         ('/login', LoginPage),
-        ('/logout', LogoutPage)
+        ('/logout', LogoutPage),
+        ('/forbidden', Forbidden)
     ], debug=True)
+

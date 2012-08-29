@@ -1,7 +1,7 @@
 from BaseHandler import *
-from models.User import User
 
 class SignUpPage(BaseHandler):
+
     def get(self):
         self.render("signup.html")
 

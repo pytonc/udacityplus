@@ -4,6 +4,7 @@ from models.User import User
 class LoginPage(BaseHandler):
     def get(self):
         self.render("login.html")
+        params = self.get_params(["username, password"])
 
     def post(self):
         params = self.get_params(["username", "password"])

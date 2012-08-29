@@ -21,8 +21,10 @@ from google.appengine.ext import db
 
 class User(db.Model):
     username = db.StringProperty(required=True)
-    email    = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
+    salt     = db.StringProperty()
+    email    = db.StringProperty(required=True)
+
 
     @staticmethod
     def valid_password(password):
@@ -58,6 +60,4 @@ class User(db.Model):
     @staticmethod
     def exist(username, password):
         user = User.gql("WHERE username=:1", username).get()
-        if not user:
-            return False 
-        return user.password == password
+        return user and user.password == password
