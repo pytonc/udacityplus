@@ -1,7 +1,3 @@
-import webapp2
-import jinja2
-import os
-
 # Basic webapp2 handler with some useful methods
 #
 # render(template_name, template_vals={})
@@ -21,6 +17,10 @@ import os
 #
 # get_params([param1, param2...])      - return [value1, value2...]
 # get_params_dict([param1, param2...]) - return {param1:value1, param2:value2}
+
+import webapp2
+import jinja2
+import os
 
 
 head, tail   = os.path.split(os.path.dirname(__file__))

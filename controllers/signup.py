@@ -1,4 +1,6 @@
 from BaseHandler import *
+from models.User import User
+from authentication import Authentication as aut
 
 class SignUpPage(BaseHandler):
 
@@ -10,7 +12,8 @@ class SignUpPage(BaseHandler):
         user = User.save(*params)
 
         if user:
-            self.set_cookies({'username':user.username, 'password':user.password})
+            log_token = aut.create_and_save_log_token(user)
+            self.set_cookies({'username':user.username, 'log_token':log_token})
             self.redirect("/")
         else:
             self.redirect("/signup")

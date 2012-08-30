@@ -1,5 +1,3 @@
-from google.appengine.ext import db
-
 # Simple user model that we can use
 # in further development of pm part
 #
@@ -17,25 +15,38 @@ from google.appengine.ext import db
 # SAVE
 # 
 # save() - save and return user if valid() else False
+#
+#
+# LOG TOKEN
+#
+# bcrypt.gensalt() is used for creating tokens
+# tokens in database are hashed with bcrypt
+# new token is generated with every new login
 
+
+from google.appengine.ext import db
+from externals.bcrypt import bcrypt as bc
 
 class User(db.Model):
-    username = db.StringProperty(required=True)
-    password = db.StringProperty(required=True)
-    salt     = db.StringProperty()
-    email    = db.StringProperty(required=True)
+    username  = db.StringProperty(required=True)
+    password  = db.StringProperty(required=True)
+    email     = db.StringProperty(required=True)
+    log_token = db.StringProperty(required=False)
 
+    @staticmethod
+    def get_user(username):
+        # shortcut for other classes that import User
+        return User.gql("WHERE username=:1", username).get()
 
     @staticmethod
     def valid_password(password):
-        n = len(password)
-        return n > 7 and n < 21
+        return len(password) < 40
 
     @staticmethod
     def valid_username(username):
         n = len(username)
-        users = User.gql("WHERE username=:1", username).get()
-        return users == None and n > 4 and n < 21
+        users = User.get_user(username)
+        return not users and n > 4 and n < 21
 
     @staticmethod
     def valid_email(email):
@@ -52,12 +63,9 @@ class User(db.Model):
     @staticmethod
     def save(username, email, password):
         if User.valid(username, email, password):
-            user = User(username=username, password=password, email=email)
+            password = bc.hashpw(password, bc.gensalt())
+            # call to create and save log token is in signup controller
+            user = User(username = username, password = password, email = email)
             user.put()
             return user
         return False
-
-    @staticmethod
-    def exist(username, password):
-        user = User.gql("WHERE username=:1", username).get()
-        return user and user.password == password
