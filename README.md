@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 udacityplus
 ===========
-=======
-uplusmessaging
-==============
 
-Collaborative Social Network Private Messaging
->>>>>>> uplusmessaging/master
+stylized **U+**
+
+The Udacity Collaborative Social Network
