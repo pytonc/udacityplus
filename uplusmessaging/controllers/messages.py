@@ -1,5 +1,5 @@
 from BaseHandler import *
-from controllers.authentication import Authentication
+from helpers.authentication import Authentication
 
 
 class MessagePage(BaseHandler):
