@@ -1,6 +1,6 @@
 from BaseHandler import *
 from models.User import User
-from authentication import Authentication as aut
+from helpers.authentication import Authentication as aut
 
 class SignUpPage(BaseHandler):
 

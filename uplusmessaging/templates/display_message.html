@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+    
+    <div id="displayMessage">
+
+        <h2>{{ message.title }}</h2>
+
+        <br />
+
+        <label for='msg_from'>from:</label>
+        <span id='msg_from'>{{ message.sender }}</span>
+
+        <br />
+
+        <label for='msg_to'>to:</label>
+        <span id='msg_to'>{{ message.receiver }}</span>
+
+        <br />
+
+        <label for='timestamp'>Created:</label>
+        <span id='timestamp'>{{ message.timestamp }}</span>
+
+        <br />
+
+        <div id="message">{{ message.content }}</div>
+
+    </div>
+        
+{% endblock %}
