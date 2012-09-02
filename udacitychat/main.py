@@ -197,7 +197,7 @@ def user_quit(username, args):
     for contactname in user.get_contact_names():
         # Remove user from their contacts' contact lists
         # Possible double-handling, but that's ok because remove_contact checks for that
-        contact = get_user(contact)
+        contact = get_user(contactname)
         if contact:
             contact.remove_contact(username)
     try:
@@ -219,6 +219,7 @@ def user_privmsg(username, args):
     if recipient and user:
         recipientname = recipient.username # Use actual name
         channel_api.send_message(recipientname, "PRIVMSG "+username+" "+message)
+        channel_api.send_message(username, "SENTMSG "+recipientname+" "+message)
         # Add sender and recipient to each other's contact lists to inform of e.g. quittage
         recipient.add_contact(username)
         user.add_contact(recipientname)
