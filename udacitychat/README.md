@@ -8,8 +8,6 @@ This is a realtime chat server and client designed to run on Google App Engine.
 It is part of the collaborative Udacity Plus project.
 
 ## Bugs
-- privmsg doesn't show for the sender (not sure whether to implement at client or server level)
-  - probably server
 - need to find a way to clear user after a certain amount of time if they did not connect (but did log in)
   - maybe at the login phase, check if user exists (if they are not connected and session is X seconds old, delete the old user)
 - remove arguments from XHR post (use jQuery's .ajax() function)
