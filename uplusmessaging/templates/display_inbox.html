@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <h2>Inbox</h2>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>From</th>
+            <th>Date</th>
+        </tr>
+        {% if messages %}
+        {% for message in messages: %}
+        <tr>
+            <td><a href='/messages/{{ message.key().id() }}'>{{ message.title }}</a></td>
+            <td>{{ message.sender }}</td>
+            <td>{{ message.timestamp }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </table> 
+    <a href='/messages?show=sent'>check outbox</a>
+    <a href='/messages?show=new'>Send new message</a>
+
+{% endblock %}

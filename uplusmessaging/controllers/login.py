@@ -1,6 +1,6 @@
 from BaseHandler import *
-from authentication import Authentication as aut
 from externals.bcrypt import bcrypt as bc
+from helpers.authentication import Authentication as aut
 
 class LoginPage(BaseHandler):
     def get(self):

@@ -4,9 +4,13 @@
 # if user is allowed to see a page
 #
 #
-# valid_login(username, password)
+# valid_login(username, password) 
+# if username and password are ok, new log_token is created, saved 
+# in db and returned to contrroler so it can can be set in a cookie
+#
 # valid_log_token(username, log_token)
 # create_and_save_log_token(user)
+
 
 
 from models.User import User
