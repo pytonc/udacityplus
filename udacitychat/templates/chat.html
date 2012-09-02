@@ -194,13 +194,11 @@ onMessage({data:"QUIT Quitter"});*/
         // If user leaves page, try to send a quit message
         // Just in case the /_ah/channel/disconnected/ page isn't hit
         sendMessage("QUIT");
-        alert("left page");
       }
       
       function onMessage(message) {
         message = message.data;
         // Received a message from the server
-/*console.log("Server message: "+message);*/
         var command = message.split(' ')[0];
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
@@ -212,6 +210,14 @@ onMessage({data:"QUIT Quitter"});*/
           arg = arg.substring(arg.indexOf(' ')+1);
           var content = createTimestamp()+" <"+sender+"> "+arg;
           addUserContent(sender, content);
+          break;
+        case "SENTMSG":
+          // A message sent by this user (server confirmation or error message)
+          // Format: SENTMSG RECIPIENT message text
+          var recipient = arg.split(' ')[0];
+          arg = arg.substring(arg.indexOf(' ')+1);
+          var content = createTimestamp()+" <"+username+"> "+arg;
+          addUserContent(recipient, content);
           break;
         case "CHANNELMSG":
           // Message sent to a #channel user is in
