@@ -1,3 +1,12 @@
+# Display specific message if message id is given in the 
+# url, otherwise get show param and display inbox, outbox 
+# or render form for a new message.
+#
+# If start and end params are given, in inbox/outbox show 
+# messages from start to end sorted by creation time DESC
+# else use default values defined in model (and temp.js)
+
+
 from BaseHandler import *
 from helpers.authentication import Authentication
 from models.Message import Message
@@ -8,21 +17,17 @@ class MessagePage(BaseHandler):
     
     @Authentication.do
     def get(self):
-        """Display specific message if message id is given in the 
-           url otherwise get show param and display inbox, outbox 
-           or render form for a new message"""
         msg_id   = re.search(r"/messages(/?)([0-9]*)", self.request.url).group(2)
         username = self.get_cookie("username")
-        show     = self.request.get("show")
+        show, start, end = self.get_params(["show", "from", "to"])
 
         if msg_id:
-            msg_id = int(msg_id)
-            self.display_message(msg_id)
+            self.display_message(int(msg_id))
         else:
             if show == "received":
-                self.display_inbox(username)
+                self.display_inbox(username, start, end)
             elif show == "sent":
-                self.display_outbox(username)
+                self.display_outbox(username, start, end)
             elif show == "new":
                 self.show_form_for_new_message()
             else:
@@ -33,13 +38,13 @@ class MessagePage(BaseHandler):
         template_values = { 'message' : message }
         self.render("display_message.html", template_values)
 
-    def display_inbox(self, username):
-        messages = Message.received(username)
+    def display_inbox(self, username, start, end):
+        messages = Message.received(username, start, end)
         template_values = { "messages" : messages }
         self.render("display_inbox.html", template_values)
 
-    def display_outbox(self, username):
-        messages = Message.sent(username)
+    def display_outbox(self, username, start, end):
+        messages = Message.sent(username, start, end)
         template_values = { "messages" : messages }
         self.render("display_outbox.html", template_values)
 
