@@ -13,7 +13,7 @@
         <tr>
             <td>{{ message.title }}</td>
             <td>{{ message.receiver }}</td>
-            <td>{{ message.timestamp }}</td>
+            <td>{{ message.timestamp.strftime("%B %d") }}</td>
         </tr>
         <tr>
             <td class="preview" colspan="3"><a href='/messages/{{ message.key().id() }}'>{{ message.content|truncate(140) }}</a></td>

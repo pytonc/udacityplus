@@ -13,7 +13,7 @@
         <tr>
             <td>{{ message.title }}</td>
             <td>{{ message.sender }}</td>
-            <td>{{ message.timestamp }}</td>
+            <td>{{ message.timestamp.strftime("%B %d") }}</td>
         </tr>
         <tr>
             <td class="preview" colspan="3"><a href='/messages/{{ message.key().id() }}'>{{ message.content|truncate(140) }}</a></td>
@@ -21,7 +21,7 @@
         {% endfor %}
         {% endif %}
     </table> 
-    <a href='/messages?show=sent'>check outbox</a>
+    <a href='/messages?show=sent'>Check outbox</a>
     <a href='/messages?show=new'>Send new message</a>
 
 {% endblock %}
