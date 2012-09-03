@@ -64,10 +64,10 @@ table td.preview {
     margin: 5px;
 }
 
-#displayMessage label {
+label {
     font-weight: bold;
     display: inline-block;
-    width: 80px;
+    width: 90px;
     margin: 5px;
 }
 
