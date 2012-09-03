@@ -11,14 +11,17 @@
         {% if messages %}
         {% for message in messages: %}
         <tr>
-            <td><a href='/messages/{{ message.key().id() }}'>{{ message.title }}</a></td>
+            <td>{{ message.title }}</td>
             <td>{{ message.receiver }}</td>
             <td>{{ message.timestamp }}</td>
+        </tr>
+        <tr>
+            <td class="preview" colspan="3"><a href='/messages/{{ message.key().id() }}'>{{ message.content|truncate(100) }}</a></td>
         </tr>
         {% endfor %}
         {% endif %}
     </table>
-    <a href='/messages?show=received'>check outbox</a>
+    <a href='/messages?show=received'>Check inbox</a>
     <a href='/messages?show=new'>Send new message</a>
 
 {% endblock %}

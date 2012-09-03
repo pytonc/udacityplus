@@ -11,9 +11,12 @@
         {% if messages %}
         {% for message in messages: %}
         <tr>
-            <td><a href='/messages/{{ message.key().id() }}'>{{ message.title }}</a></td>
+            <td>{{ message.title }}</td>
             <td>{{ message.sender }}</td>
             <td>{{ message.timestamp }}</td>
+        </tr>
+        <tr>
+            <td class="preview" colspan="3"><a href='/messages/{{ message.key().id() }}'>{{ message.content|truncate(100) }}</a></td>
         </tr>
         {% endfor %}
         {% endif %}
