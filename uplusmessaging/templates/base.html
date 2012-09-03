@@ -2,13 +2,16 @@
 <html>
 <head>
     <title>Messaging system demo</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/temp.css" />
+    <script type="text/javascript" src="/js/temp.js"></script>
 </head>
 <body>
     <div id ="header">
+        <a href="/logout">Logout</a>
         <a href="/login">Login</a>
         <a href="/signup">Sign up</a>
-        <a href="/logout">Logout</a>
         <a href="/messages?show=received">Messages</a>
+        <a href="/">Home</a>
     </div>
     <div id="content">
         {% block content %}
