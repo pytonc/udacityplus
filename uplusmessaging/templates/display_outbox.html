@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
     <h2>Outbox</h2>
     <table>
         <tr>
@@ -23,5 +22,5 @@
     </table>
     <a href='/messages?show=received'>Check inbox</a>
     <a href='/messages?show=new'>Send new message</a>
-
+    <button onclick="getPreviousMessages()">Older</button>
 {% endblock %}
