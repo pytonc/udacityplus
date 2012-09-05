@@ -1,0 +1,26 @@
+
+.editor {
+	font-family: verdana, arial, sans-serif;
+	font-size:13px;
+	padding: 5px;
+	background: #d5e8f9;
+	border: 1px solid #e5ecf9;
+	
+
+}
+
+.button {
+margin: 1px;
+padding: 2px;
+}
+
+.button:hover {
+opacity:.60;
+filter: alpha(opacity=60); 
+-moz-opacity: 0.60;
+}
+
+.ed {
+width: 400px;
+height: 150px;
+}

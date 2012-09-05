@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<script type="text/javascript" src="/static/js/ed.js"></script>  
+<form method="post">
+	<div>
+		Send a message to: <input type="text" name="recipient" placeholder="Recipient's username">
+	</div>
+ 	<div> 
+		<script>edToolbar('message'); </script>
+		<textarea name="message" id="message" class="ed" placeholder="Enter a message here"></textarea>
+	</div>
+	<div>
+		<input type="submit" name="Submit" value="Submit">
+	</div>
+</form>
+{% endblock %}

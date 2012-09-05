@@ -27,7 +27,7 @@ head, tail   = os.path.split(os.path.dirname(__file__))
 template_dir = os.path.join(head, "templates")
 
 jinja_environment=jinja2.Environment(
-    loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
+    loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
 
 class BaseHandler(webapp2.RequestHandler):
     def render(self, template, vals={}):
@@ -56,3 +56,6 @@ class BaseHandler(webapp2.RequestHandler):
 
     def get_params_dict(self, params):
         return {param : self.request.get(param) for param in params}
+
+    def write(self, param):
+        return self.response.out.write(param)
