@@ -15,9 +15,10 @@
 
 from models.User import User
 from externals.bcrypt import bcrypt as bc
+import uuid
 
 class Authentication(object):
-    
+
     @staticmethod
     def do(fn):
         def wrapper(self, *args):
@@ -34,16 +35,15 @@ class Authentication(object):
     def valid_login(username, password):
         user = User.get_user(username)
         if user and bc.hashpw(password, user.password) == user.password:
-            return Authentication.create_and_save_log_token(user) 
+            return Authentication.create_and_save_log_token(user)
 
     @staticmethod
     def valid_log_token(username, log_token):
         user = User.get_user(username)
-        return user and bc.hashpw(log_token, user.log_token) == user.log_token
-        
+        return user and log_token == user.log_token
+
     @staticmethod
     def create_and_save_log_token(user):
-        log_token = bc.gensalt()
-        user.log_token = bc.hashpw(log_token, bc.gensalt())
+        user.log_token = str(uuid.uuid4())
         user.put()
-        return log_token
+        return user.log_token
