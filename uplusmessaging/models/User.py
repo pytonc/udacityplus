@@ -27,11 +27,34 @@
 from google.appengine.ext import db
 from externals.bcrypt import bcrypt as bc
 
+class ExternalProfileLink(db.Model):
+    url             = db.URLProperty(required=True)
+    profile_loc     = db.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
+                                                                'LinkedIn', 'Website', 'GitHub', 'BitBucket',
+                                                                'Blog', 'Portfolio', 'Other'})
+
 class User(db.Model):
-    username  = db.StringProperty(required=True)
-    password  = db.StringProperty(required=True)
-    email     = db.StringProperty(required=True)
-    log_token = db.StringProperty(required=False)
+    username        = db.StringProperty(required=True)
+    password        = db.StringProperty(required=True)
+    email           = db.StringProperty(required=True)
+
+    friends         = db.StringListProperty()
+
+    # details
+    forum_name      = db.StringProperty()
+    real_name       = db.StringProperty()
+    short_about     = db.StringProperty()
+    tools           = db.StringProperty()
+    age             = db.IntegerProperty()
+
+    # location
+    city            = db.StringProperty()
+    country         = db.StringProperty()
+
+    # settings
+    show_friends    = db.BooleanProperty(default=False)
+    log_token       = db.StringProperty(required=False)
+
 
     @staticmethod
     def get_user(username):
