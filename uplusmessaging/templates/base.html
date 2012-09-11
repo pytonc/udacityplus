@@ -7,9 +7,12 @@
 </head>
 <body>
     <div id ="header">
-        <a href="/logout">Logout</a>
-        <a href="/login">Login</a>
-        <a href="/signup">Sign up</a>
+        {% if not is_authenticated() %}
+            <a href="/signup">Sign up</a>
+            <a href="/login">Login</a>
+        {% else %}
+            <a href="/logout">Logout</a>
+        {% endif %}
         <a href="/messages?show=received">Messages</a>
         <a href="/">Home</a>
     </div>

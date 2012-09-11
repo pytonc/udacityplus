@@ -21,6 +21,7 @@
 import webapp2
 import jinja2
 import os
+from jinja_custom.helpers import is_authenticated
 
 
 head, tail   = os.path.split(os.path.dirname(__file__))
@@ -28,6 +29,8 @@ template_dir = os.path.join(head, "templates")
 
 jinja_environment=jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
+
+jinja_environment.globals['is_authenticated'] = is_authenticated
 
 class BaseHandler(webapp2.RequestHandler):
     def render(self, template, vals={}):
