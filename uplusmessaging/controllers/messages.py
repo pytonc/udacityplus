@@ -36,20 +36,20 @@ class MessagePage(BaseHandler):
     def display_message(self, msg_id):
         message = Message.get_by_id(msg_id)
         template_values = { 'message' : message }
-        self.render("display_message.html", template_values)
+        self.render("messages/display_message.html", template_values)
 
     def display_inbox(self, username, start, end):
         messages = Message.received(username, start, end)
         template_values = { "messages" : messages }
-        self.render("display_inbox.html", template_values)
+        self.render("messages/display_inbox.html", template_values)
 
     def display_outbox(self, username, start, end):
         messages = Message.sent(username, start, end)
         template_values = { "messages" : messages }
-        self.render("display_outbox.html", template_values)
+        self.render("messages/display_outbox.html", template_values)
 
     def show_form_for_new_message(self):
-        self.render("new_message.html")
+        self.render("messages/messages/new_message.html")
 
     @Authentication.do
     def post(self):
