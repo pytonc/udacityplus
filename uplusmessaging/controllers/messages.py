@@ -9,7 +9,7 @@
 
 from BaseHandler import *
 from helpers.authentication import Authentication
-from models.Message import Message
+from models.Message import Message, MessageIndex
 import re
 
 
@@ -57,13 +57,21 @@ class MessagePage(BaseHandler):
         receiver = self.request.get('receiver')
         title    = self.request.get('title')
         content  = self.request.get('content')
-        
+
         if receiver and title and content:
+            r = receiver.split(',')
             msg = Message(sender   = sender, 
-                          receiver = receiver, 
+                          receivers = r,
                           title    = title, 
                           content  = content)
             msg.put()
+            index = MessageIndex(
+                key_name='msg_index',
+                parent=msg,
+                receivers=r
+            )
+            index.put()
+
             self.redirect('/')
         else:
             self.response.out.write("Error in Messages.post()")
