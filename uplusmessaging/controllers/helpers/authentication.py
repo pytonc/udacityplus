@@ -18,7 +18,7 @@ from externals.bcrypt import bcrypt as bc
 import uuid
 
 class Authentication(object):
-
+#TODO: CSRF
     @staticmethod
     def do(fn):
         def wrapper(self, *args):

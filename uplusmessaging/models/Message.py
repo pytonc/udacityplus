@@ -3,6 +3,7 @@ from User import User
 
 
 class Message(ndb.Model):
+    #TODO: deleting
     created     = ndb.DateTimeProperty(auto_now_add=True)
     modified    = ndb.DateTimeProperty(auto_now=True)
     content     = ndb.TextProperty(required=True)
@@ -11,6 +12,7 @@ class Message(ndb.Model):
 
 
 class Conversation(ndb.Model):
+    #TODO: deleting
     receivers_list    = ndb.KeyProperty(User, repeated=True)
     receivers_list_norm    = ndb.StringProperty(repeated=True)
     title           = ndb.StringProperty(required=True)
