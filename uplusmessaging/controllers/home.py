@@ -2,7 +2,8 @@ from BaseHandler import *
 
 class HomePage(BaseHandler):
     def get(self):
-        template_values = {'title' : self.get_title()}
+        name = self.get_cookie('username')
+        template_values = {'title' : self.get_title(), 'username': name}
         self.render("index.html", template_values)
 
     def get_title(self):
