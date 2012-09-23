@@ -1,0 +1,7 @@
+{% macro input(type, name, id, value) -%}
+<input type="{{ type }}" name="{{ name }}" id="{{ id }}"
+        {% if value %}
+       value="{{ value }}" readonly="readonly"
+        {% endif %}
+        />
+{%- endmacro %}
