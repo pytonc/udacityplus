@@ -1,34 +1,73 @@
-from google.appengine.ext import db
+from google.appengine.ext import ndb
+from User import User
 
 
-class Message(db.Model):
-    # TODO: does receivers here badly affect performance?
-    receivers   = db.StringListProperty(required=True)
-    sender      = db.StringProperty(required=True)
-    title       = db.StringProperty(required=True)
-    content     = db.TextProperty(required=True)
-    timestamp   = db.DateTimeProperty(auto_now_add=True)
+class Message(ndb.Model):
+    created     = ndb.DateTimeProperty(auto_now_add=True)
+    modified    = ndb.DateTimeProperty(auto_now=True)
+    content     = ndb.TextProperty(required=True)
+    sender      = ndb.StringProperty(required=True)
+    read        = ndb.BooleanProperty(default=False)
 
-    @staticmethod
-    def received(username, offset, limit):
-        offset = offset or 0
-        limit  = limit  or 10
-        offset, limit = int(offset), int(limit)
 
-        keys = db.GqlQuery(
-            "SELECT __key__ FROM MessageIndex WHERE receivers = :1", username
-        ).fetch(limit, offset)
-        return db.get([k.parent() for k in keys])
+class Conversation(ndb.Model):
+    receivers_list    = ndb.KeyProperty(User, repeated=True)
+    receivers_list_norm    = ndb.StringProperty(repeated=True)
+    title           = ndb.StringProperty(required=True)
+    created         = ndb.DateTimeProperty(auto_now_add=True)
+    messages_list   = ndb.KeyProperty(Message, repeated=True)
 
-    @staticmethod
-    def sent(username, offset, limit):
-        offset = offset or 0
-        limit  = limit  or 10
-        offset, limit = int(offset), int(limit)
-        q = db.Query(Message)
-        q.filter('sender', username)
-        q.order("-timestamp")
-        return q.fetch(offset=offset, limit=limit)
+    @property
+    def messages(self):
+        """Get all messages in this Conversation instance
+        """
+        u = ndb.get_multi(self.messages_list)
+        return u
 
-class MessageIndex(db.Model):
-    receivers   = db.StringListProperty(required=True)
+    @property
+    def receivers(self):
+        """Get all participants in this Conversation thread
+        """
+        return ndb.get_multi(self.receivers_list)
+
+    def insert_message(self, m):
+        """Appends a message to the conversation thread
+        """
+        self.messages_list.append(m)
+
+    @classmethod
+    def add_new_message(cls, thread, sender, content):
+        """Creates a new message appends to conversation
+        """
+        conv = cls.get_by_id(int(thread))
+        msg = Message(
+            sender = sender,
+            content = content,
+        )
+        msg.put()
+        conv.insert_message(msg.key)
+        conv.put()
+
+    @classmethod
+    def add_new_conversation(cls, sender, receiver, title, content):
+        """Adds new conversation with receiver for sender
+        """
+        skey = ndb.Key('User', sender)
+        rkey = ndb.Key('User', receiver)
+
+        conv = cls(
+            receivers_list = [rkey, skey],
+            receivers_list_norm = [sender, receiver],
+            title = title,
+        )
+        msg = Message(
+            sender = sender,
+            content = content
+        )
+
+
+        k = msg.put()
+        conv.insert_message(k)
+        ck = conv.put()
+
+        User.add_conversation_for_users(ck, sender, receiver)
