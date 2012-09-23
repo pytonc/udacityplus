@@ -24,71 +24,103 @@
 # new token is generated with every new login
 
 
-from google.appengine.ext import db
+from google.appengine.ext import  ndb
 from externals.bcrypt import bcrypt as bc
 
-class ExternalProfileLink(db.Model):
-    url             = db.URLProperty(required=True)
-    profile_loc     = db.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
+class ExternalProfileLink(ndb.Model):
+    url             = ndb.StringProperty(required=True)
+    profile_loc     = ndb.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
                                                                 'LinkedIn', 'Website', 'GitHub', 'BitBucket',
-                                                                'Blog', 'Portfolio', 'Other'})
+                                                                'Blog', 'Portfolio', 'Other', 'Coursera', })
 
-class User(db.Model):
-    username        = db.StringProperty(required=True)
-    password        = db.StringProperty(required=True)
-    email           = db.StringProperty(required=True)
+class Location(ndb.Model):
+    city            = ndb.StringProperty()
+    country         = ndb.StringProperty()
 
-    friends         = db.StringListProperty()
+class User(ndb.Model):
+    username        = ndb.StringProperty(required=True)
+    username_norm   = ndb.ComputedProperty(lambda self: self.username.lower())
+    password        = ndb.StringProperty(required=True)
+    email           = ndb.StringProperty(required=True)
+
+    friends         = ndb.KeyProperty(kind='User', repeated=True)
 
     # details
-    forum_name      = db.StringProperty()
-    real_name       = db.StringProperty()
-    short_about     = db.StringProperty()
-    tools           = db.StringProperty()
-    age             = db.IntegerProperty()
-
-    # location
-    city            = db.StringProperty()
-    country         = db.StringProperty()
+    forum_name      = ndb.StringProperty()
+    real_name       = ndb.StringProperty()
+    short_about     = ndb.StringProperty()
+    tools           = ndb.StringProperty()
+    age             = ndb.IntegerProperty()
+    profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
+    location        = ndb.StructuredProperty(Location)
 
     # settings
-    show_friends    = db.BooleanProperty(default=False)
-    log_token       = db.StringProperty(required=False)
+    show_friends    = ndb.BooleanProperty(default=False)
+    log_token       = ndb.StringProperty(required=False)
 
+    conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
-    @staticmethod
-    def get_user(username):
+    def add_conversation(self, conversation):
+        self.conversations.append(conversation)
+
+    def get_all_conversations(self):
+        return ndb.get_multi(self.conversations)
+
+    @classmethod
+    def add_conversation_for_user(cls, username, conversation):
+        """Add a conversation thread for user with username
+        """
+        u = cls.query(User.username_norm == username.lower()).get()
+        u.conversations.append(conversation)
+        u.put()
+
+    @classmethod
+    def add_conversation_for_users(cls, conversation, *users):
+        """Adds participants to a conversation thread for each user in users
+        """
+        for user in users:
+            cls.add_conversation_for_user(user, conversation)
+
+    @classmethod
+    def get_user(cls, username):
         # shortcut for other classes that import User
-        return User.gql("WHERE username=:1", username).get()
+        return cls.query(User.username_norm == username).get()
 
-    @staticmethod
-    def valid_password(password):
+    @classmethod
+    def get_conversations_for(cls, username):
+        """Gets conversations for user with username
+        """
+        u = User.query(User.username_norm == username.lower()).get()
+        return ndb.get_multi(u.conversations)
+
+    @classmethod
+    def valid_password(cls, password):
         return len(password) < 40
 
-    @staticmethod
-    def valid_username(username):
+    @classmethod
+    def valid_username(cls, username):
         n = len(username)
-        users = User.get_user(username)
+        users = cls.get_user(username)
         return not users and n > 4 and n < 21
 
-    @staticmethod
-    def valid_email(email):
-        emails = User.gql("WHERE email=:1", email).get()
+    @classmethod
+    def valid_email(cls, email):
+        emails = cls.query(User.email == email).get()
         #too lazy for regex now
         return emails == None
 
-    @staticmethod
-    def valid(username, email, password):
-        return User.valid_password(password) and \
-               User.valid_username(username) and \
-               User.valid_email(email)
+    @classmethod
+    def valid(cls, username, email, password):
+        return cls.valid_password(password) and \
+               cls.valid_username(username) and \
+               cls.valid_email(email)
 
-    @staticmethod
-    def save(username, email, password):
-        if User.valid(username, email, password):
+    @classmethod
+    def save(cls, username, email, password):
+        if cls.valid(username, email, password):
             password = bc.hashpw(password, bc.gensalt())
             # call to create and save log token is in signup controller
-            user = User(username = username, password = password, email = email)
+            user = cls(id = username, username = username, password = password, email = email)
             user.put()
             return user
         return False
