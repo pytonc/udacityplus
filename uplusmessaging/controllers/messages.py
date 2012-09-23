@@ -5,11 +5,11 @@
 # If start and end params are given, in inbox/outbox show 
 # messages from start to end sorted by creation time DESC
 # else use default values defined in model (and temp.js)
-
-
 from BaseHandler import *
 from helpers.authentication import Authentication
-from models.Message import Message, MessageIndex
+from models.User import User
+from models.Message import Message, Conversation
+from google.appengine.ext import ndb
 import re
 
 
@@ -17,39 +17,46 @@ class MessagePage(BaseHandler):
     
     @Authentication.do
     def get(self):
-        msg_id   = re.search(r"/messages(/?)([0-9]*)", self.request.url).group(2)
+        (conv_id, msg_id)   = re.search(r"/messages(/?)([0-9]*)(/?)([0-9]*)", self.request.url).group(2, 4)
         username = self.get_cookie("username")
-        show, start, end = self.get_params(["show", "from", "to"])
+        show, start, end, thread, id = self.get_params(["show", "from", "to", "thread", "id"])
 
         if msg_id:
-            self.display_message(int(msg_id))
+            self.display_message(int(msg_id), int(conv_id))
         else:
-            if show == "received":
-                self.display_inbox(username, start, end)
-            elif show == "sent":
-                self.display_outbox(username, start, end)
+            if show == "all":
+                self.display_messages(username, start, end)
             elif show == "new":
-                self.show_form_for_new_message()
+                self.show_form_for_new_message(thread, id)
             else:
                 self.response.out.write("Invalid url")
 
-    def display_message(self, msg_id):
+    def display_message(self, msg_id, conv_id):
         message = Message.get_by_id(msg_id)
-        template_values = { 'message' : message }
+
+        template_values = { 'message' : message, 'conv_id': conv_id}
         self.render("messages/display_message.html", template_values)
 
-    def display_inbox(self, username, start, end):
-        messages = Message.received(username, start, end)
-        template_values = { "messages" : messages }
-        self.render("messages/display_inbox.html", template_values)
+    def display_messages(self, username, start, end):
+        conv = User.get_conversations_for(username)
 
-    def display_outbox(self, username, start, end):
-        messages = Message.sent(username, start, end)
-        template_values = { "messages" : messages }
-        self.render("messages/display_outbox.html", template_values)
+        template_values = { "conversations" : conv, "me": username}
+        self.render("messages/messages.html", template_values)
 
-    def show_form_for_new_message(self):
-        self.render("messages/messages/new_message.html")
+    def show_form_for_new_message(self, thread=None, id=None):
+        """Shows a form for a brand new message and a reply if given thread and id
+        """
+        context = {}
+        if id and thread:
+            id = int(id)
+            thread = int(thread)
+
+            msg = Message.get_by_id(id)
+            conv = Conversation.get_by_id(thread)
+
+            context = {'receiver': msg.sender,  'title': conv.title}
+
+        self.render("messages/new_message.html", context)
 
     @Authentication.do
     def post(self):
@@ -57,21 +64,18 @@ class MessagePage(BaseHandler):
         receiver = self.request.get('receiver')
         title    = self.request.get('title')
         content  = self.request.get('content')
+        thread, id = self.get_params([ "thread", "id"])
 
-        if receiver and title and content:
-            r = receiver.split(',')
-            msg = Message(sender   = sender, 
-                          receivers = r,
-                          title    = title, 
-                          content  = content)
-            msg.put()
-            index = MessageIndex(
-                key_name='msg_index',
-                parent=msg,
-                receivers=r
-            )
-            index.put()
+        sender = sender.lower()
+        receiver = receiver.lower()
 
-            self.redirect('/')
+        # Adds a new message to conversation
+        if thread and id:
+            Conversation.add_new_message(thread, sender, content)
+        # Adds a new conversation with first message
+        elif receiver and title and content:
+            Conversation.add_new_conversation(sender, receiver, title, content)
         else:
             self.response.out.write("Error in Messages.post()")
+
+        self.redirect('/')
