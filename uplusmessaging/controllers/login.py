@@ -7,6 +7,7 @@ class LoginPage(BaseHandler):
         self.render("login.html")
 
     def post(self):
+        #TODO: what if i'm already logged in
         params = self.get_params(["username", "password"])
         log_token = aut.valid_login(*params)
         if log_token:
