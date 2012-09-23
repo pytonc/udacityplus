@@ -33,8 +33,10 @@ class MessagePage(BaseHandler):
 
     def display_message(self, msg_id, conv_id):
         message = Message.get_by_id(msg_id)
+        message.read = True
+        message.put()
 
-        template_values = { 'message' : message, 'conv_id': conv_id}
+        template_values = { 'message' : message, 'conv_id': conv_id, 'me': self.get_cookie("username")}
         self.render("messages/display_message.html", template_values)
 
     def display_messages(self, username, start, end):
