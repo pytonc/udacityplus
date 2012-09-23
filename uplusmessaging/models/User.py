@@ -37,6 +37,11 @@ class Location(ndb.Model):
     city            = ndb.StringProperty()
     country         = ndb.StringProperty()
 
+class Avatar(ndb.Model):
+    url             = ndb.StringProperty()
+    uploaded        = ndb.DateTimeProperty(auto_now=True)
+    use_gravatar    = ndb.BooleanProperty(default=True)
+
 class User(ndb.Model):
     username        = ndb.StringProperty(required=True)
     username_norm   = ndb.ComputedProperty(lambda self: self.username.lower())
@@ -53,6 +58,7 @@ class User(ndb.Model):
     age             = ndb.IntegerProperty()
     profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Location)
+    avatar          = ndb.StructuredProperty(Avatar)
 
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
