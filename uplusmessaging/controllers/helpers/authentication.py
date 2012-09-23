@@ -33,14 +33,18 @@ class Authentication(object):
 
     @staticmethod
     def valid_login(username, password):
-        user = User.get_user(username)
-        if user and bc.hashpw(password, user.password) == user.password:
-            return Authentication.create_and_save_log_token(user)
+        if username:
+            username = username.lower()
+            user = User.get_user(username)
+            if user and bc.hashpw(password, user.password) == user.password:
+                return Authentication.create_and_save_log_token(user)
 
     @staticmethod
     def valid_log_token(username, log_token):
-        user = User.get_user(username)
-        return user and log_token == user.log_token
+        if username:
+            username = username.lower()
+            user = User.get_user(username)
+            return user and log_token == user.log_token
 
     @staticmethod
     def create_and_save_log_token(user):
