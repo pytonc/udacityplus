@@ -1,15 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-    <form action="" method="Post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username">
-        <br />
-        <label for="email">Email:</label>
-        <input type="text" id="email" name="email">
-        <br />
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password">
-        <br />
-        <input type="submit">
-    </form>
+<div class="row">
+    <div class="span5 offset3">
+        <h2>Signup</h2>
+        <form action="" method="post" class="form-horizontal">
+            <fieldset>
+                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label" for="focusedInput">Username</label>
+                    <div class="controls">
+                        <input type="text"
+                               name="username"
+                               class="input-xlarge focused"
+                               placeholder="Username">
+                    </div>
+                </div>
+                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label">Username</label>
+                    <div class="controls">
+                        <input type="text"
+                               name="email"
+                               class="input-xlarge focused"
+                               placeholder="Email">
+                    </div>
+                </div>
+
+                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label">Password</label>
+                    <div class="controls">
+                        <input type="password"
+                               name="password"
+                               class="input-xlarge focused"
+                               placeholder="Password">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">Sign up</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
 {% endblock %}

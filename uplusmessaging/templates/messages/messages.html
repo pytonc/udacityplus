@@ -1,16 +1,18 @@
 {% extends "base.html" %}
+{% block title %}Messages{% endblock %}
 {% block content %}
-
-    <h2>Inbox</h2>
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>With</th>
-            <th>Date</th>
-        </tr>
+<div class="span9">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>With</th>
+                <th>Date</th>
+            </tr>
+        </thead>
         {% if conversations %}
             {% for c in conversations %}
-                <tr>
+                <tr class="success">
                     <td>{{ c.title }}</td>
                     <td>
                         {% for r in c.receivers %}
@@ -22,8 +24,12 @@
                     <td>{{ c.created.strftime("%B %d") }}</td>
                 </tr>
                 {% for m in c.messages %}
-                    <tr>
-                        <td class="preview" colspan="3"><a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>{{ m.content|truncate(140) }}</a></td>
+                    <tr {% if m.sender != me and not m.read %}class="info"{% endif %}>
+                        <td class="preview" colspan="3">
+                            <a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>
+                                {{ m.content|truncate(140) }}
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
             {% endfor %}
@@ -31,5 +37,5 @@
     </table>
     <a href='/messages?show=new'>Send new message</a>
     <button onclick="getPreviousMessages()">Older</button>
-
+</div>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    
+<div class="span9">
     <div id="displayMessage">
 
         <h2>{{ message.title }}</h2>
@@ -20,5 +20,5 @@
         <div id="message">{{ message.content }}</div>
         <div><a href="/messages?show=new&thread={{ conv_id }}&id={{ message.key.id() }}">reply</a></div>
     </div>
-        
+</div>
 {% endblock %}
