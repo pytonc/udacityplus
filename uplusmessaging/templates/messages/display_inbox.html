@@ -8,17 +8,21 @@
             <th>From</th>
             <th>Date</th>
         </tr>
-        {% if messages %}
-        {% for message in messages: %}
-        <tr>
-            <td>{{ message.title }}</td>
-            <td>{{ message.sender }}</td>
-            <td>{{ message.timestamp.strftime("%B %d") }}</td>
-        </tr>
-        <tr>
-            <td class="preview" colspan="3"><a href='/messages/{{ message.key().id() }}'>{{ message.content|truncate(140) }}</a></td>
-        </tr>
-        {% endfor %}
+        {% if conversations %}
+            {% for c in conversations %}
+                <tr>
+                    <td>{{ c.title }}</td>
+                    <td>
+                        {{ c.receiver_name }}
+                    </td>
+                    <td>{{ c.created.strftime("%B %d") }}</td>
+                </tr>
+                {% for m in c.messages %}
+                    <tr>
+                        <td class="preview" colspan="3"><a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>{{ m.content|truncate(140) }}</a></td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
         {% endif %}
     </table> 
     <a href='/messages?show=sent'>Check outbox</a>
