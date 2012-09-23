@@ -10,20 +10,15 @@
         <label for='msg_from'>from:</label>
         <span id='msg_from'>{{ message.sender }}</span>
 
-        <br />
-
-        <label for='msg_to'>to:</label>
-        <span id='msg_to'>{{ message.receiver }}</span>
-
-        <br />
+        <br/>
 
         <label for='timestamp'>Created:</label>
-        <span id='timestamp'>{{ message.timestamp.strftime("%B %d, %Y") }}</span>
+        <span id='timestamp'>{{ message.created.strftime("%B %d, %Y") }}</span>
 
         <br />
 
         <div id="message">{{ message.content }}</div>
-
+        <div><a href="/messages?show=new&thread={{ conv_id }}&id={{ message.key.id() }}">reply</a></div>
     </div>
         
 {% endblock %}
