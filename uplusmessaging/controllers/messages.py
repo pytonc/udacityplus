@@ -18,34 +18,42 @@ class MessagePage(BaseHandler):
     @Authentication.do
     def get(self):
         (conv_id, msg_id)   = re.search(r"/messages(/?)([0-9]*)(/?)([0-9]*)", self.request.url).group(2, 4)
+
         username = self.get_cookie("username")
         show, start, end, thread, id = self.get_params(["show", "from", "to", "thread", "id"])
 
+        me = User.get_user(username)
+        friends = me.get_friends()
+
         if msg_id:
-            self.display_message(int(msg_id), int(conv_id))
+            self.display_message(int(msg_id), int(conv_id), friends)
         else:
             if show == "all":
-                self.display_messages(username, start, end)
+                self.display_messages(username, start, end, friends)
             elif show == "new":
-                self.show_form_for_new_message(thread, id)
+                self.show_form_for_new_message(thread, id, friends)
             else:
                 self.response.out.write("Invalid url")
 
-    def display_message(self, msg_id, conv_id):
+    def display_message(self, msg_id, conv_id, friends):
         message = Message.get_by_id(msg_id)
         message.read = True
         message.put()
 
-        template_values = { 'message' : message, 'conv_id': conv_id, 'me': self.get_cookie("username")}
+        template_values = { 'message' : message,
+                            'conv_id': conv_id,
+                            'username': self.get_cookie("username"),
+                            'friends': friends}
+
         self.render("messages/display_message.html", template_values)
 
-    def display_messages(self, username, start, end):
+    def display_messages(self, username, start, end, friends):
         conv = User.get_conversations_for(username)
 
-        template_values = { "conversations" : conv, "me": username}
+        template_values = { "conversations" : conv, "username": username, 'friends': friends}
         self.render("messages/messages.html", template_values)
 
-    def show_form_for_new_message(self, thread=None, id=None):
+    def show_form_for_new_message(self, thread=None, id=None, friends=None):
         """Shows a form for a brand new message and a reply if given thread and id
         """
         context = {}
@@ -56,7 +64,7 @@ class MessagePage(BaseHandler):
             msg = Message.get_by_id(id)
             conv = Conversation.get_by_id(thread)
 
-            context = {'receiver': msg.sender,  'title': conv.title}
+            context = {'receiver': msg.sender,  'title': conv.title, 'friends': friends}
 
         self.render("messages/new_message.html", context)
 
@@ -80,4 +88,7 @@ class MessagePage(BaseHandler):
         else:
             self.response.out.write("Error in Messages.post()")
 
-        self.redirect('/')
+        if self.request.path == '/messages':
+            self.redirect('/messages')
+        else:
+            self.redirect(self.request.referer)
