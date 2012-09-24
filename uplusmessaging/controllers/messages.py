@@ -89,6 +89,6 @@ class MessagePage(BaseHandler):
             self.response.out.write("Error in Messages.post()")
 
         if self.request.path == '/messages':
-            self.redirect('/messages')
+            self.redirect('/messages?show=all')
         else:
             self.redirect(self.request.referer)
