@@ -9,6 +9,8 @@ handlers:
   static_dir: js
 - url: /stylesheets
   static_dir: stylesheets
+- url: /img
+  static_dir: img
 - url: /.*
   script: main.app
 
