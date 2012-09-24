@@ -25,6 +25,7 @@
 
 
 from google.appengine.ext import  ndb
+from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
 
 class ExternalProfileLink(ndb.Model):
@@ -37,10 +38,6 @@ class Location(ndb.Model):
     city            = ndb.StringProperty()
     country         = ndb.StringProperty()
 
-class Avatar(ndb.Model):
-    url             = ndb.StringProperty()
-    uploaded        = ndb.DateTimeProperty(auto_now=True)
-    use_gravatar    = ndb.BooleanProperty(default=True)
 
 class User(ndb.Model):
     username        = ndb.StringProperty(required=True)
@@ -48,7 +45,8 @@ class User(ndb.Model):
     password        = ndb.StringProperty(required=True)
     email           = ndb.StringProperty(required=True)
 
-    friends         = ndb.KeyProperty(kind='User', repeated=True)
+#    friends         = ndb.KeyProperty(kind='User', repeated=True)
+    friends         = ndb.StringProperty(repeated=True)
 
     # details
     forum_name      = ndb.StringProperty()
@@ -58,7 +56,11 @@ class User(ndb.Model):
     age             = ndb.IntegerProperty()
     profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Location)
-    avatar          = ndb.StructuredProperty(Avatar)
+
+    # TODO: upload to a static directory?
+    avatar          = ndb.BlobProperty()
+    avatar_url      = ndb.StringProperty(default="/img/defaultavatar.png")
+    use_gravatar    = ndb.BooleanProperty(default=False)
 
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
@@ -123,6 +125,7 @@ class User(ndb.Model):
 
     @classmethod
     def save(cls, username, email, password):
+        #TODO: check for duplicate usernames and emails
         if cls.valid(username, email, password):
             password = bc.hashpw(password, bc.gensalt())
             # call to create and save log token is in signup controller
@@ -130,3 +133,29 @@ class User(ndb.Model):
             user.put()
             return user
         return False
+
+    @classmethod
+    def add_friend(cls, me, friend):
+        #TODO: check if friend exists, etc
+        #TODO: friend requests/approvals - right now auto adds to both parties
+        #TODO: use transactions
+
+        mes = cls.query(cls.username_norm == me.lower()).get()
+        if friend not in mes.friends:
+            mes.friends.append(friend.lower())
+            mes.put()
+
+        # just auto add me to the other person's list
+        fs = cls.query(cls.username_norm == friend.lower()).get()
+        if me not in fs.friends:
+            fs.friends.append(me.lower())
+
+            fs.put()
+
+    def get_friends(self):
+        keys = [ndb.Key('User', f) for f in self.friends]
+        return ndb.get_multi(keys)
+
+    def delete_friend(self):
+        #TODO: deleting friends
+        pass
