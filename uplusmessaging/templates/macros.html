@@ -5,3 +5,46 @@
         {% endif %}
         />
 {%- endmacro %}
+
+{% macro sendMsgModal(modal_label, sender, receiver, act)-%}
+<div class="modal hide fade"  id="{{ modal_label }}" tabindex="-1" role="dialog" aria-labelledby="send_msg_modal-{{ receiver }}" aria-hidden="true">
+    <form class="form-horizontal" action={{ act }}, method="post">
+        <fieldset>
+            <div id="legend" class="">
+                <legend class="">Send message to {{ receiver }}</legend>
+            </div>
+            <div class="control-group">
+                <input type="hidden" value="{{ receiver }}" name="receiver"/>
+                <input type="hidden" value="{{ sender }}" name="username"/>
+
+                <label class="control-label" for="input01">Title</label>
+                <div class="controls">
+                    <input type="text" placeholder="Title" name="title" class="input-xlarge">
+                    <p class="help-block"></p>
+                </div>
+            </div>
+
+            <div class="control-group">
+
+                <!-- Textarea -->
+                <label class="control-label">Message</label>
+                <div class="controls">
+                    <div class="textarea">
+                        <textarea type="" name="content" class="" style="margin: 0px; width: 271px; height: 110px; "> </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"></label>
+
+                <!-- Button -->
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+        </fieldset>
+    </form>
+</div>
+{% endmacro -%}
