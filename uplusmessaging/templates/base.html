@@ -1,26 +1,23 @@
+{% import "macros.html" as m %}
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}Messaging system demo{% endblock %}</title>
+    <title>{% block title %}Udacity+{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- Le styles -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
-    <link href="/stylesheets/temp.css" rel="stylesheet">
-    <style type="text/css">
+
+    <style>
         body {
             padding-top: 60px;
-            padding-bottom: 40px;
-        }
-        .sidebar-nav {
-            padding: 9px 0;
         }
     </style>
-    <link href="/stylesheets/bootstrap-responsive.css" rel="stylesheet">
-
+    <link href="/stylesheets/bootstrap-responsive.min.css" rel="stylesheet">
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -28,14 +25,8 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/img/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/img/apple-touch-icon-57-precomposed.png">
 </head>
-
 <body>
-
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container-fluid">
@@ -44,7 +35,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="#">Project name</a>
+            <a class="brand" href="#">Udacity+</a>
             <div class="nav-collapse collapse">
                 {% if not is_authenticated() %}
                     <a class="btn btn-primary pull-right space4" href="/signup">Sign up</a>
@@ -55,113 +46,100 @@
                     </form>
                 {% else %}
                     <p class="navbar-text pull-right">
-                        <a href="/logout" class="navbar-link">Log out</a> {{ username }}
+                        <a href="/logout" class="navbar-link">Log out {{ username }}</a>
                     </p>
                 {% endif %}
-                <ul class="nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="/profile">Profile</a></li>
-                    <li><a href="/messages?show=all">Messages</a></li>
-                </ul>
             </div><!--/.nav-collapse -->
         </div>
     </div>
 </div>
-<div class="container-fluid">
-    <div class="row-fluid">
-        {% block leftnav %}
-        <div class="span3">
-            <div class="well sidebar-nav">
-                <ul class="nav nav-list">
-                    <li class="nav-header">Sidebar</li>
-                    <li class="active"><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li class="nav-header">Sidebar</li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li class="nav-header">Sidebar</li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                    <li><a href="#">Link</a></li>
-                </ul>
-            </div><!--/.well -->
-        </div><!--/span-->
-        {% endblock %}
-        {% block content %}
-        <div class="span9">
-            <div class="hero-unit">
-                <h1>Hello, world!</h1>
-                <p>This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
-                <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-            </div>
-            <div class="row-fluid">
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-            </div><!--/row-->
-            <div class="row-fluid">
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>Heading</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-            </div><!--/row-->
-        </div><!--/span-->
-        {% endblock %}
-    </div><!--/row-->
+{% block content %}
+    <div class="container-fluid">
 
-    <hr>
+        <div class="row-fluid">
 
-    <footer>
-        <p>&copy; jz 2012</p>
-    </footer>
+            <!-- side avatar & navbar
+           ================================================== -->
+            {% block leftsidebar %}
+                <div class="span2 well sidebar-nav">
+                    {% block profileavatar %}
 
-</div><!--/.fluid-container-->
-<!-- Le javascript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
+                    {% endblock profileavatar %}
+                    {% block sidebarnav %}
+                        <ul class="nav nav-list">
+
+                            <li class="active"><a href="/{{ username }}"><i class="icon-home"></i>Profile</a></li>
+                            <li><a href="/messages?show=all"><i class="icon-envelope"></i>Messages</a></li>
+                            <li><a href="#"><i class="icon-calendar"></i>Meetups</a></li>
+                            <li><a href="#"><i class="icon-wrench"></i>Settings</a></li>
+
+                            <li class="nav-header">Groups</li>
+
+                            <li><a href="#"><i class="icon-user"></i>CS212 PS5</a></li>
+                            <li><a href="#"><i class="icon-user"></i>Contest Project</a></li>
+
+                        </ul>
+                    {% endblock sidebarnav %}
+                </div>
+            {% endblock %}
+
+            <!-- body
+           ================================================== -->
+
+            {% block usercontent %}
+            {% endblock usercontent %}
+
+            <!-- peers list
+           ================================================== -->
+            {% block peerlist %}
+                <div class="span3 well sidebar-nav">
+
+                    <h2>Peers</h2>
+
+                    <form class="navbar-search pull-left">
+                        <input type="text" class="search-query" placeholder="Search...">
+                    </form>
+
+                    <br><br>
+                    <div class="bs-docs-example">
+                        <div class="dropdown clearfix">
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+                                {% for friend in friends %}
+
+                                    {{ m.sendMsgModal("sendMsgModal-" + friend.username, username, friend.username, '/messages') }}
+                                    <li class="dropdown-submenu">
+                                        <a tabindex="-1" href="/{{ friend.username }}">{{ friend.real_name or friend.username }}</a>
+                                        <ul class="dropdown-menu">
+
+                                            <li><a data-toggle="modal"
+                                                   href="#sendMsgModal-{{ friend.username }}"
+                                                   role="button">Send Message</a>
+                                            </li>
+                                            <li><a tabindex="-1" href="#">Chat</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li class="divider"></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            {% endblock peerlist %}
+        </div>
+
+        <hr>
+        <footer>
+            <p>footer</p>
+        </footer>
+
+    </div>
+{% endblock content %}
+</body>
+
 <script type="text/javascript" src="/js/temp.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-{#<script src="../js/bootstrap-transition.js"></script>#}
-{#<script src="../js/bootstrap-alert.js"></script>#}
-{#<script src="../js/bootstrap-modal.js"></script>#}
-{#<script src="../js/bootstrap-dropdown.js"></script>#}
-{#<script src="../js/bootstrap-scrollspy.js"></script>#}
-{#<script src="../js/bootstrap-tab.js"></script>#}
-{#<script src="../js/bootstrap-tooltip.js"></script>#}
-{#<script src="../js/bootstrap-popover.js"></script>#}
-{#<script src="../js/bootstrap-button.js"></script>#}
-{#<script src="../js/bootstrap-collapse.js"></script>#}
-{#<script src="../js/bootstrap-carousel.js"></script>#}
-{#<script src="../js/bootstrap-typeahead.js"></script>#}
-
-</body>
+<script src="/js/bootstrap-transition.js"></script>
+<script src="/js/bootstrap-modal.js"></script>
 </html>
