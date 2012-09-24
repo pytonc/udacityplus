@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Messages{% endblock %}
-{% block content %}
-<div class="span9">
+{% block usercontent %}
+<div class="span7">
     <table class="table table-hover">
         <thead>
             <tr>
@@ -16,7 +16,7 @@
                     <td>{{ c.title }}</td>
                     <td>
                         {% for r in c.receivers %}
-                            {% if r.username_norm != me %}
+                            {% if r.username_norm != username %}
                                 {{ r.username }}
                             {% endif %}
                         {% endfor %}
@@ -24,7 +24,7 @@
                     <td>{{ c.created.strftime("%B %d") }}</td>
                 </tr>
                 {% for m in c.messages %}
-                    <tr {% if m.sender != me and not m.read %}class="info"{% endif %}>
+                    <tr {% if m.sender != username and not m.read %}class="info"{% endif %}>
                         <td class="preview" colspan="3">
                             <a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>
                                 {{ m.content|truncate(140) }}
