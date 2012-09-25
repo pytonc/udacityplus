@@ -68,6 +68,9 @@ class User(ndb.Model):
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
+    created         = ndb.DateTimeProperty(auto_now_add=True)
+    updated         = ndb.DateTimeProperty(auto_now=True)
+
     def add_conversation(self, conversation):
         self.conversations.append(conversation)
 
