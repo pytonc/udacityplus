@@ -28,7 +28,7 @@ class MessagePage(BaseHandler):
             if show in ('all', 'new') or not show:
                 if show == 'new':
                     self.show_form_for_new_message(conv_id, msg_id, friends)
-                elif show == 'all':
+                elif show == 'all' or not (show or conv_id or msg_id):
                     self.display_messages(username, start, end, friends)
                 elif conv_id and msg_id:
                     self.display_message(int(msg_id), int(conv_id), friends)
