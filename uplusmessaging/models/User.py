@@ -27,6 +27,7 @@
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
+from Message import Message, Conversation
 
 class ExternalProfileLink(ndb.Model):
     url             = ndb.StringProperty(required=True)
@@ -86,6 +87,8 @@ class User(ndb.Model):
     def add_conversation_for_users(cls, conversation, *users):
         """Adds participants to a conversation thread for each user in users
         """
+        if all(users):
+            users = [users[0]]
         for user in users:
             cls.add_conversation_for_user(user, conversation)
 
@@ -95,11 +98,16 @@ class User(ndb.Model):
         return cls.query(User.username_norm == username).get()
 
     @classmethod
-    def get_conversations_for(cls, username):
+    def get_conversations_for(cls, username, offset, limit):
         """Gets conversations for user with username
         """
-        u = User.query(User.username_norm == username.lower()).get()
-        return ndb.get_multi(u.conversations)
+        limit = int(limit) if limit else 10
+        offset = int(offset) if offset else 0
+
+        c = Conversation.query(Conversation.receivers_list_norm.IN([username.lower()]))\
+                        .order(-Conversation.modified)\
+                        .fetch(limit=limit, offset=offset, keys_only=True)
+        return ndb.get_multi(c)
 
     @classmethod
     def valid_password(cls, password):
@@ -159,3 +167,40 @@ class User(ndb.Model):
     def delete_friend(self):
         #TODO: deleting friends
         pass
+
+    def get_conversations(self):
+        c = Conversation.query(self.username_norm in Conversation.receivers, keys_only=True).order(Conversation.modified).limit(10)
+        return ndb.get_multi(c)
+
+    @classmethod
+    def add_new_conversation(cls, sender, receiver, title, content):
+        """Adds new conversation with receiver for sender
+        """
+        #TODO: check if sender and receiver aren't the same person, if so, add only once
+
+        skey = ndb.Key('User', sender)
+        rkey = ndb.Key('User', receiver)
+
+        if sender == receiver:
+            rl = [skey]
+            rln  = [sender]
+        else:
+            rl = [rkey, skey]
+            rln = [sender, receiver]
+
+        conv = Conversation(
+            receivers_list = rl,
+            receivers_list_norm = rln,
+            title = title,
+        )
+        msg = Message(
+            sender = sender,
+            content = content
+        )
+
+
+        k = msg.put()
+        conv.insert_message(k)
+        ck = conv.put()
+
+        User.add_conversation_for_users(ck, sender, receiver)
