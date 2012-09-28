@@ -18,7 +18,7 @@
         <br />
 
         <div id="message">{{ message.content }}</div>
-        <div><a href="/messages?show=new&thread={{ conv_id }}&id={{ message.key.id() }}">reply</a></div>
+        <div><a href="/messages/{{ conv_id }}/{{ message.key.id() }}?show=new">reply</a></div>
     </div>
 </div>
 {% endblock %}
