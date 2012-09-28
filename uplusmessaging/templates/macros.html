@@ -7,8 +7,13 @@
 {%- endmacro %}
 
 {% macro sendMsgModal(modal_label, sender, receiver, act)-%}
-<div class="modal hide fade"  id="{{ modal_label }}" tabindex="-1" role="dialog" aria-labelledby="send_msg_modal-{{ receiver }}" aria-hidden="true">
-    <form class="form-horizontal" action={{ act }}, method="post">
+<div class="modal hide fade"
+     id="{{ modal_label }}"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="send_msg_modal-{{ receiver }}"
+     aria-hidden="true">
+    <form class="form-horizontal" action="{{ act }}" method="post">
         <fieldset>
             <div id="legend" class="">
                 <legend class="">Send message to {{ receiver }}</legend>
