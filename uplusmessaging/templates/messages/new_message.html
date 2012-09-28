@@ -5,9 +5,13 @@
     <div id="newMessage">
         <h1>Send Message</h1>
         <form action='' method='post'>
-            <label for='receiver'>Send to:</label>
-            {{  m.input("text", "receiver", "receiver", receiver) }}
-            <br />
+            {% if receiver %}
+                {{  m.input("hidden", "receiver", "receiver", receiver) }}
+            {% else %}
+                <label for='receiver'>Send to:</label>
+                {{  m.input("text", "receiver", "receiver", receiver) }}
+                <br />
+            {% endif %}
 
             <label for='title'>Title</label>
             {{  m.input("text", "title", "title", title) }}
