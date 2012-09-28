@@ -14,8 +14,8 @@ app = webapp2.WSGIApplication([
         (r'/login', LoginPage),
         (r'/logout', LogoutPage),
         (r'/forbidden', Forbidden),
-        (r'/messages.*', MessagePage),
+        (r'/messages(?:/?)([0-9]*)(?:/?)([0-9]*)', MessagePage),
         (r'/friends', FriendsController),
         (r'/(?P<username>\w+)', ProfilePage),
-    ], debug=True)
+    ], debug=False)
 
