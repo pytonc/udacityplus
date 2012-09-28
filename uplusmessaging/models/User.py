@@ -177,7 +177,7 @@ class User(ndb.Model):
 
     @classmethod
     def add_new_conversation(cls, sender, receiver, title, content):
-        """Adds new conversation with receiver for sender
+        """Adds new conversation with receiver for sender, returns key to it
         """
         #TODO: check if sender and receiver aren't the same person, if so, add only once
 
@@ -207,3 +207,5 @@ class User(ndb.Model):
         ck = conv.put()
 
         User.add_conversation_for_users(ck, sender, receiver)
+
+        return ck
