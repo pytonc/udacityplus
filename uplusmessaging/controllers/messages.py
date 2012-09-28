@@ -14,26 +14,27 @@ import re
 
 
 class MessagePage(BaseHandler):
-    
+
     @Authentication.do
-    def get(self):
-        (conv_id, msg_id)   = re.search(r"/messages(/?)([0-9]*)(/?)([0-9]*)", self.request.url).group(2, 4)
+    def get(self, conv_id, msg_id):
+#       (conv_id and msg_id) or (not conv_id and not msg_id)
+        if not bool(conv_id) ^ bool(msg_id):
+            username = self.get_cookie("username")
+            show, start, end, thread, id = self.get_params(["show", "from", "to", "thread", "id"])
 
-        username = self.get_cookie("username")
-        show, start, end, thread, id = self.get_params(["show", "from", "to", "thread", "id"])
+            me = User.get_user(username)
+            friends = me.get_friends()
 
-        me = User.get_user(username)
-        friends = me.get_friends()
-
-        if msg_id:
-            self.display_message(int(msg_id), int(conv_id), friends)
-        else:
-            if show == "all":
-                self.display_messages(username, start, end, friends)
-            elif show == "new":
-                self.show_form_for_new_message(thread, id, friends)
+            if show in ('all', 'new') or not show:
+                if show == 'new':
+                    self.show_form_for_new_message(conv_id, msg_id, friends)
+                elif show == 'all':
+                    self.display_messages(username, start, end, friends)
+                elif conv_id and msg_id:
+                    self.display_message(int(msg_id), int(conv_id), friends)
             else:
-                self.response.out.write("Invalid url")
+                self.response.out.write("invalid url")
+
 
     def display_message(self, msg_id, conv_id, friends):
         message = Message.get_by_id(msg_id)
@@ -48,7 +49,7 @@ class MessagePage(BaseHandler):
         self.render("messages/display_message.html", template_values)
 
     def display_messages(self, username, start, end, friends):
-        conv = User.get_conversations_for(username)
+        conv = User.get_conversations_for(username, start, end)
 
         template_values = { "conversations" : conv, "username": username, 'friends': friends}
         self.render("messages/messages.html", template_values)
@@ -69,22 +70,21 @@ class MessagePage(BaseHandler):
         self.render("messages/new_message.html", context)
 
     @Authentication.do
-    def post(self):
+    def post(self, conv_id, msg_id):
         sender   = username = self.get_cookie("username")
         receiver = self.request.get('receiver')
         title    = self.request.get('title')
         content  = self.request.get('content')
-        thread, id = self.get_params([ "thread", "id"])
 
         sender = sender.lower()
         receiver = receiver.lower()
 
         # Adds a new message to conversation
-        if thread and id:
-            Conversation.add_new_message(thread, sender, content)
+        if conv_id and msg_id:
+            Conversation.add_new_message(conv_id, sender, content)
         # Adds a new conversation with first message
         elif receiver and title and content:
-            Conversation.add_new_conversation(sender, receiver, title, content)
+            User.add_new_conversation(sender, receiver, title, content)
         else:
             self.response.out.write("Error in Messages.post()")
 
