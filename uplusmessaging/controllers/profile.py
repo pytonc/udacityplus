@@ -32,9 +32,6 @@ class ProfilePage(BaseHandler):
             else:
                 gravatar = user.avatar_url
 
-    #        uri_add = uri_for('friends-controller', friend=user.username_norm, action='add')
-
-
             context = {'user': user, 'username': username, 'gravatar': gravatar, 'friends': friends}
 
             self.render("profile/profile.html", context)
