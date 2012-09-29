@@ -107,7 +107,7 @@ class User(ndb.Model):
     @classmethod
     def get_user(cls, username):
         # shortcut for other classes that import User
-        return cls.query(User.username_norm == username).get()
+        return cls.query(User.username_norm == username.lower()).get()
 
     @classmethod
     def get_conversations_for(cls, username, offset, limit):
@@ -148,7 +148,6 @@ class User(ndb.Model):
 
     @classmethod
     def save(cls, username, email, password):
-        #TODO: check for duplicate usernames and emails
         if cls.valid(username, email, password):
             password = bc.hashpw(password, bc.gensalt())
             # call to create and save log token is in signup controller
@@ -175,9 +174,12 @@ class User(ndb.Model):
 
             fs.put()
 
-    def get_friends(self):
-        keys = [ndb.Key('User', f) for f in self.friends]
-        return ndb.get_multi(keys)
+    def get_friends(self, limit=10, offset=0):
+        if bool(self.friends):
+            f = User.query(User.username_norm.IN(self.friends)).order(-User.username)\
+                    .fetch(limit, offset=offset, projection=['username', 'real_name'])
+            return f
+        return None
 
     def delete_friend(self):
         #TODO: deleting friends
