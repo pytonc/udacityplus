@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-    <form action="" method="Post">
+    <form action="" method="Post" onsubmit="return validateSignUpForm()">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username">
+        <input type="text" id="username" name="username"><div id="username_error"></div>
         <br />
         <label for="email">Email:</label>
-        <input type="text" id="email" name="email">
+        <input type="text" id="email" name="email"><div id="email_error"></div>
         <br />
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password">
+        <input type="password" id="password" name="password"><div id="password_error"></div>
         <br />
         <input type="submit">
     </form>
