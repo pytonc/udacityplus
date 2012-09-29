@@ -11,7 +11,8 @@ class HomePage(BaseHandler):
 
         if name:
             user = User.get_user(name)
-            friends = user.get_friends()
+            if user:
+                friends = user.get_friends()
 
         template_values = {'title' : self.get_title(), 'username': name, 'friends': friends}
         self.render("index.html", template_values)
