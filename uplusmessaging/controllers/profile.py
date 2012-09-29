@@ -32,7 +32,10 @@ class ProfilePage(BaseHandler):
             else:
                 gravatar = user.avatar_url
 
-            friend_btn = user.username_norm not in (f.username_norm for f in friends)
+            if friends:
+                friend_btn = user.username_norm not in (f.username_norm for f in friends)
+            else:
+                friend_btn = True
             context = {'user': user, 'username': username, 'gravatar': gravatar, 'friends': friends, 'friend_btn': friend_btn}
 
             self.render("profile/profile.html", context)
