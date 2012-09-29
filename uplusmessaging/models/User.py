@@ -112,6 +112,9 @@ class User(ndb.Model):
     @classmethod
     def get_conversations_for(cls, username, offset, limit):
         """Gets conversations for user with username
+
+        Returns:
+         A list of Conversation objects for username
         """
         limit = int(limit) if limit else 10
         offset = int(offset) if offset else 0
@@ -148,6 +151,11 @@ class User(ndb.Model):
 
     @classmethod
     def save(cls, username, email, password):
+        """Save a user object
+
+        Returns:
+         The saved User object
+        """
         if cls.valid(username, email, password):
             password = bc.hashpw(password, bc.gensalt())
             # call to create and save log token is in signup controller
@@ -175,6 +183,12 @@ class User(ndb.Model):
             fs.put()
 
     def get_friends(self, limit=10, offset=0):
+        """Gets friends for current User object
+
+        Returns:
+         A list of User objects who are current in current User's friends list or
+         None if User's friends list is empty
+        """
         if bool(self.friends):
             f = User.query(User.username_norm.IN(self.friends)).order(-User.username)\
                     .fetch(limit, offset=offset, projection=['username', 'real_name'])
@@ -185,8 +199,16 @@ class User(ndb.Model):
         #TODO: deleting friends
         pass
 
-    def get_conversations(self):
-        c = Conversation.query(self.username_norm in Conversation.receivers, keys_only=True).order(Conversation.modified).limit(10)
+    def get_conversations(self, limit=10, offset=0):
+        """UNUSED - Get conversations for current User object
+
+        Returns:
+         A list of Conversation objects
+        """
+
+        c = Conversation.query(self.username_norm in Conversation.receivers, keys_only=True)\
+                        .order(Conversation.modified)\
+                        .limit(limit, offset=offset)
         return ndb.get_multi(c)
 
     @classmethod
