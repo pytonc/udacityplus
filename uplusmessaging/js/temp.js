@@ -12,6 +12,7 @@ function getPreviousMessages() {
         temp = to;
         to = 2 * to - from;
         from = temp;
+        
         if(from >= 0 && to > 0 && to > from) {
             url = m[1] + "from=" + from + "&to=" + to;
         }
