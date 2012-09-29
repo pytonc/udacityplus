@@ -57,4 +57,30 @@ indexes:
 - kind: User
   properties:
   - name: username_norm
+  - name: email
   - name: username
+
+- kind: User
+  properties:
+  - name: username_norm
+  - name: real_name
+  - name: username
+
+- kind: User
+  properties:
+  - name: username_norm
+  - name: username
+
+- kind: User
+  properties:
+  - name: username_norm
+  - name: username
+    direction: desc
+  - name: email
+
+- kind: User
+  properties:
+  - name: username_norm
+  - name: username
+    direction: desc
+  - name: real_name
