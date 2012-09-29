@@ -21,3 +21,7 @@ email1 = 'person1@place.com'
 email2 = 'person2@place.com'
 password1 = 'password1'
 password2 = 'password2'
+
+title_plain_text = 'sample title'
+content_plain_text = 'sample content'
+
