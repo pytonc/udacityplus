@@ -46,7 +46,7 @@ class User(db.Model):
     def valid_username(username):
         n = len(username)
         users = User.get_user(username)
-        return not users and n > 2 and n < 21
+        return not users and n > 2 and n < 16
 
     @staticmethod
     def valid_email(email):

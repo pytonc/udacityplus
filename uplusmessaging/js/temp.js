@@ -37,10 +37,28 @@ function getNewerMessages() {
 }
 
 
-// Used on sign up page to validate username, email and password
+// Used on forms to validate username, email, password, title, content...
 
 function writeErrorMessage(id, message) {
     document.getElementById(id).innerHTML = message;
+}
+
+function notAvailabileFromRPC(attr, value) {
+    // synchronous call: check if entity with value for given attr is already in DB
+    // works for username and email, check RPC controller for more details
+    var query = attr + "=" + value;
+    var req;
+    var available;
+
+    if (window.XMLHttpRequest) {
+        req = new XMLHttpRequest();
+    } else {
+        req = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
+    req.open("GET", "/rpc?" + query, false);
+    req.send(null);
+    return req.responseText != "True"
 }
 
 function validUsername(username) {
@@ -51,6 +69,9 @@ function validUsername(username) {
         valid = false;
     } else if (username.length > 15) {
         writeErrorMessage("username_error", "Username too long (15 characters max)");
+        valid = false;
+    } else if (notAvailabileFromRPC("username", username)) {
+        writeErrorMessage("username_error", "Username is not available");
         valid = false;
     } else {
         writeErrorMessage("username_error", "");
@@ -64,6 +85,9 @@ function validEmail(email) {
 
     if (!email.match("^[-0-9A-Za-z!#$%&'*+/=?^_`{|}~.]+@[-0-9A-Za-z!#$%&'*+/=?^_`{|}~.]+")) {
         writeErrorMessage("email_error", "Invalid email");
+        valid = false;
+    } else if (notAvailabileFromRPC("email", email)) {
+        writeErrorMessage("email_error", "Email is not available");
         valid = false;
     } else {
         writeErrorMessage("email_error", "");
