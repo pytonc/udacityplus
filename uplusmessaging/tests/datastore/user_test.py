@@ -4,6 +4,7 @@ from google.appengine.datastore import datastore_stub_util
 from models.User import User
 from tests.testdata import *
 
+
 class TestUser(unittest.TestCase):
     def setUp(self):
         self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=0)
@@ -15,19 +16,15 @@ class TestUser(unittest.TestCase):
         self.testbed.deactivate()
 
     def testValidUsername(self):
-
-
         for k, v in uv.iteritems():
             u = User.valid_username(k)
             self.assertEqual(u, v, k)
 
     def testValidPassword(self):
-
         for k, v in pv.iteritems():
             p = User.valid_password(k)
             self.assertEqual(p, v, k)
 
-    # this needs to be implemented differently
     def testValidEmail(self):
         e = User.valid_email(email1)
         self.assertEqual(e, True, "With no existing user")
@@ -42,6 +39,19 @@ class TestUser(unittest.TestCase):
             for p, t in pv.iteritems():
                 valid = User.valid(k, email, p)
                 self.assertEqual(valid, v and t, "{} - {}".format(k, p))
+
+    def testSave(self):
+        email = 'jzegan@gmail.com'
+        user_combos = []
+        for k, v in uv.iteritems():
+            for p, t in pv.iteritems():
+                u = User.save(k, email, p)
+                if u:
+                    r = u.key.get()
+                    if r:
+                        self.assertEqual(r.username == k, v and t, "{}".format(k, p))
+                        user_combos.append(r)
+        self.assertEqual(len(user_combos), 2, "Should contain 2 users - per current test data (check if changed)")
 
 
 def suite():
