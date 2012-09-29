@@ -25,3 +25,5 @@ password2 = 'password2'
 title_plain_text = 'sample title'
 content_plain_text = 'sample content'
 
+title_plain_text2 = 'sample title 2'
+content_plain_text2 = 'sample content 2'
