@@ -21,11 +21,16 @@ class TestMessages(unittest.TestCase):
         self.testbed.deactivate()
 
     def testCreate(self):
-        ck = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm, 'sample title', 'sample content')
+        ck = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+                                        title_plain_text,
+                                        content_plain_text)
+
 
         conv = ck.get()
-        self.assertEqual(conv.title, 'sample title')
-        self.assertEqual(conv.messages[0].content, 'sample content')
+        self.assertEqual(conv.title, title_plain_text, 'new conversation title')
+        self.assertEqual(conv.messages[0].content, content_plain_text, 'new conversation message')
+
+
 
 def suite():
     suite = unittest.TestSuite()
