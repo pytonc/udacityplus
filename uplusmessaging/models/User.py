@@ -52,6 +52,9 @@ class User(ndb.Model):
     password        = ndb.StringProperty(required=True)
     email           = ndb.StringProperty(required=True)
 
+    created         = ndb.DateTimeProperty(auto_now_add=True)
+    updated         = ndb.DateTimeProperty(auto_now=True)
+
 #    friends         = ndb.KeyProperty(kind='User', repeated=True)
     friends         = ndb.StringProperty(repeated=True)
 
@@ -59,7 +62,7 @@ class User(ndb.Model):
     forum_name      = ndb.StringProperty()
     real_name       = ndb.StringProperty()
     short_about     = ndb.StringProperty()
-    tools           = ndb.StringProperty()
+    tools           = ndb.TextProperty()
     age             = ndb.IntegerProperty()
     profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Location)
@@ -75,8 +78,6 @@ class User(ndb.Model):
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
-    created         = ndb.DateTimeProperty(auto_now_add=True)
-    updated         = ndb.DateTimeProperty(auto_now=True)
 
     def add_conversation(self, conversation):
         self.conversations.append(conversation)
