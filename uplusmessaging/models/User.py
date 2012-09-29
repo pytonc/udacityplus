@@ -29,6 +29,12 @@ from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
 from Message import Message, Conversation
 
+import re
+
+_UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
+uname = re.compile(_UNAMEP)
+
+
 class ExternalProfileLink(ndb.Model):
     url             = ndb.StringProperty(required=True)
     profile_loc     = ndb.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
@@ -83,8 +89,11 @@ class User(ndb.Model):
         """Add a conversation thread for user with username
         """
         u = cls.query(User.username_norm == username.lower()).get()
-        u.conversations.append(conversation)
-        u.put()
+        if u:
+            u.conversations.append(conversation)
+            u.put()
+            return u
+        return None
 
     @classmethod
     def add_conversation_for_users(cls, conversation, *users):
@@ -114,19 +123,22 @@ class User(ndb.Model):
 
     @classmethod
     def valid_password(cls, password):
-        return len(password) < 40
+        p = len(password)
+        return  p >= 8 and p < 50
 
     @classmethod
     def valid_username(cls, username):
-        n = len(username)
-        users = cls.get_user(username)
-        return not users and n > 4 and n < 21
+        if uname.match(username):
+            users = cls.query(User.username_norm == username.lower()).fetch(1, projection=['username'])
+        else:
+            return False
+
+        return not users
 
     @classmethod
     def valid_email(cls, email):
-        emails = cls.query(User.email == email).get()
-        #too lazy for regex now
-        return emails == None
+        email = cls.query(User.email == email).fetch(1, projection=['username'])
+        return not email
 
     @classmethod
     def valid(cls, username, email, password):
