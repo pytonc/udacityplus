@@ -57,7 +57,8 @@ class MessagePage(BaseHandler):
     def show_form_for_new_message(self, thread=None, id=None, friends=None):
         """Shows a form for a brand new message and a reply if given thread and id
         """
-        context = {}
+        context = {'friends': friends, 'username': self.get_cookie('username')}
+
         if id and thread:
             id = int(id)
             thread = int(thread)
@@ -65,7 +66,8 @@ class MessagePage(BaseHandler):
             msg = Message.get_by_id(id)
             conv = Conversation.get_by_id(thread)
 
-            context = {'receiver': msg.sender,  'title': conv.title, 'friends': friends}
+            context['receiver'] = msg.sender
+            context['title'] = conv.title
 
         self.render("messages/new_message.html", context)
 
