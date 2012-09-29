@@ -104,6 +104,7 @@
                     <div class="bs-docs-example">
                         <div class="dropdown clearfix">
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+                                {% if friends %}
                                 {% for friend in friends %}
 
                                     {{ m.sendMsgModal("sendMsgModal-" + friend.username, username, friend.username, '/messages') }}
@@ -121,6 +122,7 @@
 
                                     <li class="divider"></li>
                                 {% endfor %}
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
