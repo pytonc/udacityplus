@@ -83,7 +83,7 @@ class MessagePage(BaseHandler):
 
         # Adds a new message to conversation
         if conv_id and msg_id:
-            Conversation.add_new_message(conv_id, sender, content)
+            Conversation.add_new_message(sender, content, conv_id=conv_id)
         # Adds a new conversation with first message
         elif receiver and title and content:
             User.add_new_conversation(sender, receiver, title, content)
