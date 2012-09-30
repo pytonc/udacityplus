@@ -13,8 +13,8 @@ class RPCPage(BaseHandler):
 
 	def checkUsernameAvailability(self, username):
 		users = User.get_user(username)
-		self.response.out.write(users == None)
+		self.response.out.write(users != None)
 
 	def checkEmailAvailability(self, email):
 		emails = User.gql("WHERE email=:1", email).get()
-		self.response.out.write(emails == None)
+		self.response.out.write(emails != None)

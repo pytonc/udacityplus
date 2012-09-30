@@ -59,9 +59,9 @@ class MessagePage(BaseHandler):
     @Authentication.do
     def post(self):
         sender   = self.get_cookie("username")
-        receiver = self.request.get('receiver')
-        title    = self.request.get('title')
-        content  = self.request.get('content')
+        receiver = self.request.get('msg_receiver')
+        title    = self.request.get('msg_title')
+        content  = self.request.get('msg_content')
         
         if receiver and title and content:
             msg = Message(sender    = sender, 

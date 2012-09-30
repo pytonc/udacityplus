@@ -43,7 +43,7 @@ function writeErrorMessage(id, message) {
     document.getElementById(id).innerHTML = message;
 }
 
-function notAvailabileFromRPC(attr, value) {
+function inDB(attr, value) {
     // synchronous call: check if entity with value for given attr is already in DB
     // works for username and email, check RPC controller for more details
     var query = attr + "=" + value;
@@ -58,7 +58,7 @@ function notAvailabileFromRPC(attr, value) {
 
     req.open("GET", "/rpc?" + query, false);
     req.send(null);
-    return req.responseText != "True"
+    return req.responseText == "True"
 }
 
 function validUsername(username) {
@@ -70,7 +70,7 @@ function validUsername(username) {
     } else if (username.length > 15) {
         writeErrorMessage("username_error", "Username too long (15 characters max)");
         valid = false;
-    } else if (notAvailabileFromRPC("username", username)) {
+    } else if (inDB("username", username)) {
         writeErrorMessage("username_error", "Username is not available");
         valid = false;
     } else {
@@ -86,8 +86,8 @@ function validEmail(email) {
     if (!email.match("^[-0-9A-Za-z!#$%&'*+/=?^_`{|}~.]+@[-0-9A-Za-z!#$%&'*+/=?^_`{|}~.]+")) {
         writeErrorMessage("email_error", "Invalid email");
         valid = false;
-    } else if (notAvailabileFromRPC("email", email)) {
-        writeErrorMessage("email_error", "Email is not available");
+    } else if (inDB("email", email)) {
+        writeErrorMessage("email_error", "Email address is already registered");
         valid = false;
     } else {
         writeErrorMessage("email_error", "");
@@ -120,4 +120,49 @@ function validateSignUpForm() {
     var vPass = validPassword(password.value);
 
     return vUser && vEmail && vPass;
+}
+
+function validRecipient(recipient) {
+    var valid = true;
+    if (!recipient || !inDB("username", recipient)) {
+        writeErrorMessage("reciever_error", "No such user!");
+        valid = false;
+    } else {
+        writeErrorMessage("reciever_error", "");
+    }
+    return valid;
+}
+
+function validTitle(title) {
+    var valid = true;
+    if (!title) {
+        writeErrorMessage("title_error", "No title");
+        valid = false;
+    } else {
+        writeErrorMessage("title_error", "")
+    }
+    return valid;
+}
+
+function validContent(content) {
+    var valid = true;
+    if (!content) {
+        writeErrorMessage("content_error", "No content!");
+        valid = false;
+    } else {
+        writeErrorMessage("content_error", "");
+    }
+    return valid;
+}
+
+function validateMessage() {
+    var recipient = document.getElementById("msg_receiver");
+    var title = document.getElementById("msg_title");
+    var content = document.getElementById("msg_content");
+
+    var vRecipient = validRecipient(recipient.value);
+    var vTitle = validTitle(title.value);
+    var vContent = validContent(content.value);
+
+    return vRecipient && vTitle && vContent;
 }
