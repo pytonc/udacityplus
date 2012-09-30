@@ -168,6 +168,7 @@ onMessage({data:"QUIT Quitter"});*/
       
       // Opens a Google API Channel to receive messages from the server
       function openChannel() {
+      	//channel seems ambiguous here.maybe change a name? 
         var channel = new goog.appengine.Channel(token);
         var handler = {
           "onopen": onOpen,
@@ -203,7 +204,7 @@ onMessage({data:"QUIT Quitter"});*/
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
         case "PRIVMSG":
-          // Message from another @user
+          // Message from another @user;sender side
           // Format: PRIVMSG SENDER message text
           var sender = arg.split(' ')[0];
           // Retrieve the message
@@ -220,7 +221,7 @@ onMessage({data:"QUIT Quitter"});*/
           addUserContent(recipient, content);
           break;
         case "CHANNELMSG":
-          // Message sent to a #channel user is in
+          // Message sent to a #channel which user is in
           // Format: CHANNELMSG CHANNEL SENDER message text
           var channel = arg.split(' ')[0];
           var sender = arg.split(' ')[1]; 
@@ -338,6 +339,7 @@ onMessage({data:"QUIT Quitter"});*/
       
       function removeUsernameFromChannel(removedUsername, channel) {        
         if (channels[channel]["users"].indexOf(removedUsername) !== -1) {
+        	//may be someting get wrong in below statement
           channels[channel]["users"].splice(channels[channel]["users"].indexOf(removedUsername), 1);
           updateEntity(channel);    
           return true;
@@ -422,6 +424,7 @@ onMessage({data:"QUIT Quitter"});*/
       }
       
       function updateEntity(updatedEntity) {
+      	//updatedEntity is a channelname or a username
         if (updatedEntity === activeEntity) {
           // Active entity was updated so update chat and users
           /* Technically, depending on message, only chat or users
@@ -430,7 +433,7 @@ onMessage({data:"QUIT Quitter"});*/
           var scrolledToBottom = chatScrollBottom();
           if (activeEntity in channels) {
             // activeEntity is a #channel
-            $("div#chatarea").html(channels[activeEntity]["text"]);            
+            $("div#chatarea").html(channels[activeEntity]["text"]);
             var userList = "Users in "+activeEntity+":";
             for (user in channels[activeEntity]["users"].sort()) {
               userList += "<br/>"+channels[activeEntity]["users"][user];
