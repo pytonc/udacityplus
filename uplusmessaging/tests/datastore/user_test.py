@@ -3,6 +3,7 @@ from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from models.User import User
 from tests.testdata import *
+import webapp2
 
 
 class TestUser(unittest.TestCase):
@@ -11,6 +12,9 @@ class TestUser(unittest.TestCase):
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_datastore_v3_stub(consistency_policy=self.policy)
+
+        self.u1 = User.save(username1, email1, password1)
+        self.u2 = User.save(username2, email2, password2)
 
     def tearDown(self):
         self.testbed.deactivate()
