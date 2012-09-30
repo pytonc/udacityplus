@@ -40,13 +40,13 @@ class User(db.Model):
 
     @staticmethod
     def valid_password(password):
-        return len(password) < 40
+        return len(password) < 40 and len(password) > 5
 
     @staticmethod
     def valid_username(username):
         n = len(username)
         users = User.get_user(username)
-        return not users and n > 4 and n < 21
+        return not users and n > 2 and n < 16
 
     @staticmethod
     def valid_email(email):
