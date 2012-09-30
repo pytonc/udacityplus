@@ -75,6 +75,7 @@ class User(ndb.Model):
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
     log_token       = ndb.StringProperty(required=False)
+    notify_on_msg   = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
@@ -107,8 +108,14 @@ class User(ndb.Model):
 
     @classmethod
     def get_user(cls, username):
-        # shortcut for other classes that import User
-        return cls.query(User.username_norm == username.lower()).get()
+        """Get a User object given username
+
+        Returns:
+         A User class instance
+        """
+        key = ndb.Key(User, username.lower())
+        u = key.get()
+        return u
 
     @classmethod
     def get_conversations_for(cls, username, offset, limit):
@@ -246,4 +253,4 @@ class User(ndb.Model):
 
         User.add_conversation_for_users(ck, sender, receiver)
 
-        return conv
+        return conv, msg
