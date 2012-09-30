@@ -16,7 +16,7 @@ pv = {
 }
 
 username1 = 'person1'
-username2 = 'person2'
+username2 = 'Person2'
 email1 = 'person1@place.com'
 email2 = 'person2@place.com'
 password1 = 'password1'
