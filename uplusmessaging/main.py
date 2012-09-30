@@ -5,6 +5,7 @@ from controllers.login     import LoginPage
 from controllers.logout    import LogoutPage
 from controllers.forbidden import Forbidden
 from controllers.messages  import MessagePage
+from controllers.RPC       import RPCPage
 
 app = webapp2.WSGIApplication([
         ('/', HomePage),
@@ -12,6 +13,7 @@ app = webapp2.WSGIApplication([
         ('/login', LoginPage),
         ('/logout', LogoutPage),
         ('/forbidden', Forbidden),
+        ('/rpc', RPCPage),
         ('/messages.*', MessagePage)
     ], debug=True)
 
