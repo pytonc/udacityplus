@@ -9,14 +9,13 @@ from BaseHandler import *
 from helpers.authentication import Authentication
 from models.User import User
 from models.Message import Message, Conversation
-from google.appengine.ext import ndb
-import re
+from contactextern.usernotifications import new_message_notify
 
 
 class MessagePage(BaseHandler):
 
     @Authentication.do
-    def get(self, conv_id, msg_id):
+    def get(self, conv_id=None, msg_id=None):
 #       (conv_id and msg_id) or (not conv_id and not msg_id)
         if not bool(conv_id) ^ bool(msg_id):
             username = self.get_cookie("username")
@@ -38,12 +37,14 @@ class MessagePage(BaseHandler):
 
     def display_message(self, msg_id, conv_id, friends):
         message = Message.get_by_id(msg_id)
-        message.read = True
+        username = self.get_cookie("username")
+        if message.sender != username:
+            message.read = True
         message.put()
 
         template_values = { 'message' : message,
                             'conv_id': conv_id,
-                            'username': self.get_cookie("username"),
+                            'username': username,
                             'friends': friends}
 
         self.render("messages/display_message.html", template_values)
@@ -71,6 +72,15 @@ class MessagePage(BaseHandler):
 
         self.render("messages/new_message.html", context)
 
+    def notify_user(self, sender, conv_id, msg):
+        #TODO: use task queue
+        conv = Conversation.get_by_id(int(conv_id))
+        for uname in conv.receivers_list_norm:
+            if uname != sender:
+                user = User.get_user(sender)
+                if user.notify_on_msg:
+                    new_message_notify(user.email, conv_id, msg)
+
     @Authentication.do
     def post(self, conv_id, msg_id):
         sender   = username = self.get_cookie("username")
@@ -83,14 +93,17 @@ class MessagePage(BaseHandler):
 
         # Adds a new message to conversation
         if conv_id and msg_id:
-            Conversation.add_new_message(sender, content, conv_id=conv_id)
+            msg = Conversation.add_new_message(sender, content, conv_id=conv_id)
+            self.notify_user(sender, conv_id, msg)
+
         # Adds a new conversation with first message
         elif receiver and title and content:
-            User.add_new_conversation(sender, receiver, title, content)
+            (conv, msg) = User.add_new_conversation(sender, receiver, title, content)
+            self.notify_user(sender, conv.key.id(), msg)
         else:
             self.response.out.write("Error in Messages.post()")
 
-        if self.request.path == '/messages':
+        if self.request.path.startswith('/messages'):
             self.redirect('/messages?show=all')
         else:
             self.redirect(self.request.referer)
