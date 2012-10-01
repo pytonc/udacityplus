@@ -36,18 +36,22 @@ class MessagePage(BaseHandler):
 
 
     def display_message(self, msg_id, conv_id, friends):
-        message = Message.get_by_id(msg_id)
         username = self.get_cookie("username")
-        if message.sender != username:
-            message.read = True
-        message.put()
+        conv = Conversation.get_by_id(conv_id)
+        if username not in conv.receivers_list_norm:
+            self.abort(403)
+        else:
+            message = Message.get_by_id(msg_id)
+            if message.sender != username:
+                message.read = True
+            message.put()
 
-        template_values = { 'message' : message,
-                            'conv_id': conv_id,
-                            'username': username,
-                            'friends': friends}
+            template_values = { 'message' : message,
+                                'conv_id': conv_id,
+                                'username': username,
+                                'friends': friends}
 
-        self.render("messages/display_message.html", template_values)
+            self.render("messages/display_message.html", template_values)
 
     def display_messages(self, username, start, end, friends):
         conv = User.get_conversations_for(username, start, end)
@@ -77,7 +81,7 @@ class MessagePage(BaseHandler):
         conv = Conversation.get_by_id(int(conv_id))
         for uname in conv.receivers_list_norm:
             if uname != sender:
-                user = User.get_user(sender)
+                user = User.get_user(uname)
                 if user.notify_on_msg:
                     new_message_notify(user.email, conv_id, msg)
 
