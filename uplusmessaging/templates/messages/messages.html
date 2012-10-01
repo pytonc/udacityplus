@@ -7,7 +7,7 @@
             <tr>
                 <th>Title</th>
                 <th>With</th>
-                <th>Date</th>
+                <th>Started</th>
             </tr>
         </thead>
         {% if conversations %}
@@ -21,7 +21,7 @@
                             {% endif %}
                         {% endfor %}
                     </td>
-                    <td>{{ c.created.strftime("%B %d") }}</td>
+                    <td>{{ c.created.strftime("%B %d, %Y at %I:%M") }}</td>
                 </tr>
                 {% for m in c.messages %}
                     <tr {% if m.sender != username and not m.read %}class="info"{% endif %}>
