@@ -98,7 +98,7 @@ class ChatChannel(db.Model):
     users = db.TextProperty(required = False) # JSON array
     def store(self):
         '''Store in memcache and datastore'''
-        memcache.set(channelkey(self.key().name()), self)
+        memcache.set(channel_key(self.key().name()), self)
         self.put()
     def get_user_names(self):
         '''Returns a list of all the users in this channel'''
@@ -300,13 +300,13 @@ def clear_user(username):
         logging.info("Removed "+username)
 
 ## want to change channelkey to channel_key to get consistency
-def channelkey(channelname):
+def channel_key(channelname):
     '''For consistency'''
     return "channel/"+channelname.lower()
 
 def get_channel(channelname):
     '''Get a channel from memcache or datastore, returns None if channel does not exist'''
-    key = channelkey(channelname)
+    key = channel_key(channelname)
     channel = memcache.get(key)
     if not channel:
         channel = ChatChannel.get_by_key_name(channelname.lower())
@@ -322,7 +322,7 @@ def clear_channel(channelname):
     channel = get_channel(channelname)
     if channel:
         channel.delete()
-        memcache.set(channelkey(channelname), "placeholder to reduce memcache misses")
+        memcache.set(channel_key(channelname), "placeholder to reduce memcache misses")
 
 class Main(webapp2.RequestHandler):
     def get(self):
