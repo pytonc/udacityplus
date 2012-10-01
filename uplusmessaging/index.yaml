@@ -12,7 +12,77 @@ indexes:
 
 - kind: Message
   properties:
+  - name: deleted
   - name: receiver
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: deleteted_by
+  - name: sender
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: receiver
+  - name: receiver_del
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: receiver
+  - name: receiver_deleted
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: receiver
+  - name: stored_by
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: receiver
+  - name: storeded_by=
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: receiver
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: sender
+  - name: sender_del
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: sender
+  - name: sender_deleted
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: sender
+  - name: stored_by
+  - name: timestamp
+    direction: desc
+
+- kind: Message
+  properties:
+  - name: sender
+  - name: storeded_by=
   - name: timestamp
     direction: desc
 
