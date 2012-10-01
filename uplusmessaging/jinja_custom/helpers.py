@@ -1,6 +1,9 @@
+from appengine.api import memcache
+from appengine.api.app_identity import get_default_version_hostname
 import webapp2
 from controllers.helpers.authentication import Authentication
-import urllib, hashlib
+import urllib
+from hashlib import md5
 
 def is_authenticated():
     username  = webapp2.get_request().cookies.get("username")
@@ -10,11 +13,16 @@ def is_authenticated():
 
 
 def get_gravatar(email):
-    default = "http://jz-uplusmessaging.appspot.com"
-    size = 146
+    gravatar_url = memcache.get(email, namespace='gravatar')
 
-    # construct the url
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+    if not gravatar_url:
+        default = get_default_version_hostname()
+        size = 146
+
+        # construct the url
+        gravatar_url = "http://www.gravatar.com/avatar/" + md5(email.lower()).hexdigest() + "?"
+        gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+
+        memcache.set(email, gravatar_url, namespace='gravatar')
 
     return gravatar_url
