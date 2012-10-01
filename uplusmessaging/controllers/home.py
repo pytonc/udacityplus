@@ -3,9 +3,7 @@ from controllers.helpers.authentication import Authentication
 from models.User import User
 
 class HomePage(BaseHandler):
-    @Authentication.do
     def get(self):
-        #TODO: add sanity
         name = self.get_cookie('username')
         friends = None
 
