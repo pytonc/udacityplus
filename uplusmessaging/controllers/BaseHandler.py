@@ -59,3 +59,9 @@ class BaseHandler(webapp2.RequestHandler):
 
     def get_params_dict(self, params):
         return {param : self.request.get(param) for param in params}
+
+    def handle_404(request, response, exception):
+        #TODO: Implement nice error code handling
+#        logging.exception(exception)
+        response.write('Resource does not exist')
+        response.set_status(404)
