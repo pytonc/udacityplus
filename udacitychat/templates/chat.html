@@ -204,7 +204,7 @@ onMessage({data:"QUIT Quitter"});*/
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
         case "PRIVMSG":
-          // Message from another @user;sender side
+          // Message from another @user;recipient side
           // Format: PRIVMSG SENDER message text
           var sender = arg.split(' ')[0];
           // Retrieve the message
@@ -213,7 +213,7 @@ onMessage({data:"QUIT Quitter"});*/
           addUserContent(sender, content);
           break;
         case "SENTMSG":
-          // A message sent by this user (server confirmation or error message)
+          // A message sent by this user (server confirmation or error message);sender side
           // Format: SENTMSG RECIPIENT message text
           var recipient = arg.split(' ')[0];
           arg = arg.substring(arg.indexOf(' ')+1);

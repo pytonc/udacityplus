@@ -299,7 +299,6 @@ def clear_user(username):
         memcache.set(user_key(username), "placeholder to reduce memcache misses")
         logging.info("Removed "+username)
 
-## want to change channelkey to channel_key to get consistency
 def channel_key(channelname):
     '''For consistency'''
     return "channel/"+channelname.lower()
