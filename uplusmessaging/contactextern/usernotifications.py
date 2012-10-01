@@ -1,4 +1,4 @@
-from appengine.api.app_identity import get_default_version_hostname
+from google.appengine.api.app_identity import get_default_version_hostname
 from google.appengine.api import mail
 from google.appengine.api import memcache
 from hashlib import sha1

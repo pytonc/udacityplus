@@ -1,5 +1,5 @@
-from appengine.api import memcache
-from appengine.api.app_identity import get_default_version_hostname
+from google.appengine.api import memcache
+from google.appengine.api.app_identity import get_default_version_hostname
 import webapp2
 from controllers.helpers.authentication import Authentication
 import urllib
