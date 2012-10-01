@@ -1,4 +1,3 @@
-from webapp2 import uri_for
 from BaseHandler import *
 from controllers.helpers.authentication import Authentication
 from jinja_custom.helpers import get_gravatar
