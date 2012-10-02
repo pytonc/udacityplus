@@ -557,6 +557,7 @@ onMessage({data:"QUIT Quitter"});*/
             onMessage({data : "NOTICE " + "you left " + arg});
             //remove tab.
             onMessage({data:"LEAVE "+username+" "+arg});
+						delete channels.arg;                       
           } else {
             onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
           }
