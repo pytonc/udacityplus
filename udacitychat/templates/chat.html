@@ -436,9 +436,15 @@ onMessage({data:"QUIT Quitter"});*/
           tabName : tabName.substring(1)+".c";
         //maybe this statement is better
         //$("ul#chattabs").remove('li[id="'+identifer+'"]')
-       	$('li[id="'+identifer+'"]').remove();
+        removedTab=$('li[id="'+identifer+'"]');
+        previousTab=$($("li").get($("li").index(removedTab)-1));
+       	removedTab.remove();
        	//go to previous Tab.
+       	previousTab.addClass("active");
+        activeEntity=$("a",previousTab).html();
+        updateEntity(activeEntity);
       }
+      
       function updateEntity(updatedEntity) {
       	//updatedEntity is a channelname or a username
         if (updatedEntity === activeEntity) {
