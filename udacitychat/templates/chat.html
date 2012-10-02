@@ -434,8 +434,6 @@ onMessage({data:"QUIT Quitter"});*/
       function removeTab(tabName){
       	var identifer = (tabName in users) ?
           tabName : tabName.substring(1)+".c";
-        var removedTab = jQuery('<li id="'+identifer+'">'+
-          '<a href="#'+identifer+'">'+tabName+'</a></li>');
         //maybe this statement is better
         //$("ul#chattabs").remove('li[id="'+identifer+'"]')
        	$('li[id="'+identifer+'"]').remove();
