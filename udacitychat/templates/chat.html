@@ -263,12 +263,7 @@ onMessage({data:"QUIT Quitter"});*/
           // Format: LEAVE username channel
           var u = arg.split(' ')[0];
           var channel = arg.split(' ')[1];
-          try {
-            removeTab(channel);
-          }
-          catch(err) {
-            alert(err);
-          }
+          removeTab(channel);
           break;
         case "LEFT":
           // Format: LEFT username channel
@@ -435,6 +430,15 @@ onMessage({data:"QUIT Quitter"});*/
         return newTab;
       }
       
+      //remove a Tab
+      function removeTab(tabName){
+      	var identifer = (tabName in users) ?
+          tabName : tabName.substring(1)+".c";
+        var removedTab = jQuery('<li id="'+identifer+'">'+
+          '<a href="#'+identifer+'">'+tabName+'</a></li>');
+       	$('li[id="'+identifer+'"]').remove();
+       	//go to previous Tab.
+      }
       function updateEntity(updatedEntity) {
       	//updatedEntity is a channelname or a username
         if (updatedEntity === activeEntity) {
@@ -550,7 +554,7 @@ onMessage({data:"QUIT Quitter"});*/
             // Handle leave on local end!
             onMessage({data : "NOTICE " + "you left " + arg});
             //remove tab.
-            onMessage({data:"LEAVE "+username+arg});
+            onMessage({data:"LEAVE "+username+" "+arg});
           } else {
             onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
           }
