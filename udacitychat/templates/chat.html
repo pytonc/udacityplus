@@ -258,6 +258,18 @@ onMessage({data:"QUIT Quitter"});*/
           addUsernameToChannel(u, channel);
           addChannelContent(channel, createTimestamp()+" "+u+" joined "+channel);
           break;
+        case "LEAVE":
+          // leave on local end
+          // Format: LEAVE username channel
+          var u = arg.split(' ')[0];
+          var channel = arg.split(' ')[1];
+          try {
+            removeTab(channel);
+          }
+          catch(err) {
+            alert(err);
+          }
+          break;
         case "LEFT":
           // Format: LEFT username channel
           var u = arg.split(' ')[0];
@@ -536,6 +548,9 @@ onMessage({data:"QUIT Quitter"});*/
           if (arg in channels && arg !== server) {
             sendMessage("LEAVE "+arg);
             // Handle leave on local end!
+            onMessage({data : "NOTICE " + "you left " + arg});
+            //remove tab.
+            onMessage({data:"LEAVE "+username+arg});
           } else {
             onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
           }
