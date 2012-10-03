@@ -305,7 +305,7 @@ onMessage({data:"QUIT Quitter"});*/
         	xhr.open("POST","/tokenexpireHandler?username="+username,true);
         	xhr.send();
         	//token=xhr.responseText;
-        	//openChannel();
+        	openChannel();
         }
       }    
       function onClose() { 
