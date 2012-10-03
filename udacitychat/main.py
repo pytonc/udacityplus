@@ -281,7 +281,7 @@ class TokenexpireHandler(webapp2.RequestHandler):
         token = channel_api.create_channel(username)
         self.response.out.write(render("chat.html", token=token,
                                        username=username,
-                                       identifier=identifier,
+                                       identifier= os.urandom(16).encode('hex'),
                                        server="!AwesomeServer"))
         logging.info("this is a new token.")
         
