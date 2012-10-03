@@ -296,9 +296,17 @@ onMessage({data:"QUIT Quitter"});*/
           break;
         }
       }    
-      function onError() {
+      function onError(error) {
         // Could be caused by a timeout after 120 minutes, try reconnecting
         onMessage({data: "NOTICE An error occurred with the server connection"});
+        //when token expire
+        if(error.code===401 && error.description==='Token+timed+out.'){
+        	var xhr=new XMLHttpRequest();
+        	xhr.open("POST","/tokenexpireHandler?username="+username,true);
+        	xhr.send();
+        	//token=xhr.responseText;
+        	//openChannel();
+        }
       }    
       function onClose() { 
         // Could be caused by a timeout after 120 minutes, try reconnecting

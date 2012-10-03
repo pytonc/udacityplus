@@ -273,7 +273,17 @@ class Disconnect(webapp2.RequestHandler):
             user_quit(username, "")
         clear_user(username)
         logging.info("Disconnected: "+username)
-
+        
+class TokenexpireHandler(webapp2.RequestHandler):
+    def post(self):
+        ##handle token expire
+        username = urllib.unquote(self.request.get('username'))
+        token = channel_api.create_channel(username)
+        self.response.out.write(render("chat.html", token=token,
+                                       username=username,
+                                       identifier=identifier,
+                                       server="!AwesomeServer"))
+        
 def user_key(username):
     '''user_key function is for key consistency'''
     return "user/"+username.lower()
@@ -349,7 +359,8 @@ class Main(webapp2.RequestHandler):
                                            channel=channelname,
                                            channelerror=channelerror))
         else:
-            token = channel_api.create_channel(username) # Expires after 120 minutes
+            token = channel_api.create_channel(username,1) # Expires after 120 minutes
+            logging.info("%s is a token. type of token: %s"%(token,type(token)))
             identifier = os.urandom(16).encode('hex')
             user = ChatUser(key_name=username.lower(),
                             username=username,
