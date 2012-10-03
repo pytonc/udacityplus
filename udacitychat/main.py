@@ -279,10 +279,12 @@ class TokenexpireHandler(webapp2.RequestHandler):
         ##handle token expire
         username = urllib.unquote(self.request.get('username'))
         token = channel_api.create_channel(username)
-        self.response.out.write(render("chat.html", token=token,
+        logging.info(token)
+        self.response.out.write("you mother fucker~~")
+        """self.response.out.write(render("chat.html", token=token,
                                        username=username,
                                        identifier= os.urandom(16).encode('hex'),
-                                       server="!AwesomeServer"))
+                                       server="!AwesomeServer"))"""
         logging.info("this is a new token.")
         
 def user_key(username):
