@@ -283,6 +283,7 @@ class TokenexpireHandler(webapp2.RequestHandler):
                                        username=username,
                                        identifier=identifier,
                                        server="!AwesomeServer"))
+        logging.info("this is a new token.")
         
 def user_key(username):
     '''user_key function is for key consistency'''
