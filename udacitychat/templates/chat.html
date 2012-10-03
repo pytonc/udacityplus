@@ -181,6 +181,7 @@ onMessage({data:"QUIT Quitter"});*/
         socket.onmessage = onMessage;
         socket.onerror = onError;
         socket.onclose = onClose;
+        //onMessage({data:"NOTICE token in openChannel "+token})
       }
       setTimeout(openChannel, 100);
       
@@ -302,9 +303,12 @@ onMessage({data:"QUIT Quitter"});*/
         //when token expire
         if(error.code===401 && error.description==='Token+timed+out.'){
         	var xhr=new XMLHttpRequest();
-        	xhr.open("POST","/tokenexpireHandler?username="+username,true);
+        	xhr.open("GET","/tokenexpireHandler?username="+username,true);
         	xhr.send();
-        	//token=xhr.responseText;
+        	token=xhr.responseText;
+        	onMessage({data:"NOTICE responseText in onError : "+xhr.responseText})
+        	onMessage({data:"NOTICE responseXML in onError : "+xhr.responseXML})
+        	onMessage({data:"NOTICE token in onError : "+token})
         	openChannel();
         }
       }    

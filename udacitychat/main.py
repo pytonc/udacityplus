@@ -275,17 +275,12 @@ class Disconnect(webapp2.RequestHandler):
         logging.info("Disconnected: "+username)
         
 class TokenexpireHandler(webapp2.RequestHandler):
-    def post(self):
+    def get(self):
         ##handle token expire
         username = urllib.unquote(self.request.get('username'))
         token = channel_api.create_channel(username)
-        logging.info(token)
-        self.response.out.write("you mother fucker~~")
-        """self.response.out.write(render("chat.html", token=token,
-                                       username=username,
-                                       identifier= os.urandom(16).encode('hex'),
-                                       server="!AwesomeServer"))"""
-        logging.info("this is a new token.")
+        logging.info("this is a new token. :"+token)
+        self.response.out.write(token)
         
 def user_key(username):
     '''user_key function is for key consistency'''
