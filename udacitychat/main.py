@@ -380,5 +380,6 @@ app = webapp2.WSGIApplication([
                                ('/', Main),
                                ('/communication', Communication),
                                ('/_ah/channel/connected/?', Connect),
-                               ('/_ah/channel/disconnected/?', Disconnect)
+                               ('/_ah/channel/disconnected/?', Disconnect),
+                               ('/tokenexpireHandler',TokenexpireHandler)
                                ], debug=True)
