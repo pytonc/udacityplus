@@ -168,6 +168,7 @@ onMessage({data:"QUIT Quitter"});*/
       
       // Opens a Google API Channel to receive messages from the server
       function openChannel() {
+      	//channel seems ambiguous here.maybe change a name? 
         var channel = new goog.appengine.Channel(token);
         var handler = {
           "onopen": onOpen,
@@ -180,11 +181,14 @@ onMessage({data:"QUIT Quitter"});*/
         socket.onmessage = onMessage;
         socket.onerror = onError;
         socket.onclose = onClose;
+        //onMessage({data:"NOTICE token in openChannel "+token})
       }
       setTimeout(openChannel, 100);
       
       function onOpen() {
-        addChannel(server);      
+      	if (!(server in channels)){
+        	addChannel(server);
+        }
         onMessage({data: "NOTICE Connected to server"});          
       }    
       
@@ -203,7 +207,7 @@ onMessage({data:"QUIT Quitter"});*/
         var arg = message.substring(message.indexOf(' ')+1);
         switch(command) {
         case "PRIVMSG":
-          // Message from another @user
+          // Message from another @user;recipient side
           // Format: PRIVMSG SENDER message text
           var sender = arg.split(' ')[0];
           // Retrieve the message
@@ -212,7 +216,7 @@ onMessage({data:"QUIT Quitter"});*/
           addUserContent(sender, content);
           break;
         case "SENTMSG":
-          // A message sent by this user (server confirmation or error message)
+          // A message sent by this user (server confirmation or error message);sender side
           // Format: SENTMSG RECIPIENT message text
           var recipient = arg.split(' ')[0];
           arg = arg.substring(arg.indexOf(' ')+1);
@@ -220,7 +224,7 @@ onMessage({data:"QUIT Quitter"});*/
           addUserContent(recipient, content);
           break;
         case "CHANNELMSG":
-          // Message sent to a #channel user is in
+          // Message sent to a #channel which user is in
           // Format: CHANNELMSG CHANNEL SENDER message text
           var channel = arg.split(' ')[0];
           var sender = arg.split(' ')[1]; 
@@ -257,6 +261,13 @@ onMessage({data:"QUIT Quitter"});*/
           addUsernameToChannel(u, channel);
           addChannelContent(channel, createTimestamp()+" "+u+" joined "+channel);
           break;
+        case "LEAVE":
+          // leave on local end
+          // Format: LEAVE username channel
+          var u = arg.split(' ')[0];
+          var channel = arg.split(' ')[1];
+          removeTab(channel);
+          break;
         case "LEFT":
           // Format: LEFT username channel
           var u = arg.split(' ')[0];
@@ -288,9 +299,16 @@ onMessage({data:"QUIT Quitter"});*/
           break;
         }
       }    
-      function onError() {
+      function onError(error) {
         // Could be caused by a timeout after 120 minutes, try reconnecting
         onMessage({data: "NOTICE An error occurred with the server connection"});
+        //when token expire
+        if(error.code===401 && error.description==='Token+timed+out.'){
+        	$.post("/tokenexpireHandler?username="+username,function(data){
+        		token=data;
+        		openChannel();
+        	});
+        }
       }    
       function onClose() { 
         // Could be caused by a timeout after 120 minutes, try reconnecting
@@ -338,6 +356,7 @@ onMessage({data:"QUIT Quitter"});*/
       
       function removeUsernameFromChannel(removedUsername, channel) {        
         if (channels[channel]["users"].indexOf(removedUsername) !== -1) {
+        	//may be someting get wrong in below statement
           channels[channel]["users"].splice(channels[channel]["users"].indexOf(removedUsername), 1);
           updateEntity(channel);    
           return true;
@@ -421,7 +440,23 @@ onMessage({data:"QUIT Quitter"});*/
         return newTab;
       }
       
+      //remove a Tab when user leave.?
+      function removeTab(tabName){
+      	var identifer = (tabName in users) ?
+          tabName : tabName.substring(1)+".c";
+        //maybe this statement is better
+        //$("ul#chattabs").remove('li[id="'+identifer+'"]')
+        removedTab=$('li[id="'+identifer+'"]');
+        previousTab=$($("li").get($("li").index(removedTab)-1));
+       	removedTab.remove();
+       	//go to previous Tab.
+       	previousTab.addClass("active");
+        activeEntity=$("a",previousTab).html();
+        updateEntity(activeEntity);
+      }
+      
       function updateEntity(updatedEntity) {
+      	//updatedEntity is a channelname or a username
         if (updatedEntity === activeEntity) {
           // Active entity was updated so update chat and users
           /* Technically, depending on message, only chat or users
@@ -430,7 +465,7 @@ onMessage({data:"QUIT Quitter"});*/
           var scrolledToBottom = chatScrollBottom();
           if (activeEntity in channels) {
             // activeEntity is a #channel
-            $("div#chatarea").html(channels[activeEntity]["text"]);            
+            $("div#chatarea").html(channels[activeEntity]["text"]);
             var userList = "Users in "+activeEntity+":";
             for (user in channels[activeEntity]["users"].sort()) {
               userList += "<br/>"+channels[activeEntity]["users"][user];
@@ -533,6 +568,10 @@ onMessage({data:"QUIT Quitter"});*/
           if (arg in channels && arg !== server) {
             sendMessage("LEAVE "+arg);
             // Handle leave on local end!
+            onMessage({data : "NOTICE " + "you left " + arg});
+            //remove tab.
+            onMessage({data:"LEAVE "+username+" "+arg});
+						delete channels.arg;                       
           } else {
             onMessage({data: "NOTICE "+arg+" is not a channel you can leave"});
           }
