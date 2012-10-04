@@ -302,13 +302,10 @@ onMessage({data:"QUIT Quitter"});*/
         onMessage({data: "NOTICE An error occurred with the server connection"});
         //when token expire
         if(error.code===401 && error.description==='Token+timed+out.'){
-        	var xhr=new XMLHttpRequest();
-        	xhr.open("GET","/tokenexpireHandler?username="+username,true);
-        	xhr.send();
-        	token=xhr.responseText;
-        	onMessage({data:"NOTICE responseText in onError : "+xhr.responseText})
-        	onMessage({data:"NOTICE responseXML in onError : "+xhr.responseXML})
-        	onMessage({data:"NOTICE token in onError : "+token})
+        	$.post("/tokenexpireHandler?username="+username,function(data){
+        		onMessage({data:"NOTICE token in onError : "+data})
+        		token=data;
+        	})
         	openChannel();
         }
       }    

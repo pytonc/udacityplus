@@ -275,10 +275,10 @@ class Disconnect(webapp2.RequestHandler):
         logging.info("Disconnected: "+username)
         
 class TokenexpireHandler(webapp2.RequestHandler):
-    def get(self):
+    def post(self):
         ##handle token expire
         username = urllib.unquote(self.request.get('username'))
-        token = channel_api.create_channel(username)
+        token = channel_api.create_channel(username,1)
         logging.info("this is a new token. :"+token)
         self.response.out.write(token)
         
