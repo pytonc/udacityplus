@@ -186,7 +186,9 @@ onMessage({data:"QUIT Quitter"});*/
       setTimeout(openChannel, 100);
       
       function onOpen() {
-        addChannel(server);      
+      	if (!(server in channels)){
+        	addChannel(server);
+        }
         onMessage({data: "NOTICE Connected to server"});          
       }    
       
@@ -305,8 +307,8 @@ onMessage({data:"QUIT Quitter"});*/
         	$.post("/tokenexpireHandler?username="+username,function(data){
         		onMessage({data:"NOTICE token in onError : "+data})
         		token=data;
-        	})
-        	openChannel();
+        		openChannel();
+        	});
         }
       }    
       function onClose() { 
