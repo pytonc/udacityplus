@@ -278,7 +278,7 @@ class TokenexpireHandler(webapp2.RequestHandler):
     def post(self):
         ##handle token expire
         username = urllib.unquote(self.request.get('username'))
-        token = channel_api.create_channel(username,1)
+        token = channel_api.create_channel(username)
         logging.info("this is a new token. :"+token)
         self.response.out.write(token)
         
@@ -357,7 +357,7 @@ class Main(webapp2.RequestHandler):
                                            channel=channelname,
                                            channelerror=channelerror))
         else:
-            token = channel_api.create_channel(username,1) # Expires after 120 minutes
+            token = channel_api.create_channel(username) # Expires after 120 minutes
             logging.info("%s is a token. type of token: %s"%(token,type(token)))
             identifier = os.urandom(16).encode('hex')
             user = ChatUser(key_name=username.lower(),

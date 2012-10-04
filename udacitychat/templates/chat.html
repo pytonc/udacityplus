@@ -305,7 +305,6 @@ onMessage({data:"QUIT Quitter"});*/
         //when token expire
         if(error.code===401 && error.description==='Token+timed+out.'){
         	$.post("/tokenexpireHandler?username="+username,function(data){
-        		onMessage({data:"NOTICE token in onError : "+data})
         		token=data;
         		openChannel();
         	});
