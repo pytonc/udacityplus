@@ -26,8 +26,14 @@
 
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
+from externals.bcrypt import bcrypt as bc
+#from Message import Message, Conversation
 
 import re
+
+
+_UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
+uname = re.compile(_UNAMEP)
 
 
 class ExternalProfileLink(ndb.Model):

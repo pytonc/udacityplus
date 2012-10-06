@@ -6,14 +6,14 @@ from models.User import User
 
 
 class ProfilePage(BaseHandler):
-    @Authentication.do
+    #@Authentication.do
     def get(self, username):
         """display profile of user with username, if None, display logged in user
         """
 
-        user = User.get_user('test_user')
+        user = User.get_user(username)
         if not user:
-            user = User.save('test_user', 'password', 'email')
+            user = User.save(username, 'some long password', '{}@someplace.com'.format(username))
 
 
         gravatar = None
@@ -29,6 +29,6 @@ class ProfilePage(BaseHandler):
             self.redirect('/logout')
 
 
-    @Authentication.do
+    #@Authentication.do
     def post(self):
         pass
