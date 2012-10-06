@@ -16,12 +16,12 @@ class ProfilePage(BaseHandler):
             user = User.save(username, 'some long password', '{}@someplace.com'.format(username))
 
 
-        gravatar = None
-        friends = None
+        gravatar = user.avatar_url
+        friends = []
 
         if user:
 
-            context = {'user': user, 'username': username, 'gravatar': gravatar, 'friends': [], 'friend_btn': False}
+            context = {'user': user, 'username': username, 'gravatar': gravatar, 'friends': friends, 'friend_btn': False}
 
             self.render("profile/profile.html", context)
         else:
