@@ -34,6 +34,7 @@ import re
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
 uname = re.compile(_UNAMEP)
+TOOL_CATEGORIES = ("Languages", "Software/Libraries")
 
 
 class ExternalProfileLink(ndb.Model):
@@ -47,11 +48,20 @@ class Location(ndb.Model):
     country         = ndb.StringProperty()
 
 
+class Tools(ndb.Model):
+    category        = ndb.StringProperty(choices=TOOL_CATEGORIES)
+    skill           = ndb.StringProperty()
+    level           = ndb.IntegerProperty()
+
+
 class User(ndb.Model):
     username        = ndb.StringProperty(required=True)
     username_norm   = ndb.ComputedProperty(lambda self: self.username.lower())
     password        = ndb.StringProperty(required=True)
     email           = ndb.StringProperty(required=True)
+
+    real_name       = ndb.StringProperty()
+    display_name    = ndb.StringProperty()
 
     created         = ndb.DateTimeProperty(auto_now_add=True)
     updated         = ndb.DateTimeProperty(auto_now=True)
@@ -61,9 +71,8 @@ class User(ndb.Model):
 
     # details
     forum_name      = ndb.StringProperty()
-    real_name       = ndb.StringProperty()
     short_about     = ndb.StringProperty()
-    tools           = ndb.TextProperty()
+    tools           = ndb.StructuredProperty(Tools, repeated=True)
     age             = ndb.IntegerProperty()
     profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Location)
@@ -76,6 +85,7 @@ class User(ndb.Model):
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
     log_token       = ndb.StringProperty(required=False)
+    notify_on_msg   = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
