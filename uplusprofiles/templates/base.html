@@ -139,11 +139,12 @@
     </div>
 {% endblock content %}
 </body>
-
+{% block js %}
 <script type="text/javascript" src="/js/temp.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script src="/js/bootstrap-transition.js"></script>
-<script src="/js/bootstrap-carousel.js"></script>
-<script src="/js/bootstrap-tab.js"></script>
-<script src="/js/bootstrap-modal.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap-transition.js" type="text/javascript"></script>
+<script src="/js/bootstrap-carousel.js" type="text/javascript"></script>
+<script src="/js/bootstrap-tab.js" type="text/javascript"></script>
+<script src="/js/bootstrap-modal.js" type="text/javascript"></script>
+{% endblock js %}
 </html>
