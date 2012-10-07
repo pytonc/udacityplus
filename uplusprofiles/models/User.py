@@ -28,30 +28,13 @@ from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
 #from Message import Message, Conversation
+import models.Details as Details
 
 import re
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
 uname = re.compile(_UNAMEP)
-TOOL_CATEGORIES = ("Languages", "Software/Libraries")
-
-
-class ExternalProfileLink(ndb.Model):
-    url             = ndb.StringProperty(required=True)
-    profile_loc     = ndb.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
-                                                                'LinkedIn', 'Website', 'GitHub', 'BitBucket',
-                                                                'Blog', 'Portfolio', 'Other', 'Coursera', })
-
-class Location(ndb.Model):
-    city            = ndb.StringProperty()
-    country         = ndb.StringProperty()
-
-
-class Tools(ndb.Model):
-    category        = ndb.StringProperty(choices=TOOL_CATEGORIES)
-    skill           = ndb.StringProperty()
-    level           = ndb.IntegerProperty()
 
 
 class User(ndb.Model):
@@ -72,10 +55,11 @@ class User(ndb.Model):
     # details
     forum_name      = ndb.StringProperty()
     short_about     = ndb.StringProperty()
-    tools           = ndb.StructuredProperty(Tools, repeated=True)
-    age             = ndb.IntegerProperty()
-    profile_link    = ndb.StructuredProperty(ExternalProfileLink, repeated=True)
-    location        = ndb.StructuredProperty(Location)
+    prog_langs      = ndb.StructuredProperty(Details.Tool, repeated=True)
+    soft_tools      = ndb.StructuredProperty(Details.Tool, repeated=True)
+    dob             = ndb.DateProperty()
+    profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
+    location        = ndb.StructuredProperty(Details.Location)
 
     # TODO: upload to a static directory?
     avatar          = ndb.BlobProperty()
