@@ -16,7 +16,7 @@
                     <a class="brand" href="#">{{ user.real_name or user.username }}</a>
                     <div class="btn-group">
                         {% if user.username_norm == username %}
-                        <button class="btn" type="button"><i class="icon-edit"></i> Edit Profile</button>
+                        <a href="/{{ user.username_norm }}?mode=edit" class="btn" type="button"><i class="icon-edit"></i> Edit Profile</a>
                         {% elif friend_btn %}
                         <form action="/friends" method="post" style="margin: 0;">
                             <input type="text" name="name" value="{{ user.username_norm }}" class="hidden" style="display: none;"/>
