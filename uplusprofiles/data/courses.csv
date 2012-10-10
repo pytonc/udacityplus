@@ -1,15 +1,15 @@
-name,description,dept,number,level
-"Introduction to Computer Science","Building a Search Engine (CS101)",CS,101,Beginning
-"Introduction to Physics","Landmarks in Physics (PH100)",PH,100,Beginning
-"Introduction to Statistics","Making Decisions Based on Data (ST101)",ST,101,Beginning
-Algorithms,"Crunching Social Networks (CS215)",CS,215,Intermediate
-"Differential Equations in Action","Making Math Matter (CS222)",CS,222,Intermediate
-"Web Development","How to Build a Blog (CS253)",CS,253,Intermediate
-"Software Testing","How to Make Software Fail (CS258)",CS,258,Intermediate
-"Software Debugging","Automating the Boring Tasks (CS259)",CS,259,Intermediate
-"Programming Languages","Building a Web Browser (CS262)",CS,262,Intermediate
-"Introduction to Theoretical Computer Science","Dealing with Challenging Problems (CS313)",CS,313,Intermediate
-"How to Build a Startup","The Lean LaunchPad (EP245)",EP,245,Intermediate
-"Design of Computer Programs","Programming Principles (CS212)",CS,212,Advanced
-"Artificial Intelligence","Programming A Robotic Car (CS373)",CS,373,Advanced
-"Applied Cryptography","Science of Secrets (CS387)",CS,387,Advanced
+name,level,cid,number,dept,source,key,description
+Introduction to Computer Science,Beginning,CS101,101,CS,Udacity,udacitycs101,Building a Search Engine (CS101)
+Design of Computer Programs,Advanced,CS212,212,CS,Udacity,udacitycs212,Programming Principles (CS212)
+Algorithms,Intermediate,CS215,215,CS,Udacity,udacitycs215,Crunching Social Networks (CS215)
+Differential Equations in Action,Intermediate,CS222,222,CS,Udacity,udacitycs222,Making Math Matter (CS222)
+Web Development,Intermediate,CS253,253,CS,Udacity,udacitycs253,How to Build a Blog (CS253)
+Software Testing,Intermediate,CS258,258,CS,Udacity,udacitycs258,How to Make Software Fail (CS258)
+Software Debugging,Intermediate,CS259,259,CS,Udacity,udacitycs259,Automating the Boring Tasks (CS259)
+Programming Languages,Intermediate,CS262,262,CS,Udacity,udacitycs262,Building a Web Browser (CS262)
+Introduction to Theoretical Computer Science,Intermediate,CS313,313,CS,Udacity,udacitycs313,Dealing with Challenging Problems (CS313)
+Artificial Intelligence,Advanced,CS373,373,CS,Udacity,udacitycs373,Programming A Robotic Car (CS373)
+Applied Cryptography,Advanced,CS387,387,CS,Udacity,udacitycs387,Science of Secrets (CS387)
+How to Build a Startup,Intermediate,EP245,245,EP,Udacity,udacityep245,The Lean LaunchPad (EP245)
+Introduction to Physics,Beginning,PH100,100,PH,Udacity,udacityph100,Landmarks in Physics (PH100)
+Introduction to Statistics,Beginning,ST101,101,ST,Udacity,udacityst101,Making Decisions Based on Data (ST101)
