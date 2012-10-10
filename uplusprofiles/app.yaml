@@ -19,3 +19,6 @@ libraries:
   version: "2.5.1"
 - name: jinja2
   version: latest
+
+builtins:
+- remote_api: on
