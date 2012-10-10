@@ -1,4 +1,3 @@
-# "~/google_appengine/appcfg.py" upload_data --config_file=bulkloader.yaml --kind=Course --filename=file_path.csv --url=http://<app>.appspot.com/_ah/remote_api --application=s~<app_id>
 python_preamble:
 - import: base64
 - import: re
@@ -9,33 +8,52 @@ python_preamble:
 - import: google.appengine.api.users
 
 transformers:
-- kind: Course
+
+- kind: Source
   connector: csv
   connector_options:
     encoding: utf-8
-    columns: from_header
-
   property_map:
     - property: __key__
       external_name: key
       export_transform: transform.key_id_or_name_as_string
 
-    - property: number
-      external_name: number
-      import_transform: transform.none_if_empty(int)
-      export_transform: transform.key_id_or_name_as_string
-
     - property: name
       external_name: name
-      import_transform: transform.none_if_empty(str)
+
+    - property: url
+      external_name: url
+      
+
+- kind: Course
+  connector: csv
+  connector_options:
+    encoding: utf-8
+  property_map:
+    - property: __key__
+      external_name: key
       export_transform: transform.key_id_or_name_as_string
 
-    - property: description
-      external_name: description
-      import_transform: transform.none_if_empty(str)
-      export_transform: transform.key_id_or_name_as_string
+    - property: cid
+      external_name: cid
+
+    - property: dept
+      external_name: dept
 
     - property: level
       external_name: level
-      import_transform: transform.none_if_empty(str)
+
+    - property: name
+      external_name: name
+
+    - property: number
+      external_name: number
+      import_transform: transform.none_if_empty(int)
+
+    - property: short_desc
+      external_name: description
+
+    - property: source
+      external_name: source
+      import_transform: transform.create_foreign_key('Source')
       export_transform: transform.key_id_or_name_as_string
