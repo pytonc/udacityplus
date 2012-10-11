@@ -15,7 +15,7 @@ courses = [
 #     'cid': 'CS101',
      'number': '101',
      'dept': 'CS',
-#     'source': 'Udacity',
+     'source': 'Udacity',
 #     'key': 'udacitycs101',
      'short_desc': 'Building a Search Engine (CS101)'
      },
@@ -25,7 +25,7 @@ courses = [
 #        'cid': 'CS212',
         'number': '212',
         'dept': 'CS',
-#        'source': 'Udacity',
+        'source': 'Udacity',
 #        'key': 'udacitycs212',
         'short_desc': 'Programming Principles (CS212)'
     },
@@ -35,7 +35,7 @@ courses = [
 #        'cid': 'CS215',
         'number': '215',
         'dept': 'CS',
-#        'source': 'Udacity',
+        'source': 'Udacity',
 #        'key': 'udacitycs215',
         'short_desc': 'Crunching Social Networks (CS215)'
     }
