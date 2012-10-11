@@ -49,7 +49,6 @@ class User(ndb.Model):
     created         = ndb.DateTimeProperty(auto_now_add=True)
     updated         = ndb.DateTimeProperty(auto_now=True)
 
-#    friends         = ndb.KeyProperty(kind='User', repeated=True)
     friends         = ndb.StringProperty(repeated=True)
 
     # details
@@ -72,6 +71,9 @@ class User(ndb.Model):
     notify_on_msg   = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
+
+    courses_completed = ndb.StringProperty(repeated=True)
+    courses_inprogress = ndb.StringProperty(repeated=True)
 
 
     @classmethod
@@ -150,6 +152,63 @@ class User(ndb.Model):
             return f
         return None
 
-    def delete_friend(self):
+
+    def add_courses(self, keys, completed=True):
+        """Add a completed or an in-progress course
+
+        Args:
+         key: list of key_name/id of the added course
+         completed: True by default, adds to courses_completed, False adds to courses_inprogress
+        """
+        if completed:
+            for k in keys:
+                if k not in self.courses_completed:
+                    self.courses_completed.append(k)
+        else:
+            for k in keys:
+                if k not in self.courses_inprogress:
+                    self.courses_inprogress.append(k)
+
+        self.put()
+
+    def get_courses(self, completed=True):
+        if completed:
+            field = 'courses_completed'
+        else:
+            field = 'courses_inprogress'
+
+        if hasattr(self, field):
+            keys =  [Key('Course', c) for c in getattr(self, field)]
+            return ndb.get_multi(keys)
+        return None
+
+    def delete_all_courses(self, completed=True):
+        if completed:
+            field = 'courses_completed'
+        else:
+            field = 'courses_inprogress'
+
+        if hasattr(self, field):
+            setattr(self, field, [])
+            self.put()
+
+        return self
+
+    def remove_course(self, course_key, completed=True):
+        if completed:
+            field = 'courses_completed'
+        else:
+            field = 'courses_inprogress'
+
+        if hasattr(self, field):
+            f = getattr(self, field)
+            f.remove(course_key)
+            setattr(self, field, f)
+            self.put()
+
+        return self
+
+
+def delete_friend(self):
         #TODO: deleting friends
         pass
