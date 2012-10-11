@@ -1,7 +1,6 @@
-from webapp2 import uri_for
 from BaseHandler import *
-from controllers.helpers.authentication import Authentication
 from jinja_custom.helpers import get_gravatar
+from models.Course import Course
 from models.User import User
 from datetime import date, timedelta
 
@@ -11,7 +10,6 @@ class ProfilePage(BaseHandler):
     def get(self, username):
         """display profile of user with username, if None, display logged in user
         """
-
         mode, = self.get_params(['mode'])
 
 
@@ -30,15 +28,20 @@ class ProfilePage(BaseHandler):
         gravatar = user.avatar_url
         friends = []
 
+        courses = Course.query()
+
         if user:
 
-            context = {'user': user, 'dob': dob, 'username': username, 'gravatar': gravatar, 'friends': friends, 'friend_btn': False}
+            context = {'user': user, 'dob': dob,
+                       'username': username,
+                       'gravatar': gravatar,
+                       'friends': friends,
+                       'friend_btn': False,
+                       'courses': courses}
 
             self.render(template, context)
         else:
-
             self.redirect('/logout')
-
 
     #@Authentication.do
     def post(self, username):
