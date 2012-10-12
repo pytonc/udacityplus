@@ -208,7 +208,26 @@ class User(ndb.Model):
 
         return self
 
+    def reassign_courses(self, newcourses, completed=True):
+        """Assigns a new list of the existing list of courses
+        """
+        if not isinstance(newcourses, list):
+            raise TypeError('newcourses needs to be a list')
 
-def delete_friend(self):
+        if completed:
+            field = 'courses_completed'
+        else:
+            field = 'courses_inprogress'
+
+        if hasattr(self, field):
+            setattr(self, field, newcourses)
+            self.put()
+
+        return self
+
+
+
+
+    def delete_friend(self):
         #TODO: deleting friends
         pass
