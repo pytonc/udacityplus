@@ -174,7 +174,7 @@ class User(ndb.Model):
 
     def add_course(self, course_key, completed=True):
         if not isinstance(course_key, Key):
-            raise ValueError("course_key must be a Key of a Course")
+            raise ValueError("course_key must be a Key of a Course instance")
 
         # don't append if in list
         courses = ndb.get_multi(self.courses)
