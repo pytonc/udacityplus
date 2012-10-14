@@ -183,7 +183,8 @@ class User(ndb.Model):
 
         c = Details.CourseAttempt(
             course=course_key,
-            completed=completed
+            completed=completed,
+            parent=self.key
         )
         k = c.put()
         self.courses.append(k)
