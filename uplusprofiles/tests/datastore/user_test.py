@@ -47,7 +47,6 @@ class TestUser(unittest.TestCase):
     def createNewCourses(self):
         for course in courses:
             c = Course.add_course(**course)
-            c.put()
 
     def testGetAllCourses(self):
         courses = Course.query().count(10)
