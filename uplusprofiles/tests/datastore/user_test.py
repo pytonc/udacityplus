@@ -71,9 +71,11 @@ class TestUser(unittest.TestCase):
 
         completed = self.u1.get_courses()
         incomplete = self.u1.get_courses(completed=False)
+        all = self.u1.get_all_courses()
 
         self.assertEqual(len(completed), 0, "Not deleted completed courses: %s" % len(completed))
         self.assertEqual(len(incomplete), 0, "Not deleted in progress courses: %s" % len(completed))
+        self.assertEqual(len(all), 0, "Not deleted in all courses: %s" % len(all))
 
     def testDeleteSingleCourse(self):
         completed = self.u1.get_courses()
@@ -86,6 +88,10 @@ class TestUser(unittest.TestCase):
         self.u1.remove_course(delcourse)
         self.assertEqual(len(completed), 2,
             "Incorrect completed course number after course %s deletion" % delname)
+
+        self.u1.remove_course(delcourse)
+        self.assertEqual(len(completed), 2,
+            "Incorrect completed course number after deleted course %s deletion" % delname)
 
     def testTypeError(self):
         with self.assertRaises(TypeError) as e:
