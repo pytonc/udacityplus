@@ -1,4 +1,6 @@
-from appengine.ext import ndb
+from google.appengine.ext import ndb
+from google.appengine.ext.ndb import polymodel
+from models.Course import Course
 
 
 TOOL_CATEGORIES = ("Languages", "Software/Libraries")
@@ -20,3 +22,9 @@ class Tool(ndb.Model):
     category        = ndb.StringProperty(choices=TOOL_CATEGORIES)
     skill           = ndb.StringProperty()
     level           = ndb.IntegerProperty(choices=LEVEL_OPTIONS, default=1)
+
+class CourseAttempt(ndb.Model):
+    course          = ndb.KeyProperty(Course)
+    completed       = ndb.BooleanProperty(default=False)
+    start_date      = ndb.DateTimeProperty()
+    endDate         = ndb.DateTimeProperty()
