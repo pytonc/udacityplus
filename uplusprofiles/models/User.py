@@ -27,7 +27,6 @@
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
-#from Message import Message, Conversation
 import models.Details as Details
 
 import re
@@ -59,6 +58,7 @@ class User(ndb.Model):
     dob             = ndb.DateProperty()
     profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Details.Location)
+    courses         = ndb.KeyProperty(Details.CourseAttempt, repeated=True)
 
     # TODO: upload to a static directory?
     avatar          = ndb.BlobProperty()
@@ -71,9 +71,6 @@ class User(ndb.Model):
     notify_on_msg   = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
-
-    courses_completed = ndb.StringProperty(repeated=True)
-    courses_inprogress = ndb.StringProperty(repeated=True)
 
 
     @classmethod
@@ -153,78 +150,82 @@ class User(ndb.Model):
         return None
 
 
-    def add_courses(self, keys, completed=True):
+    def add_courses(self, keys):
         """Add a completed or an in-progress course
 
         Args:
          key: list of key_name/id of the added course
          completed: True by default, adds to courses_completed, False adds to courses_inprogress
         """
-        if completed:
-            for k in keys:
-                if k not in self.courses_completed:
-                    self.courses_completed.append(k)
-        else:
-            for k in keys:
-                if k not in self.courses_inprogress:
-                    self.courses_inprogress.append(k)
+        for k in keys:
+            if k not in self.courses:
+                self.courses.append(k)
 
         self.put()
+        return self
+
+    def get_all_courses(self):
+        return ndb.get_multi(self.courses)
 
     def get_courses(self, completed=True):
-        if completed:
-            field = 'courses_completed'
-        else:
-            field = 'courses_inprogress'
+        c = ndb.get_multi(self.courses)
+        return [course for course in c if course.completed == completed]
 
-        if hasattr(self, field):
-            keys =  [Key('Course', c) for c in getattr(self, field)]
-            return ndb.get_multi(keys)
-        return None
 
-    def delete_all_courses(self, completed=True):
-        if completed:
-            field = 'courses_completed'
-        else:
-            field = 'courses_inprogress'
+    def add_course(self, course_key, completed=True):
+        if not isinstance(course_key, Key):
+            raise ValueError("course_key must be a Key of a Course")
 
-        if hasattr(self, field):
-            setattr(self, field, [])
-            self.put()
+        # don't append if in list
+        courses = ndb.get_multi(self.courses)
+        if any([c.course == course_key and c.completed == completed for c in courses]):
+            return None
 
+        c = Details.CourseAttempt(
+            course=course_key,
+            completed=completed
+        )
+        k = c.put()
+        self.courses.append(k)
+        self.put()
         return self
 
     def remove_course(self, course_key, completed=True):
-        if completed:
-            field = 'courses_completed'
-        else:
-            field = 'courses_inprogress'
+        c = ndb.get_multi(self.courses)
 
-        if hasattr(self, field):
-            f = getattr(self, field)
-            f.remove(course_key)
-            setattr(self, field, f)
-            self.put()
+        rem_list = [course for course in c if course.course == course_key and course.completed == completed]
 
+        for course in rem_list:
+            self.courses.remove(course.key)
+        self.put()
         return self
 
-    def reassign_courses(self, newcourses, completed=True):
+    def delete_all_courses(self):
+        if self.courses:
+            ndb.delete_multi(self.courses)
+            del self.courses[:]
+            self.put()
+        return self
+
+    def delete_courses(self, completed=True):
+        courses = self.get_courses(completed)
+        worklist = map(lambda c: c.key, filter(lambda x: x.completed == completed, courses))
+        complist = map(lambda c: c.key, filter(lambda x: x.completed != completed, courses))
+        ndb.delete_multi(worklist)
+        self.courses = complist
+        self.put()
+        return self
+
+    def reassign_courses(self, newcourses):
         """Assigns a new list of the existing list of courses
         """
         if not isinstance(newcourses, list):
             raise TypeError('newcourses needs to be a list')
 
-        if completed:
-            field = 'courses_completed'
-        else:
-            field = 'courses_inprogress'
-
-        if hasattr(self, field):
-            setattr(self, field, newcourses)
-            self.put()
-
+        self.delete_all_courses()
+        self.add_courses([c.key for c in newcourses])
+        self.put()
         return self
-
 
 
 
