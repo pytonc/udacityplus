@@ -124,6 +124,17 @@ class TestUser(unittest.TestCase):
 
         self.assertEqual(len(completed), 2, "Wrong number of total course enrollments %s should be 2" % len(completed))
 
+    def testUserInClass(self):
+        uinCS101 = CourseAttempt.query(
+            CourseAttempt.course == ndb.Key(Course, 'udacitycs101'),
+        ).fetch(20)
+
+        self.assertIsNotNone(uinCS101, "Zero students in class, should be non-zero")
+        self.assertEqual(uinCS101[0].key.parent().get().username_norm,
+            self.u1.username_norm, "Wrong user %s, should be %s" %
+                                   (uinCS101[0].key.parent().get().username_norm, self.u1.username_norm)
+        )
+
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUser)
     return suite
