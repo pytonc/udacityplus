@@ -36,13 +36,20 @@ class TestUser(unittest.TestCase):
         s.put()
 
     def createNewAttempts(self):
-        courses = Course.query().fetch(20)
+        courses = Course.query()
+        attempts = []
         for course in courses:
-            self.u1.add_course(course.key)
-        o = self.u1.courses[-1].get()
+            k = self.u1.add_course(course.key)
+            attempts.append(k)
+
+        courses = self.u1.get_all_courses()
+        try:
+            o = [c for c in courses if c.course == ndb.Key(Course, 'udacitycs215')][0]
+        except IndexError:
+            raise ValueError("Test data is wrong")
         o.completed = False
         o.put()
-        return self.u1.courses
+        return attempts
 
     def createNewCourses(self):
         for course in courses:
@@ -92,24 +99,6 @@ class TestUser(unittest.TestCase):
         self.assertEqual(len(completed), 2,
             "Incorrect completed course number after deleted course %s deletion" % delname)
 
-    def testTypeError(self):
-        with self.assertRaises(TypeError) as e:
-            self.u1.reassign_courses('asdf')
-
-    def testReassignCourses(self):
-        nc = CourseAttempt(
-            course=Course.get_by_id('udacitycs101').key,
-            completed=True)
-        nc.put()
-        newcourses = [nc]
-
-        self.u1.reassign_courses(newcourses)
-        c = self.u1.get_courses()
-        i = self.u1.get_courses(completed=False)
-
-        self.assertEqual(len(c), 1, "Badly reassigned course list: %s, should be 1" % len(c))
-        self.assertEqual(len(i), 0, "Badly reassigned incomplete course number: %s, should be 0" % len(i))
-
     def testUsersInCourse(self):
         inCS101c = CourseAttempt.query(
             CourseAttempt.course == ndb.Key(Course, 'udacitycs101'),
@@ -129,15 +118,15 @@ class TestUser(unittest.TestCase):
 
         self.assertEqual(len(completed), 2, "Wrong number of total course enrollments %s should be 2" % len(completed))
 
-    def testUserInClass(self):
+    def testStudentsInClass(self):
         uinCS101 = CourseAttempt.query(
             CourseAttempt.course == ndb.Key(Course, 'udacitycs101'),
-        ).fetch(20)
+        ).get()
 
         self.assertIsNotNone(uinCS101, "Zero students in class, should be non-zero")
-        self.assertEqual(uinCS101[0].key.parent().get().username_norm,
-            self.u1.username_norm, "Wrong user %s, should be %s" %
-                                   (uinCS101[0].key.parent().get().username_norm, self.u1.username_norm)
+        self.assertEqual(uinCS101.student,
+            self.u1.key, "Wrong user %s, should be %s" %
+                                   (uinCS101.student, self.u1.key)
         )
 
 def suite():
