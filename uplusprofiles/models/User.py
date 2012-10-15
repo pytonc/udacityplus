@@ -22,7 +22,7 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
-
+from appengine.ext.ndb import QueryOptions
 
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
@@ -58,7 +58,6 @@ class User(ndb.Model):
     dob             = ndb.DateProperty()
     profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Details.Location)
-    courses         = ndb.KeyProperty(Details.CourseAttempt, repeated=True)
 
     # TODO: upload to a static directory?
     avatar          = ndb.BlobProperty()
@@ -156,20 +155,35 @@ class User(ndb.Model):
         Args:
          key: list of key_name/id of the added course
          completed: True by default, adds to courses_completed, False adds to courses_inprogress
-        """
-        for k in keys:
-            if k not in self.courses:
-                self.courses.append(k)
 
-        self.put()
-        return self
+        Returns:
+         list of CourseAttempt keys
+        """
+        attempts = []
+        for k in keys:
+            ca = Details.CourseAttempt(
+                course = k,
+                student = self.key
+            )
+            k = ca.put()
+            attempts.append(k)
+
+        return attempts
 
     def get_all_courses(self):
-        return ndb.get_multi(self.courses)
+        keys = Details.CourseAttempt.query(
+            Details.CourseAttempt.student == self.key,
+            default_options=QueryOptions(keys_only=True))
+
+        return ndb.get_multi(keys)
 
     def get_courses(self, completed=True):
-        c = ndb.get_multi(self.courses)
-        return [course for course in c if course.completed == completed]
+        keys = Details.CourseAttempt.query(
+            Details.CourseAttempt.student == self.key,
+            Details.CourseAttempt.completed == completed,
+            default_options=QueryOptions(keys_only=True))
+
+        return ndb.get_multi(keys)
 
 
     def add_course(self, course_key, completed=True):
@@ -177,55 +191,36 @@ class User(ndb.Model):
             raise ValueError("course_key must be a Key of a Course instance")
 
         # don't append if in list
-        courses = ndb.get_multi(self.courses)
+        courses = self.get_all_courses()
         if any([c.course == course_key and c.completed == completed for c in courses]):
             return None
 
         c = Details.CourseAttempt(
             course=course_key,
             completed=completed,
-            parent=self.key
+            student=self.key
         )
         k = c.put()
-        self.courses.append(k)
-        self.put()
-        return self
+        return k
 
     def remove_course(self, course_key, completed=True):
-        c = ndb.get_multi(self.courses)
+        courses = self.get_courses(completed)
 
-        rem_list = [course for course in c if course.course == course_key and course.completed == completed]
+        rem_list = [course for course in courses if course.course == course_key and course.completed == completed]
 
-        for course in rem_list:
-            self.courses.remove(course.key)
-        self.put()
+        ndb.delete_multi(rem_list)
         return self
 
     def delete_all_courses(self):
-        if self.courses:
-            ndb.delete_multi(self.courses)
-            del self.courses[:]
-            self.put()
+        courses = self.get_all_courses()
+        ndb.delete_multi([c.key for c in courses])
+
         return self
 
     def delete_courses(self, completed=True):
         courses = self.get_courses(completed)
-        worklist = map(lambda c: c.key, filter(lambda x: x.completed == completed, courses))
-        complist = map(lambda c: c.key, filter(lambda x: x.completed != completed, courses))
-        ndb.delete_multi(worklist)
-        self.courses = complist
-        self.put()
-        return self
+        ndb.delete_multi([c.key for c in courses])
 
-    def reassign_courses(self, newcourses):
-        """Assigns a new list of the existing list of courses
-        """
-        if not isinstance(newcourses, list):
-            raise TypeError('newcourses needs to be a list')
-
-        self.delete_all_courses()
-        self.add_courses([c.key for c in newcourses])
-        self.put()
         return self
 
 
