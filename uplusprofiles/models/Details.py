@@ -25,6 +25,7 @@ class Tool(ndb.Model):
 
 class CourseAttempt(ndb.Model):
     course          = ndb.KeyProperty(Course)
+    student         = ndb.KeyProperty('User')
     completed       = ndb.BooleanProperty(default=False)
     start_date      = ndb.DateTimeProperty()
     endDate         = ndb.DateTimeProperty()
