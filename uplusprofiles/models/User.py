@@ -22,7 +22,7 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
-from appengine.ext.ndb import QueryOptions
+from google.appengine.ext.ndb import QueryOptions
 
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
@@ -59,6 +59,7 @@ class User(ndb.Model):
     profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Details.Location)
 
+    projects        = ndb.JsonProperty()
     # TODO: upload to a static directory?
     avatar          = ndb.BlobProperty()
     avatar_url      = ndb.StringProperty(default="/img/defaultavatar.png")

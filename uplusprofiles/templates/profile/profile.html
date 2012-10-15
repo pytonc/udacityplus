@@ -46,49 +46,46 @@
             <div class="tab-content">
 
                 <div class="tab-pane" id="aboutyou">
+
                     <h4>User</h4>
                     <p>Hi, I like programming and learning new things on Udacity.</p>
                 </div>
 
                 <div class="tab-pane active" id="projects">
+                    {% if user.username_norm == username %}
+                        <a href="/{{ user.username_norm }}?mode=add_project" class="btn" type="button">
+                            <i class="icon-plus"></i> Add
+                        </a>
+                    {% endif %}
+                    {% if projects %}
+                        <h4>Here is a selection of projects that I'm working on.</h4>
+                        <br>
 
-                    <h4>Here is a selection of projects that I'm working on.</h4>
-                    <br>
+                        <div class="bs-docs-example">
 
-                    <div class="bs-docs-example">
-                        <div id="myCarousel" class="carousel slide">
-                            <div class="carousel-inner">
-
-                                <div class="item active">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>General Artificial Intelligence</h4>
-                                        <p>I am making a general artificial intelligence.</p>
-                                    </div>
+                            <div id="myCarousel" class="carousel slide">
+                                <div class="carousel-inner">
+                                    {% set active = "active" %}
+                                    {% for project in projects %}
+                                        <div class="item {{active}}">
+                                            {% set active = "" %}
+                                            <img src="{{ project.screenshot }}" alt="">
+                                            <div class="carousel-caption">
+                                                <h4>{{ project.title }}</h4>
+                                                <p>{{ project.description }}</p>
+                                                <p><a href="{{ project.url }}" target="_blank">link</a></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
 
-                                <div class="item">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>Quantum Crytopgraphy</h4>
-                                        <p>A description.</p>
-                                    </div>
-                                </div>
-
-                                <div class="item">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>Robotics</h4>
-                                        <p>Another description.</p>
-                                    </div>
-                                </div>
-
+                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+                                <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
                             </div>
-
-                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-                            <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
                         </div>
-                    </div>
+                    {% else %}
+                        <h4> No projects added </h4>
+                    {% endif %}
                 </div>
 
                 <div class="tab-pane" id="courses">
@@ -100,7 +97,7 @@
 
                     <hr>
 
-                    <h4>Cources I've Completed...</h4>
+                    <h4>Courses I've Completed...</h4>
                     <ul>
                         <li><a href="#">Artificial Intelligence: Programming a Robotic Car</a></li>
                         <li><a href="#">Applied Cryptography: Science of Secrets</a></li>
