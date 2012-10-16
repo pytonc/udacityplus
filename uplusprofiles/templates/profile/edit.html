@@ -12,37 +12,38 @@
         <div id="legend" class="">
             <legend class="">Edit user details</legend>
         </div>
-        <div class="control-group">
 
+        <div class="control-group">
             <!-- Text input-->
             <label class="control-label" for="realName">Real Name</label>
             <div class="controls">
                 <input type="text" id="realName" placeholder="Real Name"
-                       class="input-xlarge span8" value="{{ user.real_name }}">
+                       class="input-xlarge span8" value="{% if user.real_name %}{{ user.real_name }}{% endif %}">
                 <p class="help-block"></p>
             </div>
-        </div><div class="control-group">
-
-        <!-- Email-->
-        <label class="control-label" for="email">Email</label>
-        <div class="controls">
-            <input type="text" id="email" placeholder="Email"
-                   class="input-xlarge span8" value="{{ user.email }}">
-            <p class="help-block"></p>
         </div>
-    </div>
 
         <div class="control-group">
-
-            <!-- About -->
-        <div class="control-group">
-            <label class="control-label" for="wmd-input">About</label>
+            <!-- Email-->
+            <label class="control-label" for="email">Email</label>
             <div class="controls">
-                <div class="wmd-panel">
-                    <div id="wmd-button-bar-about"></div>
-                    <textarea class="wmd-input span12" id="wmd-input-about">{{ user.about }}</textarea>
+                <input type="text" id="email" placeholder="Email"
+                       class="input-xlarge span8" value="{{ user.email }}">
+                <p class="help-block"></p>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <!-- About -->
+            <div class="control-group">
+                <label class="control-label" for="wmd-input">About</label>
+                <div class="controls">
+                    <div class="wmd-panel">
+                        <div id="wmd-button-bar-about"></div>
+                        <textarea class="wmd-input span12" id="wmd-input-about">{{ user.about }}</textarea>
+                    </div>
+                    <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
                 </div>
-                <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
             </div>
         </div>
 
@@ -50,7 +51,7 @@
             <!-- Age -->
             <label class="control-label" for="dobinp">Date of Birth</label>
             <div class="controls date" data-date="{{ dob }}" data-date-format="dd-mm-yyyy">
-                <input id="dobinp"  type="text" value="{{ user.dob }}"  class="input-xlarge span8">
+                <input id="dobinp"  type="text" value="{% if user.dob %}{{ user.dob }}{% endif %}"  class="input-xlarge span8">
                 <span class="add-on"><i class="icon-th"></i></span>
                 <p class="help-block"></p>
             </div>
@@ -127,7 +128,7 @@
             <div class="controls">
                 <!-- Options -->
                 <label class="checkbox">
-                    <input type="checkbox" value="Send email on new message">
+                    <input type="checkbox" value="Send email on new message" checked="{{ user.notify_on_msg }}">
                     Send email on new message
                 </label>
             </div>
