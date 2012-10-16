@@ -3,6 +3,8 @@
     {{ super() }}
     <link href="stylesheets/multi-select.css" media="screen" rel="stylesheet" type="text/css">
     <link href="stylesheets/datepicker.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="stylesheets/chosen.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="stylesheets/pagedown.css" media="screen" rel="stylesheet" type="text/css">
 {% endblock stylesheets %}
 {% block usercontent %}
 <form class="form-horizontal span7 well" action="/{{ user.username }}">
@@ -15,7 +17,8 @@
             <!-- Text input-->
             <label class="control-label" for="realName">Real Name</label>
             <div class="controls">
-                <input type="text" id="realName" placeholder="Real Name" class="input-xlarge">
+                <input type="text" id="realName" placeholder="Real Name"
+                       class="input-xlarge span8" value="{{ user.real_name }}">
                 <p class="help-block"></p>
             </div>
         </div><div class="control-group">
@@ -23,7 +26,8 @@
         <!-- Email-->
         <label class="control-label" for="email">Email</label>
         <div class="controls">
-            <input type="text" id="email" placeholder="Email" class="input-xlarge">
+            <input type="text" id="email" placeholder="Email"
+                   class="input-xlarge span8" value="{{ user.email }}">
             <p class="help-block"></p>
         </div>
     </div>
@@ -31,11 +35,14 @@
         <div class="control-group">
 
             <!-- About -->
-            <label class="control-label">About</label>
+        <div class="control-group">
+            <label class="control-label" for="wmd-input">About</label>
             <div class="controls">
-                <div class="textarea">
-                    <textarea type="" class=""> </textarea>
+                <div class="wmd-panel">
+                    <div id="wmd-button-bar-about"></div>
+                    <textarea class="wmd-input span12" id="wmd-input-about">{{ user.about }}</textarea>
                 </div>
+                <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
             </div>
         </div>
 
@@ -43,24 +50,26 @@
             <!-- Age -->
             <label class="control-label" for="dobinp">Date of Birth</label>
             <div class="controls date" data-date="{{ dob }}" data-date-format="dd-mm-yyyy">
-                <input id="dobinp"  type="text" value=""  class="input-xlarge">
+                <input id="dobinp"  type="text" value="{{ user.dob }}"  class="input-xlarge span8">
                 <span class="add-on"><i class="icon-th"></i></span>
                 <p class="help-block"></p>
             </div>
         </div>
 
+        <!-- courses -->
         <div class="control-group">
             <label class="control-label" for="classes_inprog">Courses in progress</label>
             <div class="controls">
-                <select id='classes_inprog' multiple='multiple'>
-                    <optgroup label='Friends'>
-                        <option value='1'>Yoda</option>
-                        <option value='2'>Obiwan</option>
-                    </optgroup>
-                    <optgroup label='Enemies'>
-                        <option value='3'>Palpatine</option>
-                        <option value='4'>Darth Vader</option>
-                    </optgroup>
+                <select name="classes_inprog" class="span8" id="classes_inprog" multiple>
+                    {% for level, courses in courses_all.iteritems() %}
+                    {% if courses %}
+                        <optgroup label="{{ level }}">
+                            {% for course in courses %}
+                                <option value="{{ course.key.id() }}">{{ course.name }} {{ course.dept }} {{ course.number }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endif %}
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -68,24 +77,37 @@
         <div class="control-group">
             <label class="control-label" for="classes_completed">Courses completed</label>
             <div class="controls">
-                <select id='classes_completed' multiple='multiple'>
-                    <optgroup label='Friends'>
-                        <option value='1'>Yoda</option>
-                        <option value='2'>Obiwan</option>
-                    </optgroup>
-                    <optgroup label='Enemies'>
-                        <option value='3'>Palpatine</option>
-                        <option value='4'>Darth Vader</option>
-                    </optgroup>
+                <select name="classes_completed" class="span8" id="classes_completed" multiple>
+                    {% for level, courses in courses_all.iteritems() %}
+                        {% if courses %}
+                        <optgroup label="{{ level }}">
+                            {% for course in courses %}
+                                <option value="{{ course.key.id() }}">{{ course.name }} {{ course.dept }} {{ course.number }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endif %}
+                    {% endfor %}
                 </select>
             </div>
         </div>
 
+        <!-- tools -->
         <div class="control-group">
-            <!-- Password-->
+            <label class="control-label" for="wmd-input">Tools</label>
+            <div class="controls">
+                <div class="wmd-panel">
+                    <div id="wmd-button-bar"></div>
+                    <textarea class="wmd-input span12" id="wmd-input">{{ user.tools }}</textarea>
+                </div>
+                <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+            </div>
+        </div>
+
+        <!-- Password-->
+        <div class="control-group">
             <label class="control-label" for="password">Password</label>
             <div class="controls">
-                <input id="password" type="password" placeholder="Password" class="input-xlarge">
+                <input id="password" type="password" placeholder="Password" class="input-xlarge span8">
                 <p class="help-block">Minimum 8 characters</p>
             </div>
         </div>
@@ -95,7 +117,7 @@
             <!-- confirm password-->
             <label class="control-label" for="password_confirm">Confirm Password</label>
             <div class="controls">
-                <input type="password" placeholder="" id="password_confirm" class="input-xlarge">
+                <input type="password" placeholder="" id="password_confirm" class="input-xlarge span8">
                 <p class="help-block"></p>
             </div>
         </div>
@@ -103,7 +125,7 @@
         <div class="control-group">
             <label class="control-label">Options</label>
             <div class="controls">
-                <!-- Multiple Checkboxes -->
+                <!-- Options -->
                 <label class="checkbox">
                     <input type="checkbox" value="Send email on new message">
                     Send email on new message
@@ -125,11 +147,24 @@
 {% endblock usercontent%}
 {% block js %}
     {{ super() }}
-    <script src="/js/jquery.multi-select.js" type="text/javascript"></script>
     <script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        $('#dob').datepicker()
-        $('#classes_completed').multiSelect();
-        $('#classes_inprog').multiSelect();
+        $('#dobinp').datepicker()
+        $('#classes_inprog').chosen({no_results_text: "No results matched"})
+        $('#classes_completed').chosen({no_results_text: "No results matched"})
+    </script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Converter.js"></script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Editor.js"></script>
+    <script type="text/javascript">
+        (function () {
+            var converter1 = Markdown.getSanitizingConverter();
+            var editor1 = new Markdown.Editor(converter1);
+            editor1.run();
+
+            var editor2 = new Markdown.Editor(converter1, '-about')
+            editor2.run();
+        })();
     </script>
 {% endblock %}
