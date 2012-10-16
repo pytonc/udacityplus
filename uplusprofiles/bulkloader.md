@@ -10,4 +10,4 @@ appcfg.py --config_file=bulkloader.yaml upload_data --filename=data/<file>.csv -
 
 Uploading to app engine
 -----------------------
-appcfg.py --config_file=bulkloader.yaml upload_data --filename=data/<file>.csv --kind=<kind: Course|Source> --url=http://localhost:8080/_ah/remote_api <path_to_app>
+appcfg.py --config_file=bulkloader.yaml upload_data --filename=data/<file>.csv --kind=<kind: Course|Source> --url=http://<app_id>.appspot.com/_ah/remote_api <path_to_app>
