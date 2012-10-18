@@ -140,9 +140,9 @@ class User(ndb.Model):
     @classmethod
     def valid(cls, username, email, password):
         #TODO: check confirmation password, implemented in valid_passwords
-        u = cls.valid_username(username)
-        p = cls.valid_password(password)
-        e = cls.valid_email(email)
+        _, u = cls.valid_username(username)
+        _, p = cls.valid_password(password)
+        _, e = cls.valid_email(email)
         errors = User.adduep(u, e, p)
         if not errors:
             return True, {}
