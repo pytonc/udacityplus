@@ -3,7 +3,7 @@ from controllers.profile import ProfilePage
 import logging
 import os
 
-DEBUG = bool(os.environ['SERVER_SOFTWARE'].startswith('Development'))
+DEBUG = bool(os.environ['SERVER_SOFTWARE'].startswith('Dev'))
 if DEBUG:
     logging.getLogger().setLevel(logging.DEBUG)
 
