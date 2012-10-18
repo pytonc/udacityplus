@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block profileavatar %}
-<h2>User</h2>
+<h2 xmlns="http://www.w3.org/1999/html">User</h2>
 
 <img src="{{ gravatar }}" height="100%" width="100%" class="img-polaroid">
 
@@ -45,10 +45,7 @@
 
             <div class="tab-content">
 
-                <div class="tab-pane" id="aboutyou">
-                    <h4>User</h4>
-                    <p>Hi, I like programming and learning new things on Udacity.</p>
-                </div>
+                <div class="tab-pane" id="aboutyou">{{ user.short_about }}</div>
 
                 <div class="tab-pane active" id="projects">
 
@@ -95,42 +92,23 @@
 
                     <h4>Courses I'm Working On...</h4>
                     <ul>
-                        <li><a href="#">Differential Equations in Action: Making Math Matter</a></li>
+                        {% for course in courses_incomplete %}
+                        <li><a href="#">{{ course.name }}</a></li>
+                        {% endfor %}
                     </ul>
 
                     <hr>
 
                     <h4>Cources I've Completed...</h4>
                     <ul>
-                        <li><a href="#">Artificial Intelligence: Programming a Robotic Car</a></li>
-                        <li><a href="#">Applied Cryptography: Science of Secrets</a></li>
-                        <li><a href="#">Web Development: How to Build a Blog</a></li>
-                        <li><a href="#">Design of Computer Programs: Programming Principles</a></li>
+                        {% for course in courses_completed %}
+                            <li><a href="#">{{ course.name }}</a></li>
+                        {% endfor %}
                     </ul>
 
                 </div>
 
-                <div class="tab-pane" id="tools">
-
-                    <h4>Languages</h4>
-                    <table cellpadding="5" rules="cols">
-                        <tr><th>Name</th><th>Approximate Skill Level</th></tr>
-                        <tr><td>Python</td><td>Awesome</td></tr>
-                        <tr><td>Whitespace</td><td>Awesome</td></tr>
-                        <tr><td>Perl 6</td><td>Questionable</td></tr>
-                    </table>
-
-                    <hr>
-
-                    <h4>Software/Libraries</h4>
-                    <table cellpadding="5" rules="cols">
-                        <tr><th>Name</th><th>Approximate Skill Level</th></tr>
-                        <tr><td>Google App Engine</td><td>Awesome</td></tr>
-                        <tr><td>OpenGL</td><td>Awesome</td></tr>
-                        <tr><td>Jquery</td><td>Beginner</td></tr>
-                    </table>
-
-                </div>
+                <div class="tab-pane" id="tools">{{ user.tools }}</div>
 
             </div>
         </div> <!-- /tabbable -->
@@ -138,3 +116,17 @@
 
 </div>
 {% endblock usercontent %}
+{% block js %}
+    {{ super() }}
+
+    <script type="text/javascript" src="/js/pagedown/Markdown.Converter.js"></script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript">
+        var converter = Markdown.getSanitizingConverter();
+
+        var about = converter.makeHtml($('#aboutyou').text());
+        var tools = converter.makeHtml($('#tools').text());
+        $('#aboutyou').html(about);
+        $('#tools').html(tools);
+    </script>
+{% endblock %}
