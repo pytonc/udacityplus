@@ -39,7 +39,7 @@
             <a class="brand" href="#">Udacity+</a>
             <div class="nav-collapse collapse">
                 {% if not is_authenticated() %}
-                    <a class="btn btn-primary pull-right space4" href="/signup">Sign up</a>
+                    <a class="btn btn-primary pull-right space4" href="#">Sign up</a>
                     <form class="navbar-form pull-right" action="login" method="post">
                         <input class="span2" type="text" name="username" placeholder="Email">
                         <input class="span2" type="password" name="password" placeholder="Password">
@@ -47,7 +47,7 @@
                     </form>
                 {% else %}
                     <p class="navbar-text pull-right">
-                        <a href="/logout" class="navbar-link">Log out {{ username }}</a>
+                        <a href="#" class="navbar-link">Log out {{ username }}</a>
                     </p>
                 {% endif %}
             </div><!--/.nav-collapse -->
@@ -70,7 +70,7 @@
                         <ul class="nav nav-list">
 
                             <li class="active"><a href="/{{ username }}"><i class="icon-home"></i>Profile</a></li>
-                            <li><a href="/messages?show=all"><i class="icon-envelope"></i>Messages</a></li>
+                            <li><a href="#"><i class="icon-envelope"></i>Messages</a></li>
                             <li><a href="#"><i class="icon-calendar"></i>Meetups</a></li>
                             <li><a href="#"><i class="icon-wrench"></i>Settings</a></li>
 
