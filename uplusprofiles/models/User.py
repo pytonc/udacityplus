@@ -22,7 +22,7 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
-from appengine.ext.ndb import QueryOptions
+from google.appengine.ext.ndb import QueryOptions
 
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
