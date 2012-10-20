@@ -176,10 +176,12 @@ class User(ndb.Model):
         compd = {'iclasses': False, 'cclasses': True}[completed]
 
         remove = current - keep
-        self.remove_courses(remove, compd)
+        if remove:
+            self.remove_courses(remove, compd)
 
         new = pset - keep
-        self.add_courses(new, compd)
+        if new:
+            self.add_courses(new, compd)
 
     def update(self, **kwargs):
         """Update user fields
@@ -319,7 +321,8 @@ class User(ndb.Model):
     def remove_course(self, course_key, completed=True):
         ca = self.get_courses(completed)
 
-        rem_list = [attempt for attempt in ca if attempt.course == course_key and attempt.completed == completed]
+        rem_list = [attempt for attempt in ca if
+                    attempt and attempt.course == course_key and attempt.completed == completed]
 
         ndb.delete_multi(rem_list)
         return self
@@ -330,7 +333,8 @@ class User(ndb.Model):
         Args: keys - list of ndb.Key('Course', ...)
         """
         current = self.get_all_courses()
-        remove = [attempt.key for attempt in current if attempt.course in keys and attempt.completed == completed]
+        remove = [attempt.key for attempt in current if
+                  attempt and attempt.course in keys and attempt.completed == completed]
         ndb.delete_multi(remove)
 
         return self
