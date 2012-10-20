@@ -16,6 +16,8 @@ class ProfilePage(BaseHandler):
 
         if mode == 'add_project':
             template = 'profile/add_project.html'
+        elif mode == 'edit_project':
+            template = 'profile/edit_project.html'
         else:
             template = 'profile/profile.html'
 
@@ -36,7 +38,9 @@ class ProfilePage(BaseHandler):
         projects = []
         if project_ids:
             for project_id in project_ids:
-                projects.append(Project.get_by_id(project_id))
+                p = Project.get_by_id(project_id)
+                if p:
+                    projects.append(p)
 
         if user:
             context = {'user': user, 'dob': dob,
@@ -69,6 +73,26 @@ class ProfilePage(BaseHandler):
                 projects.append(project_id)
             else:
                 projects = [project_id]
+            user.projects = projects
+            user.put()
+        elif mode == 'edit_project':
+            project_id = self.request.get('projects_dropdown')
+            title = self.request.get('title')
+            screenshot = self.request.get('screenshot')
+            url = self.request.get('url')
+            description = self.request.get('description')
+            # TODO: validation
+            
+            Project.update_project(project_id, title=title, screenshot=screenshot, 
+                                url=url, description=description)
+        elif mode == 'remove_project':
+            project_id = self.request.get('project_id')
+            # TODO: validation
+
+            Project.remove_project(project_id)
+            user = User.get_user(username)
+            projects = user.projects
+            projects.remove(project_id)
             user.projects = projects
             user.put()
         else:
