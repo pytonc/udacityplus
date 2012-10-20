@@ -41,7 +41,7 @@ class Course(ndb.Model):
     @classmethod
     def courses_to_dict(cls):
         courses = memcache.get('courses_by_level_cid', namespace='udacityplus')
-        if courses is not None:
+        if courses:
             return courses
         else:
             crquery = Course.query().order(Course.cid)
