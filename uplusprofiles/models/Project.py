@@ -1,6 +1,6 @@
 #from google.appengine.ext.ndb import Key
 from google.appengine.ext import  ndb
-import logging
+
 
 class Project(ndb.Model):
     title = ndb.StringProperty()

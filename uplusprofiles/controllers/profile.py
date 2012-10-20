@@ -67,6 +67,9 @@ class ProfilePage(BaseHandler):
 
             project_id = Project.add_project(title=title, screenshot=screenshot, 
                                 url=url, description=description)
+            
+            # add project to User's model
+            # move this to User.py?
             user = User.get_user(username)
             projects = user.projects
             if projects:
@@ -89,10 +92,12 @@ class ProfilePage(BaseHandler):
             project_id = self.request.get('project_id')
             # TODO: validation
 
+            # Remove project from User's model
+            # move this to User.py?
             Project.remove_project(project_id)
             user = User.get_user(username)
             projects = user.projects
-            projects.remove(project_id)
+            projects.remove(int(project_id))
             user.projects = projects
             user.put()
         else:
