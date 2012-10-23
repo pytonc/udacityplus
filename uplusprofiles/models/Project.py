@@ -27,3 +27,13 @@ class Project(ndb.Model):
     def remove_project(cls, project_id):
         p = Project.get_by_id(int(project_id))
         p.key.delete()
+
+    @classmethod
+    def get_projects_by_ids(cls, project_ids):
+        projects = []
+        if project_ids:
+            for project_id in project_ids:
+                p = Project.get_by_id(project_id)
+                if p:
+                    projects.append(p)
+        return projects

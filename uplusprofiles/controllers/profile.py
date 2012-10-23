@@ -8,6 +8,7 @@ import logging
 
 
 class ProfilePage(BaseHandler):
+
     #@Authentication.do
     def get(self, username):
         """display profile of user with username, if None, display logged in user
@@ -34,13 +35,7 @@ class ProfilePage(BaseHandler):
 
         courses = Course.query()
 
-        project_ids = user.projects
-        projects = []
-        if project_ids:
-            for project_id in project_ids:
-                p = Project.get_by_id(project_id)
-                if p:
-                    projects.append(p)
+        projects = Project.get_projects_by_ids(user.projects)
 
         if user:
             context = {'user': user, 'dob': dob,
@@ -59,47 +54,55 @@ class ProfilePage(BaseHandler):
     def post(self, username):
         mode = self.request.get('mode')
         if mode == 'add_project':
-            title = self.request.get('title')
-            screenshot = self.request.get('screenshot')
-            url = self.request.get('url')
-            description = self.request.get('description')
-            # TODO: validation
-
-            project_id = Project.add_project(title=title, screenshot=screenshot, 
-                                url=url, description=description)
+            title = self.request.get('title').strip()
+            screenshot = self.request.get('screenshot').strip()
+            url = self.request.get('url').strip()
+            description = self.request.get('description').strip()
             
-            # add project to User's model
-            # move this to User.py?
-            user = User.get_user(username)
-            projects = user.projects
-            if projects:
-                projects.append(project_id)
+            if title and screenshot and url and description:
+                project_id = Project.add_project(title=title, screenshot=screenshot, 
+                                url=url, description=description)
+
+                User.add_project(username, project_id)
             else:
-                projects = [project_id]
-            user.projects = projects
-            user.put()
+                user = User.get_user(username)
+                template = 'profile/add_project.html'
+                context = { 'user': user,
+                            'username': username,
+                            'title': title,
+                            'screenshot': screenshot,
+                            'url': url,
+                            'description': description,
+                            'errormsg': 'All fields are manadatory'}
+                self.render(template, context)
+                return
         elif mode == 'edit_project':
             project_id = self.request.get('projects_dropdown')
-            title = self.request.get('title')
-            screenshot = self.request.get('screenshot')
-            url = self.request.get('url')
-            description = self.request.get('description')
-            # TODO: validation
-            
-            Project.update_project(project_id, title=title, screenshot=screenshot, 
+            title = self.request.get('title').strip()
+            screenshot = self.request.get('screenshot').strip()
+            url = self.request.get('url').strip()
+            description = self.request.get('description').strip()
+            if title and screenshot and url and description:
+                Project.update_project(project_id, title=title, screenshot=screenshot, 
                                 url=url, description=description)
+            else:
+                user = User.get_user(username)
+                projects = Project.get_projects_by_ids(user.projects)
+                template = 'profile/edit_project.html'
+                context = { 'user': user,
+                            'username': username,
+                            'title': title,
+                            'screenshot': screenshot,
+                            'url': url,
+                            'description': description,
+                            'projects': projects,
+                            'errormsg': 'All fields are manadatory'}
+                self.render(template, context)
+                return
         elif mode == 'remove_project':
             project_id = self.request.get('project_id')
-            # TODO: validation
-
-            # Remove project from User's model
-            # move this to User.py?
             Project.remove_project(project_id)
-            user = User.get_user(username)
-            projects = user.projects
-            projects.remove(int(project_id))
-            user.projects = projects
-            user.put()
+            User.remove_project(username, project_id)
         else:
             pass
         self.redirect('/'+username)

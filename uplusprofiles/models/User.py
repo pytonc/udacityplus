@@ -136,6 +136,27 @@ class User(ndb.Model):
 
             fs.put()
 
+    @classmethod
+    def add_project(cls, username, project_id):
+        user = cls.get_user(username)
+        if user:
+            projects = user.projects
+            if projects:
+                projects.append(project_id)
+            else:
+                projects = [project_id]
+            user.projects = projects
+            user.put()
+
+    @classmethod
+    def remove_project(cls, username, project_id):
+        user = cls.get_user(username)
+        if user:
+            projects = user.projects
+            projects.remove(int(project_id))
+            user.projects = projects
+            user.put()
+
     def get_friends(self, limit=10, offset=0):
         """Gets friends for current User object
 

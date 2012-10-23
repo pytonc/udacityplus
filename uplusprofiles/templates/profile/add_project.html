@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block stylesheets %}
     {{ super() }}
-    <link href="stylesheets/multi-select.css" media="screen" rel="stylesheet" type="text/css">
-    <link href="stylesheets/datepicker.css" media="screen" rel="stylesheet" type="text/css">
 {% endblock stylesheets %}
 {% block usercontent %}
 <form class="form-horizontal span7 well" method="POST" action="/{{ user.username }}">
@@ -14,7 +12,8 @@
         <div class="control-group">
             <label class="control-label" for="title">Project Title</label>
             <div class="controls">
-                <input type="text" id="title" name="title" placeholder="" class="input-xlarge">
+                <input type="text" id="title" name="title" placeholder="" class="input-xlarge"
+                value="{{ title }}">
                 <p class="help-block"></p>
             </div>
         </div>
@@ -30,7 +29,8 @@
         <div class="control-group">
             <label class="control-label" for="screenshot">Screenshot Url</label>
             <div class="controls">
-                <input type="text" id="screenshot" name="screenshot" placeholder="" class="input-xlarge">
+                <input type="text" id="screenshot" name="screenshot" placeholder="" 
+                class="input-xlarge" value="{{ screenshot }}">
                 <p class="help-block"></p>
             </div>
         </div>
@@ -38,7 +38,7 @@
         <div class="control-group">
             <label class="control-label" for="url">Visit/Download Url</label>
             <div class="controls">
-                <input type="text" id="url" name="url" placeholder="" class="input-xlarge">
+                <input type="text" id="url" name="url" placeholder="" class="input-xlarge" value="{{ url }}">
                 <p class="help-block"></p>
             </div>
         </div>
@@ -47,11 +47,20 @@
             <label class="control-label">Desciption</label>
             <div class="controls">
                 <div class="textarea">
-                    <textarea type="" class="" style="width: 400px; height: 200px;" name="description"> </textarea>
+                    <textarea maxlength="100" style="width: 400px; height: 200px;" 
+                    id="description" name="description">{{ description }}</textarea>
                 </div>
             </div>
         </div>
 
+        {% if errormsg %}
+            <div class="control-group">
+                <div class="alert alert-error controls" style="width: 300px;">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <strong>Error!</strong> {{errormsg}}
+                </div>
+            </div>
+        {% endif%}
 
         <div class="control-group">
             <label class="control-label"></label>
@@ -69,11 +78,27 @@
 {% endblock usercontent%}
 {% block js %}
     {{ super() }}
-    <script src="/js/jquery.multi-select.js" type="text/javascript"></script>
-    <script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        $('#dob').datepicker()
-        $('#classes_completed').multiSelect();
-        $('#classes_inprog').multiSelect();
+    <script language="javascript" type="text/javascript">
+        $(document).ready( function () {
+            setMaxLength();
+            $("#description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
+        });
+
+        function setMaxLength() {
+            $("#description").each(function(i){
+                intMax = $(this).attr("maxlength");
+                $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
+            });
+        }
+
+        function checkMaxLength(strID){
+            intCount = $("#"+strID).val().length;
+            intMax = $("#"+strID).attr("maxlength");
+            strID = "#"+strID+"Counter";
+            $(strID).text(parseInt(intMax) - parseInt(intCount));
+            if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
+            if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
+            if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
+        }
     </script>
 {% endblock %}
