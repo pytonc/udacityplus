@@ -3,7 +3,7 @@
     {{ super() }}
 {% endblock stylesheets %}
 {% block usercontent %}
-<form class="form-horizontal span7 well" method="POST" action="/{{ user.username }}">
+<form class="form-horizontal span7 well" method="POST" action="{{ upload_url }}" enctype="multipart/form-data">
     <fieldset class="bs-docs-example">
         <div id="legend" class="">
             <legend class="">Add Project</legend>
@@ -18,20 +18,11 @@
             </div>
         </div>
 
-        <!--<div class="control-group">
-            <label class="control-label" for="developers">Project Developer(s)</label>
-            <div class="controls">
-                <input type="text" id="developers" name="developers" placeholder="" class="input-xlarge">
-                <p class="help-block"></p>
-            </div>
-        </div>-->
-
         <div class="control-group">
-            <label class="control-label" for="screenshot">Screenshot Url</label>
+            <label class="control-label" for="screenshot">Screenshot</label>
             <div class="controls">
-                <input type="text" id="screenshot" name="screenshot" placeholder="" 
-                class="input-xlarge" value="{{ screenshot }}">
-                <p class="help-block"></p>
+                <input type="file" id="screenshot" name="screenshot">
+                <p class="help-block">(maximum 1MB)</p>
             </div>
         </div>
 
@@ -44,7 +35,7 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label">Desciption</label>
+            <label class="control-label">Short Desciption</label>
             <div class="controls">
                 <div class="textarea">
                     <textarea maxlength="100" style="width: 400px; height: 200px;" 
@@ -63,11 +54,11 @@
         {% endif%}
 
         <div class="control-group">
-            <label class="control-label"></label>
 
             <!-- Button -->
             <div class="controls">
                 <button type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn" onclick="redirect()">Cancel</button>
             </div>
         </div>
         <input type="hidden" name="mode" value="add_project"/>
@@ -99,6 +90,11 @@
             if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
             if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
             if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
+        }
+
+        function redirect()
+        {
+            window.location="/{{ username }}";
         }
     </script>
 {% endblock %}

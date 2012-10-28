@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 {% block stylesheets %}
     {{ super() }}
-    <link href="stylesheets/multi-select.css" media="screen" rel="stylesheet" type="text/css">
-    <link href="stylesheets/chosen.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="/stylesheets/chosen.css" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block usercontent %}
-<form class="form-horizontal span7 well" method="POST" action="/{{ user.username }}">
+<form class="form-horizontal span7 well" method="POST" action="{{ upload_url }}" enctype="multipart/form-data">
     <fieldset class="bs-docs-example">
         <div id="legend" class="">
             <legend class="">Select Project</legend>
@@ -15,7 +14,7 @@
             <div class="control-group">
                 <label class="control-label" for="projects_dropdown">Select Project</label>
                 <div class="controls">
-                    <select class="span5" id="projects_dropdown" name="projects_dropdown" onchange="load_project(this)">
+                    <select class="span5" id="projects_dropdown" name="projects_dropdown" onchange="load_selected_project(this)">
                         {% for project in projects %}
                             <option value="{{ project.key.id() }}">{{ project.title }}</option>
                         {% endfor %}
@@ -38,19 +37,11 @@
                 </div>
             </div>
 
-            <!--<div class="control-group">
-                <label class="control-label" for="developers">Project Developer(s)</label>
-                <div class="controls">
-                    <input type="text" id="developers" name="developers" placeholder="" class="input-xlarge">
-                    <p class="help-block"></p>
-                </div>
-            </div>-->
-
             <div class="control-group">
-                <label class="control-label" for="screenshot">Screenshot Url</label>
+                <label class="control-label" for="screenshot">Screenshot</label>
                 <div class="controls">
-                    <input type="text" id="screenshot" name="screenshot" class="input-xlarge" value="{{ screenshot }}">
-                    <p class="help-block"></p>
+                    <input type="file" id="screenshot" name="screenshot" class="input-xlarge">
+                    <p class="help-block">(maximum 1MB)</p>
                 </div>
             </div>
 
@@ -63,7 +54,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label">Desciption</label>
+                <label class="control-label">Short Desciption</label>
                 <div class="controls">
                     <div class="textarea">
                         <textarea maxlength="100" type="" class="" style="width: 400px; height: 200px;" 
@@ -74,7 +65,7 @@
 
             {% if errormsg %}
                 <div class="control-group">
-                    <div class="alert alert-error controls" style="width: 300px;">
+                    <div class="alert alert-error controls" style="width: 400px;">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         <strong>Error!</strong> {{errormsg}}
                     </div>
@@ -88,6 +79,7 @@
                 <!-- Button -->
                 <div class="controls">
                     <button type="submit" class="btn btn-primary"> Update </button>
+                    <button type="button" class="btn" onclick="redirect()">Cancel</button>
                 </div>
             </div>
             <input type="hidden" name="mode" value="edit_project"/>
@@ -106,57 +98,29 @@
 {% block js %}
     {{ super() }}
     <script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
-
-    <script language="javascript" type="text/javascript">
-        $(document).ready( function () {
-            setMaxLength();
-            $("#description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
-        });
-
-        function setMaxLength() {
-            $("#description").each(function(i){
-                intMax = $(this).attr("maxlength");
-                $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
-            });
-        }
-
-        function checkMaxLength(strID){
-            intCount = $("#"+strID).val().length;
-            intMax = $("#"+strID).attr("maxlength");
-            strID = "#"+strID+"Counter";
-            $(strID).text(parseInt(intMax) - parseInt(intCount));
-            if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
-            if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
-            if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
-        }
-    </script>
     
     <script type="text/javascript" >
-        $('#projects_dropdown').chosen()
         
         var js_title = new Array();
-        var js_screenshot = new Array();
         var js_url = new Array();
         var js_description = new Array();
         var count = 0;
 
         {% for project in projects %}
             js_title[count] =  '{{project.title}}'
-            js_screenshot[count] =  '{{project.screenshot}}'
             js_url[count] =  '{{project.url}}'
             js_description[count] =  '{{project.description}}'
             count++;
         {% endfor %}
 
-        function load_project(self) {
+        function load_selected_project(self) {
             var project_index = self.selectedIndex; 
             document.getElementById('title').value = js_title[project_index];
-            document.getElementById('screenshot').value = js_screenshot[project_index];
             document.getElementById('url').value = js_url[project_index];
             document.getElementById('description').value = js_description[project_index];
         }
 
-        load_project(document.getElementById('projects_dropdown'))
+        load_selected_project(document.getElementById('projects_dropdown'))
 
         function remove_selected_project() { 
             var form = document.createElement('form');
@@ -181,6 +145,35 @@
             document.body.appendChild(form);
             form.submit();
         }
+
+        $('#projects_dropdown').chosen()
+
+        $(document).ready( function () {
+            setMaxLength();
+            $("#description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
+        });
+
+        function setMaxLength() {
+            $("#description").each(function(i){
+                intMax = $(this).attr("maxlength");
+                $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
+            });
+        }
+
+        function checkMaxLength(strID){
+            intCount = $("#"+strID).val().length;
+            intMax = $("#"+strID).attr("maxlength");
+            strID = "#"+strID+"Counter";
+            $(strID).text(parseInt(intMax) - parseInt(intCount));
+            if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
+            if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
+            if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
+        }
+
+        function redirect()
+        {
+            window.location="/{{ username }}";
+        }        
     </script>
 
     

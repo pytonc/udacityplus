@@ -138,6 +138,9 @@ class User(ndb.Model):
 
     @classmethod
     def add_project(cls, username, project_id):
+        """If this is user's first project, creates a new list and adds project_id to it
+        otherwise appends project_id to the existing list. 
+        """
         user = cls.get_user(username)
         if user:
             projects = user.projects
@@ -150,12 +153,16 @@ class User(ndb.Model):
 
     @classmethod
     def remove_project(cls, username, project_id):
+        """Removes project_id from user's projects        
+        """
         user = cls.get_user(username)
         if user:
             projects = user.projects
-            projects.remove(int(project_id))
-            user.projects = projects
-            user.put()
+            pid = int(project_id)
+            if pid in projects:
+                projects.remove(pid)
+                user.projects = projects
+                user.put()
 
     def get_friends(self, limit=10, offset=0):
         """Gets friends for current User object
