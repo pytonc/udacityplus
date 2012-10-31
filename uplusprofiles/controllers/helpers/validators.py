@@ -22,4 +22,4 @@ def project_short_description(desc):
     if 10 < len(desc) < 351:
         return ''
     else:
-        return 'Desc should be atleast 10 characters long'
+        return 'Description should be atleast 10 characters long'

@@ -10,6 +10,7 @@ class Project(ndb.Model):
     screenshot_url = ndb.StringProperty()
     url = ndb.StringProperty()
     short_description = ndb.StringProperty()
+    author = ndb.KeyProperty()
 
     @classmethod
     def add_project(cls, **kwargs):

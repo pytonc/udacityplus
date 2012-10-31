@@ -113,8 +113,10 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 self.render(template, context)
                 return
             else:
-                project_id = Project.add_project(title=title, screenshot=screenshot, 
-                    screenshot_url=screenshot_url, url=url, short_description=short_description)
+                user = User.get_user(username)
+                project_id = Project.add_project(title=title, screenshot=screenshot,
+                    screenshot_url=screenshot_url, url=url, short_description=short_description, 
+                    author=user.key)
 
                 User.add_project(username, project_id)
                 
