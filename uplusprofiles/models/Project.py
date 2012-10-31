@@ -9,7 +9,7 @@ class Project(ndb.Model):
     screenshot = ndb.BlobKeyProperty()
     screenshot_url = ndb.StringProperty()
     url = ndb.StringProperty()
-    description = ndb.StringProperty()
+    short_description = ndb.StringProperty()
 
     @classmethod
     def add_project(cls, **kwargs):
@@ -31,7 +31,7 @@ class Project(ndb.Model):
         if kwargs['screenshot_url']:
             p.screenshot_url = kwargs['screenshot_url']
         p.url = kwargs['url']
-        p.description = kwargs['description']
+        p.short_description = kwargs['short_description']
         p.put()
 
     @classmethod

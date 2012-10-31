@@ -6,6 +6,7 @@ from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 
 from BaseHandler import *
+from helpers.validators import *
 from jinja_custom.helpers import get_gravatar
 from models.Course import Course
 from models.User import User
@@ -64,37 +65,37 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
     def post(self, username):
         mode = self.request.get('mode')
         if mode == 'add_project':
-            screenshot_url = None
-            errormsg = None
-
-            title = self.request.get('title').strip()
-            url = self.request.get('url').strip()
-            description = self.request.get('description').strip()
-
+            blob_info = None
+            fileerror = 'Screenshot is mandatory'
             upload_files = self.get_uploads('screenshot')
             if upload_files:
                 blob_info = upload_files[0]
                 if 'image' in blob_info.content_type:
                     screenshot = blob_info.key()
                     screenshot_url = images.get_serving_url(screenshot)
+                    fileerror = ''
                 else:
                     # uploaded file wasn't an images, hence remove from the blobstore
                     blobstore.delete(blob_info.key())
-                    errormsg = 'Invalid image type'
-            
-            if title and screenshot_url and url and description:
-                project_id = Project.add_project(title=title, screenshot=screenshot, 
-                    screenshot_url=screenshot_url, url=url, description=description)
-
-                User.add_project(username, project_id)
+                    fileerror = 'Invalid image type'
             else:
-                if upload_files and not errormsg:
-                    # blob was okay but some other field was empty
-                    # hence remove it to avoid orphaned entry
-                    blobstore.delete(blob_info.key())
+                fileerror = 'Please provide a screenshot of your project (max size: 1MB)'
 
-                if not errormsg:
-                    errormsg = 'All fields are mandatory'
+            title = self.request.get('title').strip()
+            titleerror = project_title(title)
+
+            url = self.request.get('url').strip()
+            urlerror = project_url(url)
+
+            short_description = self.request.get('short_description').strip()
+            sderror = project_short_description(short_description)
+            
+            if titleerror or urlerror or sderror or fileerror:
+                if blob_info and not fileerror:
+                    # blob was okay but validation of some other field failed
+                    # hence remove it to avoid orphaned entry
+                    # also remove the serving url
+                    Project.remove_screenshot_blob(blob_info.key())
 
                 user = User.get_user(username)
                 template = 'profile/add_project.html'
@@ -103,20 +104,25 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                             'username': username,
                             'title': title,
                             'url': url,
-                            'description': description,
+                            'short_description': short_description,
                             'upload_url': upload_url,
-                            'errormsg': errormsg}
+                            'titleerror': titleerror,
+                            'urlerror': urlerror,
+                            'sderror': sderror,
+                            'fileerror': fileerror}
                 self.render(template, context)
                 return
-        elif mode == 'edit_project':
-            project_id = self.request.get('projects_dropdown')
-            title = self.request.get('title').strip()
-            url = self.request.get('url').strip()
-            description = self.request.get('description').strip()
+            else:
+                project_id = Project.add_project(title=title, screenshot=screenshot, 
+                    screenshot_url=screenshot_url, url=url, short_description=short_description)
 
+                User.add_project(username, project_id)
+                
+        elif mode == 'edit_project':
+            blob_info = None
             screenshot = None
             screenshot_url = None
-            errormsg = None
+            fileerror = ''
 
             upload_files = self.get_uploads('screenshot')
             if upload_files:
@@ -127,21 +133,24 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 else:
                     # uploaded file wasn't an images, hence remove from the blobstore
                     blobstore.delete(blob_info.key())
-                    errormsg = 'Invalid image type'
+                    fileerror = 'Invalid image type'
 
-            if title and url and description and not errormsg:
-                # remove old screenshot from blobstore
-                blob_key = Project.get_screenshot(project_id)
-                Project.remove_screenshot_blob(blob_key)
+            project_id = self.request.get('projects_dropdown')
 
-                Project.update_project(project_id, title=title, screenshot=screenshot, 
-                    screenshot_url=screenshot_url, url=url, description=description)
-            else:
-                if upload_files and not errormsg:
+            title = self.request.get('title').strip()
+            titleerror = project_title(title)
+
+            url = self.request.get('url').strip()
+            urlerror = project_url(url)
+
+            short_description = self.request.get('short_description').strip()
+            sderror = project_short_description(short_description)
+
+            if titleerror or urlerror or sderror or fileerror:
+                if blob_info and not fileerror:
                     # same as above
-                    blobstore.delete(blob_info.key())
-                if not errormsg:
-                    errormsg = 'All fields are mandatory (except for screenshot)'
+                    Project.remove_screenshot_blob(blob_info.key())
+                
                 user = User.get_user(username)
                 projects = Project.get_projects_by_ids(user.projects)
                 upload_url = blobstore.create_upload_url('/' + username, max_bytes_per_blob=self.MAX_IMG_SIZE)
@@ -150,12 +159,23 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                             'username': username,
                             'title': title,
                             'url': url,
-                            'description': description,
+                            'short_description': short_description,
                             'projects': projects,
                             'upload_url': upload_url,
-                            'errormsg': errormsg }
+                            'titleerror': titleerror,
+                            'urlerror': urlerror,
+                            'sderror': sderror,
+                            'fileerror': fileerror,
+                            'sel': project_id }
                 self.render(template, context)
                 return
+            else:
+                # remove old screenshot from blobstore
+                blob_key = Project.get_screenshot(project_id)
+                Project.remove_screenshot_blob(blob_key)
+
+                Project.update_project(project_id, title=title, screenshot=screenshot, 
+                    screenshot_url=screenshot_url, url=url, short_description=short_description)
         elif mode == 'remove_project':
             project_id = self.request.get('project_id')
             Project.remove_project(project_id)

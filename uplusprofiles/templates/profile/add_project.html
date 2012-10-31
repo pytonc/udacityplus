@@ -12,46 +12,68 @@
         <div class="control-group">
             <label class="control-label" for="title">Project Title</label>
             <div class="controls">
-                <input type="text" id="title" name="title" placeholder="" class="input-xlarge"
+                <input type="text" required="required" id="title" name="title" placeholder="" class="input-xlarge" maxlength="50"
                 value="{{ title }}">
-                <p class="help-block"></p>
+                {% if titleerror %}
+                <p class="help-block alert alert-error">
+                    {{ titleerror }}
+                </p>
+                {% endif %}
             </div>
         </div>
 
         <div class="control-group">
             <label class="control-label" for="screenshot">Screenshot</label>
             <div class="controls">
-                <input type="file" id="screenshot" name="screenshot">
+                <input type="file" required="required" id="screenshot" name="screenshot">
+                {% if fileerror %}
+                <p class="help-block alert alert-error">
+                    {{ fileerror }}
+                </p>
+                {% else %}
                 <p class="help-block">(maximum 1MB)</p>
+                {% endif %}
             </div>
         </div>
 
         <div class="control-group">
             <label class="control-label" for="url">Visit/Download Url</label>
             <div class="controls">
-                <input type="text" id="url" name="url" placeholder="" class="input-xlarge" value="{{ url }}">
-                <p class="help-block"></p>
+                <input type="text" required="required" id="url" name="url" placeholder="" 
+                class="input-xlarge" maxlength="100"
+                value="{{ url }}">
+                {% if urlerror %}
+                <p class="help-block alert alert-error">
+                    {{ urlerror }}
+                </p>
+                {% else %}
+                <p class="help-block">enter complete URL including http://</p>
+                {% endif %}
             </div>
         </div>
 
         <div class="control-group">
-            <label class="control-label">Short Desciption</label>
+            <label class="control-label">Short Description</label>
             <div class="controls">
                 <div class="textarea">
-                    <textarea maxlength="100" style="width: 400px; height: 200px;" 
-                    id="description" name="description">{{ description }}</textarea>
+                    <textarea maxlength="350" style="width: 400px; height: 200px;" required="required"
+                    id="short_description" name="short_description">{{ short_description }}</textarea>
                 </div>
+                {% if sderror %}
+                <p class="help-block alert alert-error">
+                    {{ sderror }}
+                </p>
+                {% endif %}
             </div>
         </div>
 
         {% if errormsg %}
             <div class="control-group">
-                <div class="alert alert-error controls" style="width: 300px;">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    <strong>Error!</strong> {{errormsg}}
+                <div class="alert alert-error controls">
+                    <strong>Error!</strong> {{ errormsg }}
                 </div>
             </div>
-        {% endif%}
+        {% endif %}
 
         <div class="control-group">
 
@@ -72,11 +94,11 @@
     <script language="javascript" type="text/javascript">
         $(document).ready( function () {
             setMaxLength();
-            $("#description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
+            $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
         });
 
         function setMaxLength() {
-            $("#description").each(function(i){
+            $("#short_description").each(function(i){
                 intMax = $(this).attr("maxlength");
                 $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
             });

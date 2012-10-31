@@ -32,8 +32,13 @@
             <div class="control-group">
                 <label class="control-label" for="title">Project Title</label>
                 <div class="controls">
-                    <input type="text" id="title" name="title" class="input-xlarge" value="{{ title }}">
-                    <p class="help-block"></p>
+                    <input type="text" required="required" id="title" name="title" class="input-xlarge" maxlength="50"
+                    value="{{ title }}">
+                    {% if titleerror %}
+                    <p class="help-block alert alert-error">
+                        {{ titleerror }}
+                    </p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -41,25 +46,43 @@
                 <label class="control-label" for="screenshot">Screenshot</label>
                 <div class="controls">
                     <input type="file" id="screenshot" name="screenshot" class="input-xlarge">
+                    {% if fileerror %}
+                    <p class="help-block alert alert-error">
+                        {{ fileerror }}
+                    </p>
+                    {% else %}
                     <p class="help-block">(maximum 1MB)</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="control-group">
                 <label class="control-label" for="url">Visit/Download Url</label>
                 <div class="controls">
-                    <input type="text" id="url" name="url" class="input-xlarge" value="{{ url }}">
-                    <p class="help-block"></p>
+                    <input type="text" required="required" id="url" name="url" class="input-xlarge" maxlength="100"
+                    value="{{ url }}">
+                    {% if urlerror %}
+                    <p class="help-block alert alert-error">
+                        {{ urlerror }}
+                    </p>
+                    {% else %}
+                    <p class="help-block">enter complete URL including http://</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="control-group">
-                <label class="control-label">Short Desciption</label>
+                <label class="control-label">Short Description</label>
                 <div class="controls">
                     <div class="textarea">
-                        <textarea maxlength="100" type="" class="" style="width: 400px; height: 200px;" 
-                        id="description" name="description"> {{ descrption }} </textarea>
+                        <textarea required="required" maxlength="350" type="" style="width: 400px; height: 200px;" 
+                        id="short_description" name="short_description"> {{ short_description }} </textarea>
                     </div>
+                    {% if sderror %}
+                    <p class="help-block alert alert-error">
+                        {{ sderror }}
+                    </p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -103,23 +126,47 @@
         
         var js_title = new Array();
         var js_url = new Array();
-        var js_description = new Array();
+        var js_short_description = new Array();
         var count = 0;
 
         {% for project in projects %}
             js_title[count] =  '{{project.title}}'
             js_url[count] =  '{{project.url}}'
-            js_description[count] =  '{{project.description}}'
+            js_short_description[count] =  '{{project.short_description}}'
             count++;
         {% endfor %}
 
+        /*function load_selected_project(self) {
+            var project_index = 0
+            {% if sel %}
+
+                var options= document.getElementById('projects_dropdown').options
+                for (var i= 0; n= options.length; i<n; i++) {
+                    if (options[i].value===sid) {
+                        project_index = i;
+                    }
+                }
+            {% else %}
+                project_index = self.selectedIndex; 
+            {% endif %}
+            document.getElementById('title').value = js_title[project_index];
+            document.getElementById('url').value = js_url[project_index];
+            document.getElementById('short_description').value = js_short_description[project_index];
+        }*/
+
+        
+            
+        
+
+        
+        
         function load_selected_project(self) {
             var project_index = self.selectedIndex; 
             document.getElementById('title').value = js_title[project_index];
             document.getElementById('url').value = js_url[project_index];
-            document.getElementById('description').value = js_description[project_index];
+            document.getElementById('short_description').value = js_short_description[project_index];
         }
-
+        
         load_selected_project(document.getElementById('projects_dropdown'))
 
         function remove_selected_project() { 
@@ -150,11 +197,11 @@
 
         $(document).ready( function () {
             setMaxLength();
-            $("#description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
+            $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
         });
 
         function setMaxLength() {
-            $("#description").each(function(i){
+            $("#short_description").each(function(i){
                 intMax = $(this).attr("maxlength");
                 $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
             });
