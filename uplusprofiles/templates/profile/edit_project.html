@@ -25,7 +25,8 @@
             <hr/>
 
             <div>
-                <a href="javascript:remove_selected_project()" class="btn pull-right" type="button" id="delete">
+                <a href="javascript:remove_selected_project(&quot;{{ username }}&quot;)" 
+                class="btn pull-right" type="button" id="delete">
                     <i class="icon-trash"></i>
                 </a>
             </div>
@@ -103,7 +104,7 @@
                 <!-- Button -->
                 <div class="controls">
                     <button type="submit" class="btn btn-primary"> Update </button>
-                    <button type="button" class="btn" onclick="redirect()">Cancel</button>
+                    <button type="button" class="btn" onclick="redirectToUserHome(&quot;{{ username }}&quot;)">Cancel</button>
                 </div>
             </div>
             <input type="hidden" name="mode" value="edit_project"/>
@@ -122,7 +123,8 @@
 {% block js %}
     {{ super() }}
     <script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
-    
+    <script type="text/javascript" src="/js/uplus-custom.js"></script>
+
     <script type="text/javascript" >
 
         $("#projects_dropdown").chosen();
@@ -137,95 +139,14 @@
             js_short_description[count] =  '{{project.short_description}}'
             count++;
         {% endfor %}
-
-
-        function setCookie(c_name,c_value) {
-            document.cookie=c_name + "=" + c_value;
-        }
-
-        function getCookie(c_name) {
-            var i,x,y,ARRcookies=document.cookie.split(";");
-            for (i=0;i<ARRcookies.length;i++) {
-              x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
-              y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
-              x=x.replace(/^\s+|\s+$/g,"");
-              if (x==c_name) {
-                return y;
-              }
-            }
-        }
-        
-        function load_selected_project(self, index) {
-            var project_index = 0;
-            if(index && index < self.length) {
-                project_index = parseInt(index, 10);
-                self.selectedIndex = project_index;
-                $('#projects_dropdown').trigger('liszt:updated');
-            } else {
-                project_index = self.selectedIndex;
-            }
-             
-            document.getElementById("title").value = js_title[project_index];
-            document.getElementById("url").value = js_url[project_index];
-            document.getElementById("short_description").value = js_short_description[project_index];
-            setCookie('sel_i', project_index.toString());
-        }
         
         var psel = getCookie('sel_i')
         load_selected_project(document.getElementById('projects_dropdown'), psel);
 
-        function remove_selected_project() { 
-            var form = document.createElement('form');
-            form.setAttribute('method', 'POST');
-            form.setAttribute('action', '/{{ user.username_norm }}');
-            
-            var hiddenField1 = document.createElement('input');
-            hiddenField1.setAttribute('type', 'hidden');
-            hiddenField1.setAttribute('name', 'mode');
-            hiddenField1.setAttribute('value', 'remove_project');
-
-            var hiddenField2 = document.createElement('input');
-            hiddenField2.setAttribute('type', 'hidden');
-            hiddenField2.setAttribute('name', 'project_id');
-            var e = document.getElementById('projects_dropdown');
-            var pid = e.options[e.selectedIndex].value;
-            hiddenField2.setAttribute('value', pid);
-
-            form.appendChild(hiddenField1);
-            form.appendChild(hiddenField2);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        
-
         $(document).ready( function () {
             setMaxLength();
             $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
-        });
-
-        function setMaxLength() {
-            $("#short_description").each(function(i){
-                intMax = $(this).attr("maxlength");
-                $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
-            });
-        }
-
-        function checkMaxLength(strID){
-            intCount = $("#"+strID).val().length;
-            intMax = $("#"+strID).attr("maxlength");
-            strID = "#"+strID+"Counter";
-            $(strID).text(parseInt(intMax) - parseInt(intCount));
-            if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
-            if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
-            if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
-        }
-
-        function redirect()
-        {
-            window.location="/{{ username }}";
-        }        
+        });      
     </script>
 
     

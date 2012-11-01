@@ -8,7 +8,7 @@ def project_title(title):
     if P_TITLE.match(title):
         return ''
     else:
-        return 'Min 5 characters are required. Allowed characters: alphabets, numbers, -, _ and space'
+        return 'Minimum 5 characters required. Allowed characters: alphabets, numbers, -, _ and space'
 
 
 def project_url(url):

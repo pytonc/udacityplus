@@ -80,7 +80,7 @@
             <!-- Button -->
             <div class="controls">
                 <button type="submit" class="btn btn-primary">Add</button>
-                <button type="button" class="btn" onclick="redirect()">Cancel</button>
+                <button type="button" class="btn" onclick="redirectToUserHome(&quot;{{ username }}&quot;)">Cancel</button>
             </div>
         </div>
         <input type="hidden" name="mode" value="add_project"/>
@@ -91,32 +91,13 @@
 {% endblock usercontent%}
 {% block js %}
     {{ super() }}
+    <script type="text/javascript" src="/js/uplus-custom.js"></script>
     <script language="javascript" type="text/javascript">
         $(document).ready( function () {
             setMaxLength();
             $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
         });
 
-        function setMaxLength() {
-            $("#short_description").each(function(i){
-                intMax = $(this).attr("maxlength");
-                $(this).after("<div><span id='"+this.id+"Counter'>"+intMax+"</span> remaining</div>");
-            });
-        }
-
-        function checkMaxLength(strID){
-            intCount = $("#"+strID).val().length;
-            intMax = $("#"+strID).attr("maxlength");
-            strID = "#"+strID+"Counter";
-            $(strID).text(parseInt(intMax) - parseInt(intCount));
-            if (intCount < (intMax * .8)) {$(strID).css("color", "#006600"); } //Good
-            if (intCount > (intMax * .8)) { $(strID).css("color", "#FF9933"); } //Warning at 80%
-            if (intCount > (intMax)) { $(strID).text(0).css("color", "#990000"); } //Over
-        }
-
-        function redirect()
-        {
-            window.location="/{{ username }}";
-        }
+        
     </script>
 {% endblock %}
