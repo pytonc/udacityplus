@@ -171,10 +171,6 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 self.render(template, context)
                 return
             else:
-                # remove old screenshot from blobstore
-                blob_key = Project.get_screenshot(project_id)
-                Project.remove_screenshot_blob(blob_key)
-
                 Project.update_project(project_id, title=title, screenshot=screenshot, 
                     screenshot_url=screenshot_url, url=url, short_description=short_description)
         elif mode == 'remove_project':

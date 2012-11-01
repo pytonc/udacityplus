@@ -1,4 +1,5 @@
-#from google.appengine.ext.ndb import Key
+import re
+
 from google.appengine.ext import  ndb
 from google.appengine.ext import blobstore
 from google.appengine.api import images
@@ -16,6 +17,7 @@ class Project(ndb.Model):
     def add_project(cls, **kwargs):
         """Adds project to datastore and returns id associated with that record
         """
+        kwargs['short_description'] = cls.filter_whitespaces(kwargs['short_description'])
         p  = Project(**kwargs)
         p_key = p.put()
         return p_key.id()
@@ -27,12 +29,13 @@ class Project(ndb.Model):
         """
         p = Project.get_by_id(int(project_id))
         p.title = kwargs['title']
-        if kwargs['screenshot']:
+        if kwargs['screenshot'] and kwargs['screenshot_url']:
+            cls.remove_screenshot_blob(p.screenshot)
             p.screenshot = kwargs['screenshot']
-        if kwargs['screenshot_url']:
             p.screenshot_url = kwargs['screenshot_url']
+        
         p.url = kwargs['url']
-        p.short_description = kwargs['short_description']
+        p.short_description = cls.filter_whitespaces(kwargs['short_description'])
         p.put()
 
     @classmethod
@@ -70,3 +73,11 @@ class Project(ndb.Model):
         """
         images.delete_serving_url(blob_key)
         blobstore.delete(blob_key)
+
+    @classmethod
+    def filter_whitespaces(cls, s):
+        """Replaces whitespaces with single space
+        (Necessary as newline characters break edit_project javascript)
+        """
+        return re.sub("\s+" , " ", s)
+        
