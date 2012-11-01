@@ -167,8 +167,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                             'titleerror': titleerror,
                             'urlerror': urlerror,
                             'sderror': sderror,
-                            'fileerror': fileerror,
-                            'sel': project_id }
+                            'fileerror': fileerror }
                 self.render(template, context)
                 return
             else:

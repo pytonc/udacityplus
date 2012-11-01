@@ -14,7 +14,8 @@
             <div class="control-group">
                 <label class="control-label" for="projects_dropdown">Select Project</label>
                 <div class="controls">
-                    <select class="span5" id="projects_dropdown" name="projects_dropdown" onchange="load_selected_project(this)">
+                    <select class="span5" id="projects_dropdown" name="projects_dropdown" 
+                    onchange="load_selected_project(this, null)">
                         {% for project in projects %}
                             <option value="{{ project.key.id() }}">{{ project.title }}</option>
                         {% endfor %}
@@ -66,7 +67,7 @@
                         {{ urlerror }}
                     </p>
                     {% else %}
-                    <p class="help-block">enter complete URL including http://</p>
+                    <p class="help-block">enter complete URL (including http://)</p>
                     {% endif %}
                 </div>
             </div>
@@ -123,7 +124,8 @@
     <script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
     
     <script type="text/javascript" >
-        
+
+        $("#projects_dropdown").chosen();
         var js_title = new Array();
         var js_url = new Array();
         var js_short_description = new Array();
@@ -136,38 +138,41 @@
             count++;
         {% endfor %}
 
-        /*function load_selected_project(self) {
-            var project_index = 0
-            {% if sel %}
 
-                var options= document.getElementById('projects_dropdown').options
-                for (var i= 0; n= options.length; i<n; i++) {
-                    if (options[i].value===sid) {
-                        project_index = i;
-                    }
-                }
-            {% else %}
-                project_index = self.selectedIndex; 
-            {% endif %}
-            document.getElementById('title').value = js_title[project_index];
-            document.getElementById('url').value = js_url[project_index];
-            document.getElementById('short_description').value = js_short_description[project_index];
-        }*/
+        function setCookie(c_name,c_value) {
+            document.cookie=c_name + "=" + c_value;
+        }
 
-        
-            
-        
-
-        
-        
-        function load_selected_project(self) {
-            var project_index = self.selectedIndex; 
-            document.getElementById('title').value = js_title[project_index];
-            document.getElementById('url').value = js_url[project_index];
-            document.getElementById('short_description').value = js_short_description[project_index];
+        function getCookie(c_name) {
+            var i,x,y,ARRcookies=document.cookie.split(";");
+            for (i=0;i<ARRcookies.length;i++) {
+              x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+              y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+              x=x.replace(/^\s+|\s+$/g,"");
+              if (x==c_name) {
+                return y;
+              }
+            }
         }
         
-        load_selected_project(document.getElementById('projects_dropdown'))
+        function load_selected_project(self, index) {
+            var project_index = 0;
+            if(index && index < self.length) {
+                project_index = parseInt(index, 10);
+                self.selectedIndex = project_index;
+                $('#projects_dropdown').trigger('liszt:updated');
+            } else {
+                project_index = self.selectedIndex;
+            }
+             
+            document.getElementById("title").value = js_title[project_index];
+            document.getElementById("url").value = js_url[project_index];
+            document.getElementById("short_description").value = js_short_description[project_index];
+            setCookie('sel_i', project_index.toString());
+        }
+        
+        var psel = getCookie('sel_i')
+        load_selected_project(document.getElementById('projects_dropdown'), psel);
 
         function remove_selected_project() { 
             var form = document.createElement('form');
@@ -193,7 +198,7 @@
             form.submit();
         }
 
-        $('#projects_dropdown').chosen()
+        
 
         $(document).ready( function () {
             setMaxLength();
