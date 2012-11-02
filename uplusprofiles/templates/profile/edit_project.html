@@ -15,7 +15,7 @@
                 <label class="control-label" for="projects_dropdown">Select Project</label>
                 <div class="controls">
                     <select class="span5" id="projects_dropdown" name="projects_dropdown" 
-                    onchange="load_selected_project(this, null)">
+                    onchange="loadSelectedProject(this, null)">
                         {% for project in projects %}
                             <option value="{{ project.key.id() }}">{{ project.title }}</option>
                         {% endfor %}
@@ -25,7 +25,7 @@
             <hr/>
 
             <div>
-                <a href="javascript:remove_selected_project(&quot;{{ username }}&quot;)" 
+                <a href="javascript:removeSelectedProject(&quot;{{ username }}&quot;)" 
                 class="btn pull-right" type="button" id="delete">
                     <i class="icon-trash"></i>
                 </a>
@@ -141,7 +141,7 @@
         {% endfor %}
         
         var psel = getCookie('sel_i')
-        load_selected_project(document.getElementById('projects_dropdown'), psel);
+        loadSelectedProject(document.getElementById('projects_dropdown'), psel);
 
         $(document).ready( function () {
             setMaxLength();

@@ -35,7 +35,7 @@ function getCookie(c_name) {
     }
 }
 
-function remove_selected_project(username) { 
+function removeSelectedProject(username) { 
     var form = document.createElement('form');
     form.setAttribute('method', 'POST');
     form.setAttribute('action', '/' + username);
@@ -59,7 +59,7 @@ function remove_selected_project(username) {
     form.submit();
 }
 
-function load_selected_project(self, index) {
+function loadSelectedProject(self, index) {
     var project_index = 0;
     if(index && index < self.length) {
         project_index = parseInt(index, 10);
