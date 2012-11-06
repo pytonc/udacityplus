@@ -23,7 +23,7 @@ transformers:
 
     - property: url
       external_name: url
-      
+
 
 - kind: Course
   connector: csv

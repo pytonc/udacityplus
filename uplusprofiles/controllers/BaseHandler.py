@@ -32,7 +32,6 @@ jinja_environment=jinja2.Environment(
 
 jinja_environment.globals['is_authenticated'] = is_authenticated
 
-
 class BaseHandler(webapp2.RequestHandler):
     def render(self, template, vals={}):
         template = jinja_environment.get_template("%s" % template)

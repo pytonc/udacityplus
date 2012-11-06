@@ -28,12 +28,16 @@ from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
 import models.Details as Details
-
+from datetime import datetime
+import logging
 import re
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
 uname = re.compile(_UNAMEP)
+
+_UDOB = r'^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$'
+udob = re.compile(_UDOB)
 
 
 class User(ndb.Model):
@@ -42,7 +46,7 @@ class User(ndb.Model):
     password        = ndb.StringProperty(required=True)
     email           = ndb.StringProperty(required=True)
 
-    real_name       = ndb.StringProperty()
+    real_name       = ndb.StringProperty(default='')
     display_name    = ndb.StringProperty()
 
     created         = ndb.DateTimeProperty(auto_now_add=True)
@@ -52,14 +56,14 @@ class User(ndb.Model):
 
     # details
     forum_name      = ndb.StringProperty()
-    short_about     = ndb.StringProperty()
-    prog_langs      = ndb.StructuredProperty(Details.Tool, repeated=True)
-    soft_tools      = ndb.StructuredProperty(Details.Tool, repeated=True)
+    short_about     = ndb.StringProperty(default='')
+    projects        = ndb.JsonProperty()
+#    prog_langs      = ndb.StructuredProperty(Details.Tool, repeated=True)
+    tools           = ndb.TextProperty(default='')
     dob             = ndb.DateProperty()
     profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
     location        = ndb.StructuredProperty(Details.Location)
 
-    projects        = ndb.JsonProperty()
     # TODO: upload to a static directory?
     avatar          = ndb.BlobProperty()
     avatar_url      = ndb.StringProperty(default="/img/defaultavatar.png")
@@ -81,27 +85,140 @@ class User(ndb.Model):
     @classmethod
     def valid_password(cls, password):
         p = len(password)
-        return  p >= 8 and p < 50
+        if not ( p >= 8 and p < 50):
+            return False, {'error_password': 'Invalid password length'}
+        return True, {}
+
+    @classmethod
+    def valid_passwords(cls, password, confirmation):
+        errors = {}
+        state = True
+
+        if not password or not confirmation:
+            errors['error_password'] = "Enter both password and confirmation"
+            errors['error_verify'] = 'Enter both password and confirmation'
+            state = False
+        if not cls.valid_password(password)[0]:
+            errors['error_password'] = "Enter a valid password."
+            state = False
+        if not cls.valid_password(confirmation)[0]:
+            errors['error_verify'] = "Enter a valid confirmation password."
+            state = False
+        if password and password and password != confirmation:
+            state = False
+            errors['error_match'] = "Passwords do not match."
+
+        return state, errors
 
     @classmethod
     def valid_username(cls, username):
+        errors = {}
+        state = True
         if uname.match(username):
             users = cls.query(User.username_norm == username.lower()).fetch(1, projection=['username'])
+            if users:
+                errors['error_user_exists'] = 'User already exists'
+                state = False
         else:
-            return False
-
-        return not users
+            errors['error_invalid_username'] = 'Invalid username'
+            state = False
+        return state, errors
 
     @classmethod
-    def valid_email(cls, email):
-        email = cls.query(User.email == email).fetch(1, projection=['username'])
-        return not email
+    def valid_email(cls, email, user=None):
+        #TODO: validate email format (regex?)
+        e = cls.query(User.email == email).get(projection=['username'])
+
+        if e and not user:
+            return False, {'error_email': 'Invalid email'}
+        elif e and user:
+            if e.username == user.username:
+                return True, {}
+            else:
+                return False, {'error_email': 'Invalid email'}
+        return True, {}
 
     @classmethod
     def valid(cls, username, email, password):
-        return cls.valid_password(password) and \
-               cls.valid_username(username) and \
-               cls.valid_email(email)
+        #TODO: check confirmation password, implemented in valid_passwords
+        _, u = cls.valid_username(username)
+        _, p = cls.valid_password(password)
+        _, e = cls.valid_email(email)
+        errors = User.adduep(u, e, p)
+        if not errors:
+            return True, {}
+
+        return False, errors
+
+    @classmethod
+    def adduep(cls, udict, edict, pdict):
+        """Consolidate dictionaries containing user, email, password errors
+        """
+        #TODO: generalize this for an arbitrary number of dicts
+        errors = dict(
+            (n, udict.get(n, '') + pdict.get(n, '') + edict.get(n, ''))
+                for n in set(udict)|set(pdict)|set(edict)
+        )
+        return errors
+
+    def recafooble_classes(self, current, pset, completed):
+        """Add or remove courses from the profile
+
+        Args:
+         current   - list of Keys of classes currently saved in profile, should be a list of completed or incomplete
+                     courses
+         pset      - the new list of classes to replace current
+         completed - string "iclasses" or "classes" to indicate incomplete or complete respectively
+        """
+        current = set(current)
+        pset = set(pset)
+        keep = current.intersection(pset)
+
+        compd = {'iclasses': False, 'cclasses': True}[completed]
+
+        remove = current - keep
+        if remove:
+            self.remove_courses(remove, compd)
+
+        new = pset - keep
+        if new:
+            self.add_courses(new, compd)
+
+    def update(self, **kwargs):
+        """Update user fields
+        """
+        #TODO: update only the changed fields
+        current = self.get_all_courses()
+        incomplete = [ic.course for ic in filter(lambda c: c.completed == False, current)]
+        completed  = [cc.course for cc in filter(lambda c: c.completed, current)]
+
+        classpartition = {
+            'iclasses': incomplete,
+            'cclasses': completed
+        }
+        for t, l in classpartition.iteritems():
+            if kwargs.has_key(t):
+                self.recafooble_classes(l,
+                    [ndb.Key('Course', k) for k in kwargs[t]], t)
+
+        if kwargs.has_key('dob'):
+            kwargs['dob'] = datetime.strptime(kwargs['dob'], '%m/%d/%Y')
+        if kwargs.has_key('notify_on_msg'):
+            kwargs['notify_on_msg'] = kwargs['notify_on_msg'] == 'on'
+
+        for k, v in kwargs.iteritems():
+            if hasattr(self, k):
+                if k != 'password':
+                    setattr(self, k, v)
+                else:
+                    setattr(self, k, bc.hashpw(kwargs['password'], bc.gensalt()))
+        self.put()
+
+    @classmethod
+    def valid_date(cls, date):
+        if udob.match(date):
+            return True, {}
+        return False, {'error_date': 'Invalid date format, use mm/dd/yyyy'}
 
     @classmethod
     def save(cls, username, email, password):
@@ -110,31 +227,14 @@ class User(ndb.Model):
         Returns:
          The saved User object
         """
-        if cls.valid(username, email, password):
+        valid, errors = cls.valid(username, email, password)
+        if valid:
             password = bc.hashpw(password, bc.gensalt())
             # call to create and save log token is in signup controller
             user = cls(id = username, username = username, password = password, email = email)
             user.put()
             return user
         return False
-
-    @classmethod
-    def add_friend(cls, me, friend):
-        #TODO: check if friend exists, etc
-        #TODO: friend requests/approvals - right now auto adds to both parties
-        #TODO: use transactions
-
-        mes = cls.query(cls.username_norm == me.lower()).get()
-        if friend not in mes.friends:
-            mes.friends.append(friend.lower())
-            mes.put()
-
-        # just auto add me to the other person's list
-        fs = cls.query(cls.username_norm == friend.lower()).get()
-        if me not in fs.friends:
-            fs.friends.append(me.lower())
-
-            fs.put()
 
     @classmethod
     def add_project(cls, username, project_id):
@@ -164,6 +264,24 @@ class User(ndb.Model):
                 user.projects = projects
                 user.put()
 
+    @classmethod
+    def add_friend(cls, me, friend):
+        #TODO: check if friend exists, etc
+        #TODO: friend requests/approvals - right now auto adds to both parties
+        #TODO: use transactions
+
+        mes = cls.query(cls.username_norm == me.lower()).get()
+        if friend not in mes.friends:
+            mes.friends.append(friend.lower())
+            mes.put()
+
+        # just auto add me to the other person's list
+        fs = cls.query(cls.username_norm == friend.lower()).get()
+        if me not in fs.friends:
+            fs.friends.append(me.lower())
+
+            fs.put()
+
     def get_friends(self, limit=10, offset=0):
         """Gets friends for current User object
 
@@ -178,7 +296,7 @@ class User(ndb.Model):
         return None
 
 
-    def add_courses(self, keys):
+    def add_courses(self, keys, completed=True):
         """Add a completed or an in-progress course
 
         Args:
@@ -189,12 +307,9 @@ class User(ndb.Model):
          list of CourseAttempt keys
         """
         attempts = []
-        for k in keys:
-            ca = Details.CourseAttempt(
-                course = k,
-                student = self.key
-            )
-            k = ca.put()
+
+        for key in keys:
+            k = self.add_course(key, completed)
             attempts.append(k)
 
         return attempts
@@ -233,11 +348,24 @@ class User(ndb.Model):
         return k
 
     def remove_course(self, course_key, completed=True):
-        courses = self.get_courses(completed)
+        ca = self.get_courses(completed)
 
-        rem_list = [course for course in courses if course.course == course_key and course.completed == completed]
+        rem_list = [attempt for attempt in ca if
+                    attempt and attempt.course == course_key and attempt.completed == completed]
 
         ndb.delete_multi(rem_list)
+        return self
+
+    def remove_courses(self, keys, completed=True):
+        """Removes courses from a list of keys
+
+        Args: keys - list of ndb.Key('Course', ...)
+        """
+        current = self.get_all_courses()
+        remove = [attempt.key for attempt in current if
+                  attempt and attempt.course in keys and attempt.completed == completed]
+        ndb.delete_multi(remove)
+
         return self
 
     def delete_all_courses(self):
