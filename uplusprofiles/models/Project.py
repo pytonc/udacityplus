@@ -79,5 +79,5 @@ class Project(ndb.Model):
         """Replaces whitespaces with single space
         (Necessary as newline characters break edit_project javascript)
         """
-        return re.sub("\s+" , " ", s)
+        return re.sub("\s\s+" , " ", s)
         
