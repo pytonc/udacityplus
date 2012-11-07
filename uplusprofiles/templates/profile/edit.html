@@ -17,7 +17,8 @@
             <!-- Text input-->
             <label class="control-label" for="real_name">Real Name</label>
             <div class="controls">
-                <input type="text" id="real_name" name="real_name" placeholder="Real Name" required="required"
+                <input type="text" id="real_name" name="real_name" placeholder="Real Name" 
+                    required="required" maxlength="50"
                        class="input-xlarge span8" value="{% if user.real_name %}{{ user.real_name }}{% endif %}">
                 <p class="help-block"></p>
             </div>
@@ -27,7 +28,8 @@
             <!-- Email-->
             <label class="control-label" for="email">Email</label>
             <div class="controls">
-                <input type="text" id="email" name="email" placeholder="Email" required="required"
+                <input type="text" id="email" name="email" placeholder="Email" 
+                    required="required" maxlength="50"
                        class="input-xlarge span8" value="{{ user.email }}">
                 <span class="help-inline">{{ errors.error_email }}</span>
             </div>
@@ -115,7 +117,8 @@
         <div class={% if errors.error_password %}"control-group error"{% else %}"control-group"{% endif %}>
             <label class="control-label" for="password">Password</label>
             <div class="controls">
-                <input id="password" name="password" type="password" placeholder="Password" class="input-xlarge span8">
+                <input id="password" name="password" type="password" placeholder="Password" 
+                    maxlength="50" class="input-xlarge span8">
                 <span class="help-inline">{{ errors.error_password }}</span>
                 <p class="help-block">Minimum 8 characters</p>
             </div>
@@ -126,7 +129,7 @@
             <label class="control-label" for="password_confirm">Confirm Password</label>
             <div class="controls">
                 <input type="password" name="password_confirm" placeholder="Confirm password"
-                       id="password_confirm" class="input-xlarge span8">
+                       maxlength="50" id="password_confirm" class="input-xlarge span8">
                 <span class="help-inline">{{ errors.error_verify }}</span>
             </div>
         </div>
