@@ -6,32 +6,49 @@
         <form action="" method="post" class="form-horizontal">
             <fieldset>
                 <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
-                    <label class="control-label" for="focusedInput">Username</label>
+                    <label class="control-label" for="username">Username</label>
                     <div class="controls">
                         <input type="text"
                                name="username"
+                               id="username"
                                class="input-xlarge focused"
-                               placeholder="Username">
+                               placeholder="Username"
+                               required="required">
                     </div>
                 </div>
                 <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
-                    <label class="control-label">Email</label>
+                    <label class="control-label" for="email">Email</label>
                     <div class="controls">
                         <input type="text"
                                name="email"
+                               id="email"
                                class="input-xlarge focused"
-                               placeholder="Email">
+                               placeholder="Email"
+                               required="required">
                     </div>
                 </div>
 
                 <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
-                    <label class="control-label">Password</label>
+                    <label class="control-label" for="password">Password</label>
                     <div class="controls">
                         <input type="password"
                                name="password"
                                class="input-xlarge focused"
-                               placeholder="Password">
+                               placeholder="Password"
+                               required="required"
+                               id="password">
                     </div>
+                </div>
+                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                <label class="control-label" for="password_confirm">Password</label>
+                <div class="controls">
+                    <input type="password"
+                           name="password"
+                           class="input-xlarge focused"
+                           placeholder="Password"
+                           required="required"
+                           id="password_confirm">
+                </div>
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" type="submit">Sign up</button>
