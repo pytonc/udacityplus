@@ -22,9 +22,10 @@
                 <input type="hidden" value="{{ receiver }}" name="receiver"/>
                 <input type="hidden" value="{{ sender }}" name="username"/>
 
-                <label class="control-label" for="input01">Title</label>
+                <label class="control-label" for="title_{{ receiver }}">Title</label>
                 <div class="controls">
-                    <input type="text" placeholder="Title" name="title" class="input-xlarge">
+                    <input type="text" placeholder="Title" id="title_{{ receiver }}"
+                           name="title" class="input-xlarge" required="required">
                     <p class="help-block"></p>
                 </div>
             </div>
@@ -32,10 +33,10 @@
             <div class="control-group">
 
                 <!-- Textarea -->
-                <label class="control-label">Message</label>
+                <label class="control-label" for="content_{{ receiver }}">Message</label>
                 <div class="controls">
                     <div class="textarea">
-                        <textarea type="" name="content" class="" style="margin: 0px; width: 271px; height: 110px; "> </textarea>
+                        <textarea type="" name="content" id="content_{{ receiver }}" required="required"> </textarea>
                     </div>
                 </div>
             </div>
