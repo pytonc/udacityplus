@@ -10,6 +10,7 @@ from helpers.authentication import Authentication
 from models.User import User
 from models.Message import Message, Conversation
 from contactextern.usernotifications import new_message_notify
+from helpers.errorretrieval import check_valid_receiver
 
 
 class MessagePage(BaseHandler):
@@ -59,10 +60,15 @@ class MessagePage(BaseHandler):
         template_values = { "conversations" : conv, "username": username, 'friends': friends}
         self.render("messages/messages.html", template_values)
 
-    def show_form_for_new_message(self, thread=None, id=None, friends=None):
+    def show_form_for_new_message(self, thread=None, id=None, friends=None, errors=None):
         """Shows a form for a brand new message and a reply if given thread and id
         """
-        context = {'friends': friends, 'username': self.get_cookie('username')}
+        username = self.get_cookie('username')
+        if not friends:
+            user = User.get_user(username)
+            friends = user.get_friends()
+
+        context = {'friends': friends, 'username': username, 'errors': errors}
 
         if id and thread:
             id = int(id)
@@ -95,19 +101,23 @@ class MessagePage(BaseHandler):
         sender = sender.lower()
         receiver = receiver.lower()
 
-        # Adds a new message to conversation
-        if conv_id and msg_id:
-            msg = Conversation.add_new_message(sender, content, conv_id=conv_id)
-            self.notify_user(sender, conv_id, msg)
+        vr, err = check_valid_receiver(receiver)
+        if vr:
+            # Adds a new message to conversation
+            if conv_id and msg_id:
+                msg = Conversation.add_new_message(sender, content, conv_id=conv_id)
+                self.notify_user(sender, conv_id, msg)
 
-        # Adds a new conversation with first message
-        elif receiver and title and content:
-            (conv, msg) = User.add_new_conversation(sender, receiver, title, content)
-            self.notify_user(sender, conv.key.id(), msg)
-        else:
-            self.response.out.write("Error in Messages.post()")
+            # Adds a new conversation with first message
+            elif receiver and title and content:
+                (conv, msg) = User.add_new_conversation(sender, receiver, title, content)
+                self.notify_user(sender, conv.key.id(), msg)
+            else:
+                self.response.out.write("Error in Messages.post()")
 
-        if self.request.path.startswith('/messages'):
-            self.redirect('/messages?show=all')
+            if self.request.path.startswith('/messages'):
+                self.redirect('/messages?show=all')
+            else:
+                self.redirect(self.request.referer)
         else:
-            self.redirect(self.request.referer)
+            self.show_form_for_new_message(errors=err)
