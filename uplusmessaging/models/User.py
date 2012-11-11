@@ -22,17 +22,17 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
+
+
 from google.appengine.ext.ndb import QueryOptions
-
-
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb.key import Key
 from externals.bcrypt import bcrypt as bc
-import models.Details as Details
 from datetime import datetime
 import logging
-
 import re
+import models.Details as Details
+from Message import Message, Conversation
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
@@ -40,17 +40,6 @@ uname = re.compile(_UNAMEP)
 
 _UDOB = r'^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$'
 udob = re.compile(_UDOB)
-
-class ExternalProfileLink(ndb.Model):
-    url             = ndb.StringProperty(required=True)
-    profile_loc     = ndb.StringProperty(required=True, choices={'Facebook', 'Twitter', 'G+',
-                                                                'LinkedIn', 'Website', 'GitHub', 'BitBucket',
-                                                                'Blog', 'Portfolio', 'Other', 'Coursera', })
-
-class Location(ndb.Model):
-    city            = ndb.StringProperty()
-    country         = ndb.StringProperty()
-
 
 class User(ndb.Model):
     username        = ndb.StringProperty(required=True)
@@ -88,6 +77,20 @@ class User(ndb.Model):
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
+    @classmethod
+    def save(cls, username, email, password):
+        """Save a user object
+
+        Returns:
+         The saved User object
+        """
+        if cls.valid(username, email, password):
+            password = bc.hashpw(password, bc.gensalt())
+            # call to create and save log token is in signup controller
+            user = cls(id = username, username = username, password = password, email = email)
+            user.put()
+            return user
+        return False
 
     @classmethod
     def get_user(cls, username):
@@ -372,3 +375,92 @@ class User(ndb.Model):
     def delete_friend(self):
         #TODO: deleting friends
         pass
+
+        def add_conversation(self, conversation):
+            self.conversations.append(conversation)
+
+    def get_all_conversations(self):
+        return ndb.get_multi(self.conversations)
+
+    @classmethod
+    def add_conversation_for_user(cls, username, conversation):
+        """Add a conversation thread for user with username
+        """
+        u = cls.query(User.username_norm == username.lower()).get()
+        if u:
+            u.conversations.append(conversation)
+            u.put()
+            return u
+        return None
+
+    @classmethod
+    def add_conversation_for_users(cls, conversation, *users):
+        """Adds participants to a conversation thread for each user in users
+        """
+        if all(users):
+            users = [users[0]]
+        for user in users:
+            cls.add_conversation_for_user(user, conversation)
+
+    @classmethod
+    def get_conversations_for(cls, username, offset, limit):
+        """Gets conversations for user with username
+
+        Returns:
+         A list of Conversation objects for username
+        """
+        limit = int(limit) if limit else 10
+        offset = int(offset) if offset else 0
+
+        c = Conversation.query(Conversation.receivers_list_norm.IN([username.lower()]))\
+        .order(-Conversation.modified)\
+        .fetch(limit=limit, offset=offset, keys_only=True)
+        return ndb.get_multi(c)
+
+    def get_conversations(self, limit=10, offset=0):
+        """UNUSED - Get conversations for current User object
+
+        Returns:
+         A list of Conversation objects
+        """
+
+        c = Conversation.query(self.username_norm in Conversation.receivers, keys_only=True)\
+        .order(Conversation.modified)\
+        .limit(limit, offset=offset)
+        return ndb.get_multi(c)
+
+    @classmethod
+    def add_new_conversation(cls, sender, receiver, title, content):
+        """Adds new conversation with receiver for sender, returns Conversation object
+        """
+        #TODO: check if sender and receiver aren't the same person, if so, add only once
+
+        skey = ndb.Key('User', sender)
+        rkey = ndb.Key('User', receiver)
+
+        if sender == receiver:
+            rl = [skey]
+            rln  = [sender]
+        else:
+            rl = [rkey, skey]
+            rln = [sender, receiver]
+
+        conv = Conversation(
+            owner = sender,
+            receivers_list = rl,
+            receivers_list_norm = rln,
+            title = title,
+        )
+        msg = Message(
+            sender = sender,
+            content = content
+        )
+
+
+        k = msg.put()
+        conv.insert_message(k)
+        ck = conv.put()
+
+        User.add_conversation_for_users(ck, sender, receiver)
+
+        return conv, msg
