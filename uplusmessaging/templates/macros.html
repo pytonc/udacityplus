@@ -1,5 +1,6 @@
-{% macro input(type, name, id, value) -%}
-<input type="{{ type }}" name="{{ name }}" id="{{ id }}"
+{% macro input(type, name, id, value, placeholder) -%}
+<input type="{{ type }}" name="{{ name }}" id="{{ id }}" required="required" placeholder="{{ placeholder }}"
+       class="input-xlarge focused"
         {% if value %}
        value="{{ value }}" readonly="readonly"
         {% endif %}
@@ -16,7 +17,7 @@
     <form class="form-horizontal" action="{{ act }}" method="post">
         <fieldset>
             <div id="legend" class="">
-                <legend class="">Send message to {{ receiver }}</legend>
+                <h2 class="">Send message to {{ receiver }}</h2>
             </div>
             <div class="control-group">
                 <input type="hidden" value="{{ receiver }}" name="receiver"/>
@@ -26,30 +27,22 @@
                 <div class="controls">
                     <input type="text" placeholder="Title" id="title_{{ receiver }}"
                            name="title" class="input-xlarge" required="required">
-                    <p class="help-block"></p>
                 </div>
             </div>
 
             <div class="control-group">
-
-                <!-- Textarea -->
                 <label class="control-label" for="content_{{ receiver }}">Message</label>
                 <div class="controls">
-                    <div class="textarea">
-                        <textarea type="" name="content" id="content_{{ receiver }}" required="required"> </textarea>
-                    </div>
+                    <textarea name='content' id='content_{{ receiver }}' required="required" class="input-xlarge"></textarea>
                 </div>
             </div>
 
-            <div class="control-group">
-                <label class="control-label"></label>
+            <!-- Button -->
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <button class="btn btn-primary">Send</button>
+            </div>
 
-                <!-- Button -->
-                    <div class="modal-footer">
-                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                        <button class="btn btn-primary">Send</button>
-                    </div>
-                </div>
         </fieldset>
     </form>
 </div>
