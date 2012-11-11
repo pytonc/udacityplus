@@ -4,7 +4,7 @@
 {% block usercontent %}
     <div class="span7">
         <h2>Login</h2>
-        <form action="/messages" method="Post" class="form-horizontal">
+        <form method="Post" class="form-horizontal">
             <fieldset>
                 <div class={% if errors.error_invalid_username or errors.error_user_exists%}"control-group error"
                 {% else %}"control-group"{% endif %}>
