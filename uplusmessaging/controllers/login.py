@@ -1,10 +1,17 @@
 from BaseHandler import *
 from externals.bcrypt import bcrypt as bc
 from helpers.authentication import Authentication as aut
+from helpers.errorretrieval import get_login_errors
+import json
+import logging
 
 class LoginPage(BaseHandler):
     def get(self):
-        self.render("login.html")
+        errors = self.response.body
+
+        if errors:
+            errors = json.loads(errors)
+        self.render("login.html", {'errors': errors})
 
     def post(self):
         #TODO: what if i'm already logged in
@@ -12,7 +19,8 @@ class LoginPage(BaseHandler):
         log_token = aut.valid_login(*params)
         if log_token:
             username, _ = params
-            self.set_cookies({"username":username, "log_token":log_token})
+            self.set_cookies({"username": username, "log_token": log_token})
             self.redirect("/")
         else:
-            self.redirect("/login")
+            errors = get_login_errors(*params)
+            self.render("login.html", {'errors': errors})
