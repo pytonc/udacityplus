@@ -8,6 +8,14 @@ from controllers.forbidden import Forbidden
 from controllers.messages  import MessagePage
 from controllers.profile import ProfilePage
 
+import logging
+import os
+
+
+DEBUG = bool(os.environ['SERVER_SOFTWARE'].startswith('Dev'))
+if DEBUG:
+    logging.getLogger().setLevel(logging.DEBUG)
+
 app = webapp2.WSGIApplication([
         (r'/', HomePage),
         (r'/signup', SignUpPage),
@@ -17,5 +25,5 @@ app = webapp2.WSGIApplication([
         (r'/messages(?:/?)([0-9]*)(?:/?)([0-9]*)', MessagePage),
         (r'/friends', FriendsController),
         (r'/(?P<username>\w+)', ProfilePage),
-    ], debug=False)
+    ], debug=DEBUG)
 
