@@ -33,6 +33,7 @@ import logging
 import re
 import models.Details as Details
 from Message import Message, Conversation
+from controllers.helpers.common import adduep
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
@@ -156,25 +157,15 @@ class User(ndb.Model):
     @classmethod
     def valid(cls, username, email, password):
         #TODO: check confirmation password, implemented in valid_passwords
+        #TODO: valid_username checks only signup
         _, u = cls.valid_username(username)
         _, p = cls.valid_password(password)
         _, e = cls.valid_email(email)
-        errors = User.adduep(u, e, p)
+        errors = adduep(u, e, p)
         if not errors:
             return True, {}
 
         return False, errors
-
-    @classmethod
-    def adduep(cls, udict, edict, pdict):
-        """Consolidate dictionaries containing user, email, password errors
-        """
-        #TODO: generalize this for an arbitrary number of dicts
-        errors = dict(
-            (n, udict.get(n, '') + pdict.get(n, '') + edict.get(n, ''))
-                for n in set(udict)|set(pdict)|set(edict)
-        )
-        return errors
 
     def recafooble_classes(self, current, pset, completed):
         """Add or remove courses from the profile
