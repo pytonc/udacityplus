@@ -22,7 +22,7 @@ class TestMessages(unittest.TestCase):
         self.testbed.deactivate()
 
     def testCreateConversation(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
                                         title_plain_text,
                                         content_plain_text)
 
@@ -32,14 +32,14 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(conv.messages[0].content, content_plain_text, 'new conversation message')
 
     def testAddNewMessage(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
                                         title_plain_text,
                                         content_plain_text)
 
         m = Conversation.add_new_message(self.u2.username_norm,
                                          content_plain_text2, conv_key=c.key)
 
-        c.put()
+#        c.put()
 
         self.assertEqual(len(c.messages_list), 2, "Length of message list %s != %s" % (len(c.messages_list), 2))
 
@@ -49,7 +49,7 @@ class TestMessages(unittest.TestCase):
             self.assertEqual(newmsg.content, test_cont[i], "Message Content")
 
     def testDeleteConversationWithOwner(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
             title_plain_text,
             content_plain_text)
 
@@ -58,7 +58,7 @@ class TestMessages(unittest.TestCase):
 
         message_keys = deepcopy(c.messages_list)
 
-        c.put()
+#        c.put()
 
         Conversation.delete_conversation(self.u1.username_norm, key=c.key)
 
@@ -71,14 +71,14 @@ class TestMessages(unittest.TestCase):
 
 
     def testDeleteConversationWithoutOwner(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
             title_plain_text,
             content_plain_text)
 
         m = Conversation.add_new_message(self.u2.username_norm,
             content_plain_text2, conv_key=c.key)
 
-        c.put()
+#        c.put()
 
         Conversation.delete_conversation(self.u2.username_norm, key=c.key)
 
@@ -92,7 +92,7 @@ class TestMessages(unittest.TestCase):
                 "Message not deleted for %s" % self.u2.username_norm)
 
     def testDeleteOneMessageWithOwner(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
             title_plain_text,
             content_plain_text)
 
@@ -102,7 +102,7 @@ class TestMessages(unittest.TestCase):
         Conversation.add_new_message(self.u1.username_norm,
             content_plain_text, conv_key=c.key)
 
-        c.put()
+#        c.put()
 
         self.assertEqual(len(c.messages_list), 3, "Length of messages list != 3")
         Conversation.delete_message(self.u1.username_norm, c.key.id(), m.key.id())
@@ -112,7 +112,7 @@ class TestMessages(unittest.TestCase):
         self.assertIsNone(deleted, "Message was not deleted")
 
     def testDeleteWithoutOwner(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
             title_plain_text,
             content_plain_text)
 
@@ -122,7 +122,7 @@ class TestMessages(unittest.TestCase):
         Conversation.add_new_message(self.u1.username_norm,
             content_plain_text, conv_key=c.key)
 
-        c.put()
+#        c.put()
 
         self.assertEqual(len(c.messages_list), 3, "Length of messages list != 3")
         Conversation.delete_message(self.u2.username_norm, c.key.id(), m.key.id())
@@ -138,7 +138,7 @@ class TestMessages(unittest.TestCase):
                 self.assertIsNone(msg.deleted_for, "deleted_for was not None for a message other than deleted")
 
     def testDeleteConversationWithOneMsgAndOwner(self):
-        c = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
+        c, msg = User.add_new_conversation(self.u1.username_norm, self.u2.username_norm,
             title_plain_text,
             content_plain_text)
 
