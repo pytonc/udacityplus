@@ -1,0 +1,9 @@
+.psearch-result td {vertical-align: top }
+.psearch-avatar { width: 50px; }
+.psearch-avatar img { height: 50px; width: 50px;  }
+.psearch-info { padding-left: 10px; vertical-align: top; }
+.psearch-username { font-size: 1.2em; padding-bottom: 15px; }
+.psearch-realname { font-size: .8em; color: #888; }
+.select2-highlighted .psearch-realname{ font-size: .8em; color: #eee; }
+.bigdrop.select2-container .select2-results {max-height: 300px;}
+.bigdrop .select2-results {max-height: 300px;}
