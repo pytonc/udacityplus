@@ -63,12 +63,16 @@ def valid_email(email, user=None):
             return False, {'error_email': 'Invalid email'}
     return True, {}
 
-def valid(username, email, password):
+def valid(username, email, password, confirmation):
     #TODO: check confirmation password, implemented in valid_passwords
     _, u = valid_username(username)
-    _, p = valid_password(password)
+    ue, _ = user_exists(username)
+    _, p = valid_passwords(password, confirmation)
     _, e = valid_email(email)
-    errors = add_dicts(u, e, p)
+    ux = {}
+    if ue:
+        ux = {'error_user_exists': 'Username taken'}
+    errors = add_dicts(u, e, p, ux)
     if not errors:
         return True, {}
 
@@ -107,7 +111,8 @@ def get_login_errors(username, password):
     else:
         e = {}
 
-    return add_dicts(p, u, e)
+    d =  add_dicts(p, u, e)
+    return d
 
 def check_valid_receiver(username):
     u, err = valid_username(username)
