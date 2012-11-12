@@ -3,6 +3,7 @@ from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from models.User import User
 from tests.testdata import *
+from util.searching import find_users, find_all
 import webapp2
 
 
@@ -57,6 +58,12 @@ class TestUser(unittest.TestCase):
                         user_combos.append(r)
         self.assertEqual(len(user_combos), 2, "Should contain 2 users - per current test data (check if changed)")
 
+    def testSearch(self):
+        results = find_all()
+        self.assertEqual(len(results), 3, "Should find 2 users, found: %s" % len(results))
+
+        results = find_users("person")
+        self.assertEqual(results.number_found, 2, "Should find 2 users, found: %s" % results.number_found)
 
 def suite():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUser)
