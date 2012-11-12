@@ -34,6 +34,7 @@ import re
 import models.Details as Details
 from Message import Message, Conversation
 from controllers.helpers.common import adduep
+from util.searching import create_user_search_document, add_to_index, find_users
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
@@ -75,8 +76,28 @@ class User(ndb.Model):
     show_friends    = ndb.BooleanProperty(default=False)
     log_token       = ndb.StringProperty(required=False)
     notify_on_msg   = ndb.BooleanProperty(default=True)
+    searchable      = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
+
+    def _post_put_hook(self, future):
+        if self.searchable:
+            # TODO: update document by putting one with the same id
+            # TODO: maybe don't do this at hook, since the login token gets put into datastore on login
+
+            try:
+                doc_id = find_users(self.username_norm).results[0].doc_id
+            except IndexError:
+                doc_id = None
+
+            doc = create_user_search_document(self.username_norm, self.real_name, self.avatar_url, doc_id)
+            add_to_index(doc, 'users')
+
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        # TODO: handle user deletions from index
+        pass
+
 
     @classmethod
     def save(cls, username, email, password):
@@ -227,7 +248,7 @@ class User(ndb.Model):
         return False, {'error_date': 'Invalid date format, use mm/dd/yyyy'}
 
     @classmethod
-    def save(cls, username, email, password):
+    def save(cls, username, email, password, *args):
         """Save a user object
 
         Returns:
