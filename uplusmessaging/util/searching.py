@@ -47,11 +47,11 @@ def find_documents(query_string, limit, index_name="users"):
     try:
         username_desc = search.SortExpression(
             expression='username',
-            direction=search.SortExpression.DESCENDING,
+            direction=search.SortExpression.ASCENDING,
             default_value='aaa')
         real_name_desc = search.SortExpression(
             expression = 'real_name',
-            direction=search.SortExpression.DESCENDING,
+            direction=search.SortExpression.ASCENDING,
             default_value='aaa'
         )
         # Sort up to 10 matching results by username then real name in descending order
