@@ -1,14 +1,16 @@
 from BaseHandler import *
 from models.User import User
 from helpers.authentication import Authentication as aut
+from helpers.errorretrieval import valid
 
 class SignUpPage(BaseHandler):
 
     def get(self):
-        self.render("signup.html")
+        self.render("signup.html", {'errors': None})
 
     def post(self):
-        params = self.get_params(["username", "email", "password"])
+        #TODO: works with non-matching passwords, it shouldn't
+        params = self.get_params(["username", "email", "password", "password_confirm"])
         user = User.save(*params)
 
         if user:
@@ -16,4 +18,5 @@ class SignUpPage(BaseHandler):
             self.set_cookies({'username':user.username, 'log_token':log_token})
             self.redirect("/")
         else:
-            self.redirect("/signup")
+            _, errors = valid(*params)
+            self.render("signup.html", {'errors': errors})
