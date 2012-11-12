@@ -7,11 +7,7 @@ import logging
 
 class LoginPage(BaseHandler):
     def get(self):
-        errors = self.response.body
-
-        if errors:
-            errors = json.loads(errors)
-        self.render("login.html", {'errors': errors})
+        self.render("login.html", {'errors': None})
 
     def post(self):
         #TODO: what if i'm already logged in
