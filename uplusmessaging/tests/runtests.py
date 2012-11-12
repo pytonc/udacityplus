@@ -9,7 +9,7 @@ sys.path.insert(0, APP_ENGINE)
 # so that
 import dev_appserver
 dev_appserver.fix_sys_path()
-APP_PATH = os.path.abspath("~/code/udacityplus/uplusmessaging")
+APP_PATH = os.path.abspath("/home/jzegan/code/udacityplus/uplusmessaging")
 sys.path.insert(0, APP_PATH)
 
 # for the No api proxy found for service "memcache";
