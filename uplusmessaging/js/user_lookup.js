@@ -18,7 +18,7 @@ function userFormatSelection(person) {
 }
 $(document).ready(function() {
     $("#search").select2({
-        placeholder: "Search for a movie",
+        placeholder: "Search for a Udacian",
         minimumInputLength: 3,
         ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
             url: "/search",
