@@ -9,6 +9,7 @@
         <meta name="author" content="">
 
         <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
+        <link href="/stylesheets/select2.css" rel="stylesheet"/>
 
         <style>
             body {
@@ -92,11 +93,12 @@
                 {% block peerlist %}
                     <div class="span3 well sidebar-nav">
 
+
                         <h2>Peers</h2>
 
-                        <form class="navbar-search pull-left">
-                            <input type="text" class="search-query" placeholder="Search...">
-                        </form>
+                        <p>
+                            <input type="hidden" class="bigdrop" id="search" style="width:250px"/>
+                        </p>
 
                         <br><br>
                         <div class="bs-docs-example">
@@ -142,4 +144,6 @@
 <script src="/js/bootstrap-carousel.js"></script>
 <script src="/js/bootstrap-tab.js"></script>
 <script src="/js/bootstrap-modal.js"></script>
+<script src="/js/select2/select2.js"></script>
+<script src="/js/user_lookup.js"></script>
 </html>
