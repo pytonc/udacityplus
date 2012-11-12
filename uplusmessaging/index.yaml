@@ -63,6 +63,12 @@ indexes:
 - kind: User
   properties:
   - name: username_norm
+  - name: password
+  - name: username
+
+- kind: User
+  properties:
+  - name: username_norm
   - name: real_name
   - name: username
 
