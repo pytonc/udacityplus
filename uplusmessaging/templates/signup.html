@@ -5,7 +5,8 @@
         <h2>Signup</h2>
         <form action="" method="post" class="form-horizontal">
             <fieldset>
-                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                <div class={% if errors.error_invalid_username or errors.error_user_exists%}"control-group error"
+                {% else %}"control-group"{% endif %}>
                     <label class="control-label" for="username">Username</label>
                     <div class="controls">
                         <input type="text"
@@ -14,9 +15,11 @@
                                class="input-xlarge focused"
                                placeholder="Username"
                                required="required">
+                        <span class="help-inline">{{ errors.error_invalid_username}}</span>
+                        <span class="help-inline">{{ errors.error_user_exists }}</span>
                     </div>
                 </div>
-                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                <div class={% if errors.error_email %}"control-group error"{% else %}"control-group"{% endif %}>
                     <label class="control-label" for="email">Email</label>
                     <div class="controls">
                         <input type="text"
@@ -25,11 +28,12 @@
                                class="input-xlarge focused"
                                placeholder="Email"
                                required="required">
+                        <span class="help-inline">{{ errors.error_email }}</span>
                     </div>
                 </div>
 
-                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
-                    <label class="control-label" for="password">Password</label>
+                    <div class={% if errors.error_password %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label" for="password">Repeat password</label>
                     <div class="controls">
                         <input type="password"
                                name="password"
@@ -37,17 +41,20 @@
                                placeholder="Password"
                                required="required"
                                id="password">
+                        <span class="help-inline">{{ errors.error_password }}</span>
                     </div>
                 </div>
-                <div class={% if error %}"control-group error"{% else %}"control-group"{% endif %}>
+                <div class={% if errors.verify or errors.match%}"control-group error"{% else %}"control-group"{% endif %}>
                 <label class="control-label" for="password_confirm">Password</label>
                 <div class="controls">
                     <input type="password"
-                           name="password"
+                           name="password_confirm"
                            class="input-xlarge focused"
                            placeholder="Password"
                            required="required"
                            id="password_confirm">
+                    <span class="help-inline">{{ errors.error_verify }}</span>
+                    <span class="help-inline">{{ errors.error_match }}</span>
                 </div>
                 </div>
                 <div class="form-actions">
