@@ -4,7 +4,7 @@ import logging
 
 def create_user_search_document(username, real_name, avatar_url="/img/defaultavatar.png", doc_id=None):
     # limitation of app engine search, only matches full words, no fuzzy search either
-    tokenized_un = ','.join([username[0:i] for i in xrange(3, len(username) + 1)])
+    tokenized_un = ','.join([username[0:i] for i in xrange(1, len(username) + 1)])
     rn = real_name.split()
     rn.append(real_name)
     # tokenizes real name, "john dough", like so (if xrange(3, len(rn) + 1), i don't know if sort order matters for
@@ -22,7 +22,7 @@ def create_user_search_document(username, real_name, avatar_url="/img/defaultava
     #     'john dough']
     tokenized_rn = ','.join(sorted(
         set(
-            [s[0:i] for i in xrange(2, len(rn) + 1) for s in rn]
+            [s[0:i] for s in rn for i in xrange(1, len(s) + 1)]
         ), key=lambda x: (len(x), x)))
 
     return search.Document(doc_id=doc_id,
