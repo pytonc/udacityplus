@@ -34,7 +34,7 @@ import re
 import models.Details as Details
 from Message import Message, Conversation
 from controllers.helpers.common import adduep
-from util.searching import create_user_search_document, add_to_index, find_users
+from util.searching import create_user_search_document, add_to_index, find_users, remove_from_index
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
@@ -55,7 +55,6 @@ class User(ndb.Model):
     created         = ndb.DateTimeProperty(auto_now_add=True)
     updated         = ndb.DateTimeProperty(auto_now=True)
 
-#    friends         = ndb.KeyProperty(kind='User', repeated=True)
     friends         = ndb.StringProperty(repeated=True)
 
     # details
@@ -81,17 +80,19 @@ class User(ndb.Model):
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
     def _post_put_hook(self, future):
+        try:
+            doc_id = find_users(self.username_norm).results[0].doc_id
+        except IndexError:
+            doc_id = None
+
         if self.searchable:
             # TODO: update document by putting one with the same id
             # TODO: maybe don't do this at hook, since the login token gets put into datastore on login
 
-            try:
-                doc_id = find_users(self.username_norm).results[0].doc_id
-            except IndexError:
-                doc_id = None
-
             doc = create_user_search_document(self.username_norm, self.real_name, self.avatar_url, doc_id)
             add_to_index(doc, 'users')
+        elif not self.searchable and doc_id:
+            remove_from_index(doc_id, 'users')
 
     @classmethod
     def _pre_delete_hook(cls, key):
