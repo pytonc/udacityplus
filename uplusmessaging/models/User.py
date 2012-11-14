@@ -87,7 +87,8 @@ class User(ndb.Model):
 
         if self.searchable:
             # TODO: update document by putting one with the same id
-            # TODO: maybe don't do this at hook, since the login token gets put into datastore on login
+            # TODO: separate log_token to a login tracking subsystem or implement GAE Users. every time a user logs in
+            #       User instance gets saved and _post_put_hook called, etc.
 
             doc = create_user_search_document(self.username_norm, self.real_name, self.avatar_url, doc_id)
             add_to_index(doc, 'users')
