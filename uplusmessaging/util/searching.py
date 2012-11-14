@@ -3,6 +3,18 @@ import logging
 
 
 def create_user_search_document(username, real_name, avatar_url="/img/defaultavatar.png", doc_id=None):
+    """Create a Document that will allow searching for people based on their username and real name
+
+    Args:
+     username:      user's username as string
+     real_name:     user's real name as string
+     avatar_url:    location of user's avatar
+     doc_id:        Document id of an existing Document for this user. By default None, so a new one will be inserted,
+                    otherwise, if passed, it will be updated/replaced with new one
+
+    Returns:
+     search Document
+    """
     # limitation of app engine search, only matches full words, no fuzzy search either
     tokenized_un = ','.join([username[0:i] for i in xrange(1, len(username) + 1)])
     rn = real_name.split()
@@ -33,6 +45,16 @@ def create_user_search_document(username, real_name, avatar_url="/img/defaultava
                 search.TextField(name='tokenized_rn', value=tokenized_rn)])
 
 def add_to_index(document, index_name):
+    """adds Document instance to search index with index_name
+
+    Args:
+     document:      Document instance
+     index_name:    index name as string to add the document to
+
+    Returns:
+     True if adding succeeded
+     False if adding failed
+    """
     try:
         search.Index(name=index_name).put(document)
         logging.info('Adding to index succeeded: %s', document.doc_id)
@@ -44,6 +66,16 @@ def add_to_index(document, index_name):
 
 
 def find_documents(query_string, limit, index_name="users"):
+    """Finds a document containing query string in index
+
+    Args:
+     query_string:  query string in Search API format
+     limit:         result limit
+     index_name:    string name of the index to find the document in, users by default
+
+    Returns:
+     SearchResults of the query or None if query failed
+    """
     try:
         username_desc = search.SortExpression(
             expression='username',
@@ -68,10 +100,18 @@ def find_documents(query_string, limit, index_name="users"):
 
         return index.search(query)
     except search.Error:
-        logging.exception('Search failed')
+        logging.exception('Search failed for: {}'.format(query_string))
     return None
 
 def find_all(index="users"):
+    """Find all items in index
+
+    Args:
+     index: string index name to search, users by default
+
+    Returns:
+     List of Documents in index
+    """
     _INDEX_NAME = index
 
     doc_index = search.Index(name=_INDEX_NAME)
@@ -86,13 +126,25 @@ def find_all(index="users"):
 
 
 def find_users(query):
+    """Convenience function, calls find_documents with query
+
+    Args:
+     query: query string
+
+    Returns:
+     SearchResults
+    """
     results = find_documents(query, 10)
     if results:
         return results
 
 
 def delete_all_in_index(index_name):
-    """Delete all the docs in the given index."""
+    """Delete all the docs in the given index.
+
+    Args:
+     index_name:    string name of the index to remove results from
+    """
     doc_index = search.Index(name=index_name)
 
     while True:
@@ -105,6 +157,16 @@ def delete_all_in_index(index_name):
         doc_index.delete(document_ids)
 
 def remove_from_index(doc_id, index_name='users'):
+    """Removes document from index,
+
+    Args:
+     doc_id:    document id to remove, can find it with find_documents or find_usersc
+     index_name:    string name of the index to remove the document from
+
+    Returns:
+     False: if there was a DeleteError
+     True:  if deleting succeeded
+    """
     doc_index = search.Index(name=index_name)
     try:
         doc_index.delete(doc_id)
