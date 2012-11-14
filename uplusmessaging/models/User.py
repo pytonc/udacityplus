@@ -80,6 +80,9 @@ class User(ndb.Model):
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
     def _post_put_hook(self, future):
+        """Post put hook, adds user's username and real name to search index. This fires every time a user
+         instance is saved
+        """
         try:
             doc_id = find_users(self.username_norm).results[0].doc_id
         except IndexError:
@@ -118,11 +121,28 @@ class User(ndb.Model):
 
     @classmethod
     def get_user(cls, username):
-        # shortcut for other classes that import User
+        """Get User instance for username
+
+        Args:
+         username:  string with username
+
+        Returns:
+         instance of User class for given username or None
+        """
         return cls.query(User.username_norm == username.lower()).get()
 
     @classmethod
     def valid_password(cls, password):
+        """Check if password matches some constraint
+
+        Args:
+         password:  password string to be checked
+
+        Returns:
+         a tuple of
+             True or False, indicates if password fits constraint
+             dictionary of errors, error_password, or empty
+        """
         p = len(password)
         if not ( p >= 8 and p < 50):
             return False, {'error_password': 'Invalid password length'}
@@ -130,6 +150,17 @@ class User(ndb.Model):
 
     @classmethod
     def valid_passwords(cls, password, confirmation):
+        """Check if password and password confirmation are valid
+
+        Args:
+         password:      password
+         confirmation:  password confirmation, should be the same as password
+
+        returns:
+         tuple of:
+          state:        True or False, indicates if password and confirmation are valid
+          errors:       dictionary of errors: error_password, error_verify, error_match or empty
+        """
         errors = {}
         state = True
 
@@ -151,6 +182,16 @@ class User(ndb.Model):
 
     @classmethod
     def valid_username(cls, username):
+        """Check if username is valid and available
+
+        Args
+         username:  username as string
+
+        Returns
+         tupple of:
+          state:    True or False indicating if username is valid
+          errors;   dictionary of errors, empty or with error_user_exists or error_invalid_username
+        """
         errors = {}
         state = True
         if uname.match(username):
@@ -215,6 +256,9 @@ class User(ndb.Model):
 
     def update(self, **kwargs):
         """Update user fields
+
+        Args:
+         **kwargs:  dictionary of updated values
         """
         #TODO: update only the changed fields
         current = self.get_all_courses()
@@ -267,6 +311,12 @@ class User(ndb.Model):
 
     @classmethod
     def add_friend(cls, me, friend):
+        """Add friend to me's friends list and vice versa
+
+        Args:
+         me:        current user's username as string
+         friend:    friend's username as string
+        """
         #TODO: check if friend exists, etc
         #TODO: friend requests/approvals - right now auto adds to both parties
         #TODO: use transactions
@@ -319,6 +369,11 @@ class User(ndb.Model):
         return attempts
 
     def get_all_courses(self):
+        """Get all courses for this student
+
+        Returns:
+         list of CourseAttempt instances
+        """
         keys = Details.CourseAttempt.query(
             Details.CourseAttempt.student == self.key,
             default_options=QueryOptions(keys_only=True))
@@ -326,6 +381,14 @@ class User(ndb.Model):
         return ndb.get_multi(keys)
 
     def get_courses(self, completed=True):
+        """Get CourseAttempts for current user, filter by completed or not
+
+        Args:
+         completed: True (default) or False, get completed or incomplete courses
+
+        Returns:
+         list of CourseAttempt instances
+        """
         keys = Details.CourseAttempt.query(
             Details.CourseAttempt.student == self.key,
             Details.CourseAttempt.completed == completed,
@@ -335,6 +398,15 @@ class User(ndb.Model):
 
 
     def add_course(self, course_key, completed=True):
+        """Adds course for current user
+
+        Args:
+         course_key:    Key of the course to be added
+         completed:     True (default) or False, indicates whether course is complete or not
+
+        Returns:
+         key of the inserted CourseAttempt instance
+        """
         if not isinstance(course_key, Key):
             raise ValueError("course_key must be a Key of a Course instance")
 
@@ -352,6 +424,13 @@ class User(ndb.Model):
         return k
 
     def remove_course(self, course_key, completed=True):
+        """Removes course for the current user
+
+        Args:
+         course_key:    Key instance of Course to be removed
+         completed:     True (default) or False, indicates whether course is complete or not. User may be enrolled
+                        and have completed the same course.
+        """
         ca = self.get_courses(completed)
 
         rem_list = [attempt for attempt in ca if
@@ -399,6 +478,14 @@ class User(ndb.Model):
     @classmethod
     def add_conversation_for_user(cls, username, conversation):
         """Add a conversation thread for user with username
+
+        Args:
+         username:  username of user for which to add the conversation
+         conversation:  Conversation key to be added
+
+        Returns:
+         None:  if no user with username was found
+         User instance: if insert was successfull
         """
         u = cls.query(User.username_norm == username.lower()).get()
         if u:
@@ -410,7 +497,12 @@ class User(ndb.Model):
     @classmethod
     def add_conversation_for_users(cls, conversation, *users):
         """Adds participants to a conversation thread for each user in users
+
+        Args:
+         conversation:  Conversation key to be added
+         *users:        list of users
         """
+        #TODO: why is this conditional here again?
         if all(users):
             users = [users[0]]
         for user in users:
@@ -446,6 +538,17 @@ class User(ndb.Model):
     @classmethod
     def add_new_conversation(cls, sender, receiver, title, content):
         """Adds new conversation with receiver for sender, returns Conversation object
+
+        Args:
+         sender:    sender's username as string
+         receiver:  receiver's username as string
+         title:     title of the conversation
+         content:   content of the first post
+
+        Returns:
+         tupple with:
+          newly created Conversation instance
+          newly created Message instance
         """
         #TODO: check if sender and receiver aren't the same person, if so, add only once
 
