@@ -64,6 +64,11 @@ table td.preview {
     margin: 5px;
 }
 
+#msg_content {
+    width: 700px;
+    min-height: 100px;
+}
+
 label {
     font-weight: bold;
     display: inline-block;
