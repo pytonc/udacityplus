@@ -9,6 +9,6 @@ if DEBUG:
 
 
 app = webapp2.WSGIApplication([
-    (r'/(?P<username>\w+)', ProfilePage),
+    (r'/(?P<username>\w+)', ProfilePage)
     ], debug=DEBUG)
 

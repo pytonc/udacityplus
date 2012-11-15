@@ -57,6 +57,7 @@ class User(ndb.Model):
     # details
     forum_name      = ndb.StringProperty()
     short_about     = ndb.StringProperty(default='')
+    projects        = ndb.JsonProperty()
 #    prog_langs      = ndb.StructuredProperty(Details.Tool, repeated=True)
     tools           = ndb.TextProperty(default='')
     dob             = ndb.DateProperty()
@@ -234,6 +235,34 @@ class User(ndb.Model):
             user.put()
             return user
         return False
+
+    @classmethod
+    def add_project(cls, username, project_id):
+        """If this is user's first project, creates a new list and adds project_id to it
+        otherwise appends project_id to the existing list. 
+        """
+        user = cls.get_user(username)
+        if user:
+            projects = user.projects
+            if projects:
+                projects.append(project_id)
+            else:
+                projects = [project_id]
+            user.projects = projects
+            user.put()
+
+    @classmethod
+    def remove_project(cls, username, project_id):
+        """Removes project_id from user's projects        
+        """
+        user = cls.get_user(username)
+        if user:
+            projects = user.projects
+            pid = int(project_id)
+            if pid in projects:
+                projects.remove(pid)
+                user.projects = projects
+                user.put()
 
     @classmethod
     def add_friend(cls, me, friend):

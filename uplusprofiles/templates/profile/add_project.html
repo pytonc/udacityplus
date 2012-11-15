@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block stylesheets %}
+    {{ super() }}
+{% endblock stylesheets %}
+{% block usercontent %}
+<form class="form-horizontal span7 well" method="POST" action="{{ upload_url }}" enctype="multipart/form-data">
+    <fieldset class="bs-docs-example">
+        <div id="legend" class="">
+            <legend class="">Add Project</legend>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label" for="title">Project Title</label>
+            <div class="controls">
+                <input type="text" required="required" id="title" name="title" placeholder="" class="input-xlarge" maxlength="50"
+                value="{{ title }}">
+                {% if titleerror %}
+                <p class="help-block alert alert-error">
+                    {{ titleerror }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="screenshot">Screenshot</label>
+            <div class="controls">
+                <input type="file" required="required" id="screenshot" name="screenshot">
+                {% if fileerror %}
+                <p class="help-block alert alert-error">
+                    {{ fileerror }}
+                </p>
+                {% else %}
+                <p class="help-block">(maximum 1MB)</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="url">Visit/Download Url</label>
+            <div class="controls">
+                <input type="text" required="required" id="url" name="url" placeholder="" 
+                class="input-xlarge" maxlength="100"
+                value="{{ url }}">
+                {% if urlerror %}
+                <p class="help-block alert alert-error">
+                    {{ urlerror }}
+                </p>
+                {% else %}
+                <p class="help-block">enter complete URL (including http://)</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Short Description</label>
+            <div class="controls">
+                <div class="textarea">
+                    <textarea maxlength="350" style="width: 400px; height: 200px;" required="required"
+                    id="short_description" name="short_description">{{ short_description }}</textarea>
+                </div>
+                {% if sderror %}
+                <p class="help-block alert alert-error">
+                    {{ sderror }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if errormsg %}
+            <div class="control-group">
+                <div class="alert alert-error controls">
+                    <strong>Error!</strong> {{ errormsg }}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="control-group">
+
+            <!-- Button -->
+            <div class="controls">
+                <button type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn" onclick="redirectToUserHome(&quot;{{ username }}&quot;)">Cancel</button>
+            </div>
+        </div>
+        <input type="hidden" name="mode" value="add_project"/>
+    </fieldset>
+</form>
+
+
+{% endblock usercontent%}
+{% block js %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/uplus-custom.js"></script>
+    <script language="javascript" type="text/javascript">
+        $(document).ready( function () {
+            setMaxLength();
+            $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
+        });
+
+        
+    </script>
+{% endblock %}

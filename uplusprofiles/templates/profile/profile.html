@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block profileavatar %}
-<h2 xmlns="http://www.w3.org/1999/html">User</h2>
+<h2>User</h2>
 
 <img src="{{ gravatar }}" height="100%" width="100%" class="img-polaroid">
 
@@ -48,63 +48,73 @@
                 <div class="tab-pane" id="aboutyou">{{ user.short_about }}</div>
 
                 <div class="tab-pane active" id="projects">
-
-                    <h4>Here is a selection of projects that I'm working on.</h4>
-                    <br>
-
-                    <div class="bs-docs-example">
-                        <div id="myCarousel" class="carousel slide">
-                            <div class="carousel-inner">
-
-                                <div class="item active">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>General Artificial Intelligence</h4>
-                                        <p>I am making a general artificial intelligence.</p>
-                                    </div>
-                                </div>
-
-                                <div class="item">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>Quantum Crytopgraphy</h4>
-                                        <p>A description.</p>
-                                    </div>
-                                </div>
-
-                                <div class="item">
-                                    <img src="img/robot.png" alt="">
-                                    <div class="carousel-caption">
-                                        <h4>Robotics</h4>
-                                        <p>Another description.</p>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-                            <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+                    {% if user.username_norm == username %}
+                        <div class="pull-right">
+                            <a href="/{{ user.username_norm }}?mode=add_project" class="btn btn-mini" type="button">
+                                <i class="icon-plus"></i> Add
+                            </a>
+                            <a href="/{{ user.username_norm }}?mode=edit_project" class="btn btn-mini" type="button">
+                                <i class="icon-edit"></i> Edit
+                            </a>
                         </div>
-                    </div>
+                    {% endif %}
+                    {% if projects %}
+                        <h4>Here is a selection of projects that I'm working on.</h4>
+                        <br>
+
+                        <div class="row-fluid">
+
+                            <div id="myCarousel" class="carousel slide" data-interval="5000">
+                                <div class="carousel-inner">
+                                    {% set active = "active" %}
+                                    {% for project in projects %}
+                                        <div class="item {{active}}">
+                                            {% set active = "" %}
+                                            <img src="{{ project.screenshot_url }}" alt="Invalid Image Data" 
+                                            style="width:100%; height: 450px; ">
+                                            <div class="carousel-caption">
+                                                <h4>{{ project.title }}</h4>
+                                                <p>{{ project.short_description }}</p>
+                                                <p><a href="{{ project.url }}" target="_blank">Visit</a></p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+                                <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <h4> No projects added </h4>
+                    {% endif %}
                 </div>
 
                 <div class="tab-pane" id="courses">
 
-                    <h4>Courses I'm Working On...</h4>
-                    <ul>
-                        {% for course in courses_incomplete %}
-                        <li><a href="#">{{ course.name }}</a></li>
-                        {% endfor %}
-                    </ul>
-
+                    {% if courses_incomplete %}
+                        <h4>Courses I'm Working On...</h4>
+                        <ul>
+                            {% for course in courses_incomplete %}
+                            <li><a href="#">{{ course.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <h4>Currently I am not taking any course</h4>
+                    {% endif %}
+                    
                     <hr>
 
-                    <h4>Cources I've Completed...</h4>
-                    <ul>
-                        {% for course in courses_completed %}
-                            <li><a href="#">{{ course.name }}</a></li>
-                        {% endfor %}
-                    </ul>
+                    {% if courses_completed %}
+                        <h4>Courses I've Completed...</h4>
+                        <ul>
+                            {% for course in courses_completed %}
+                                <li><a href="#">{{ course.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <h4>I've not completed any course yet</h4>
+                    {% endif %}
 
                 </div>
 
@@ -116,6 +126,7 @@
 
 </div>
 {% endblock usercontent %}
+
 {% block js %}
     {{ super() }}
 
