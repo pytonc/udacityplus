@@ -2,14 +2,18 @@
 import sys
 import os
 
+if os.name == 'nt':
+    APP_ENGINE = os.path.abspath(os.path.join(os.environ["ProgramFiles(x86)"], 'Google', 'google_appengine'))
+elif os.name == 'posix':
+    APP_ENGINE = '~/google_appengine'
 
-APP_ENGINE = '~/google_appengine'
 sys.path.insert(0, APP_ENGINE)
 
 # so that
 import dev_appserver
 dev_appserver.fix_sys_path()
-APP_PATH = os.path.abspath("/home/jzegan/code/udacityplus/uplusmessaging")
+# so ugly
+APP_PATH = os.path.abspath(os.path.abspath(os.path.split(os.path.split(__file__)[0])[0]))
 sys.path.insert(0, APP_PATH)
 
 # for the No api proxy found for service "memcache";
