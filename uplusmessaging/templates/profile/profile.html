@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block profileavatar %}
+<h2>User</h2>
+
+<img src="{{ user.avatar_url }}" height="100%" width="100%" class="img-polaroid">
+
+<hr>
+{% endblock profileavatar %}
+{% block usercontent %}
+<div class="span7 well">
+
+    <div class="bs-docs-example bs-navbar-top-example">
+        <div class="navbar navbar-static-top" style="margin: -1px -1px 0;">
+            <div class="navbar-inner">
+                <div class="container" style="width: auto; padding: 0 20px;">
+                    <a class="brand" href="#">{{ user.real_name or user.username }}</a>
+                    <div class="btn-group">
+                        {% if user.username_norm == username %}
+                            <button class="btn" type="button"><i class="icon-edit"></i> Edit Profile</button>
+                        {% elif friend_btn %}
+                            <form action="/friends" method="post" style="margin: 0;">
+                                <input type="text" name="name" value="{{ user.username_norm }}" class="hidden" style="display: none;"/>
+                                <input type="text" name="to" value="{{ username }}" class="hidden" style="display: none;"/>
+                                <input type="text" name="action" value="add" class="hidden" style="display: none;"/>
+                                <button type="submit" class="btn"><i class="icon-user"></i> Add Friend</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div class="bs-docs-example">
+        <div class="tabbable" style="margin-bottom: 18px;">
+
+            <ul class="nav nav-tabs" id="myTab">
+                <li><a href="#aboutyou" data-toggle="tab">About You</a></li>
+                <li class="active"><a href="#projects" data-toggle="tab">Projects</a></li>
+                <li><a href="#courses" data-toggle="tab">Courses</a></li>
+                <li><a href="#tools" data-toggle="tab">Tools</a></li>
+            </ul>
+
+            <div class="tab-content">
+
+                <div class="tab-pane" id="aboutyou">
+                    <h4>User</h4>
+                    <p>Hi, I like programming and learning new things on Udacity.</p>
+                </div>
+
+                <div class="tab-pane active" id="projects">
+
+                    <h4>Here is a selection of projects that I'm working on.</h4>
+                    <br>
+
+                    <div class="bs-docs-example">
+                        <div id="myCarousel" class="carousel slide">
+                            <div class="carousel-inner">
+
+                                <div class="item active">
+                                    <img src="img/robot.png" alt="">
+                                    <div class="carousel-caption">
+                                        <h4>General Artificial Intelligence</h4>
+                                        <p>I am making a general artificial intelligence.</p>
+                                    </div>
+                                </div>
+
+                                <div class="item">
+                                    <img src="img/robot.png" alt="">
+                                    <div class="carousel-caption">
+                                        <h4>Quantum Crytopgraphy</h4>
+                                        <p>A description.</p>
+                                    </div>
+                                </div>
+
+                                <div class="item">
+                                    <img src="img/robot.png" alt="">
+                                    <div class="carousel-caption">
+                                        <h4>Robotics</h4>
+                                        <p>Another description.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+                            <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="courses">
+
+                    <h4>Courses I'm Working On...</h4>
+                    <ul>
+                        <li><a href="#">Differential Equations in Action: Making Math Matter</a></li>
+                    </ul>
+
+                    <hr>
+
+                    <h4>Cources I've Completed...</h4>
+                    <ul>
+                        <li><a href="#">Artificial Intelligence: Programming a Robotic Car</a></li>
+                        <li><a href="#">Applied Cryptography: Science of Secrets</a></li>
+                        <li><a href="#">Web Development: How to Build a Blog</a></li>
+                        <li><a href="#">Design of Computer Programs: Programming Principles</a></li>
+                    </ul>
+
+                </div>
+
+                <div class="tab-pane" id="tools">
+
+                    <h4>Languages</h4>
+                    <table cellpadding="5" rules="cols">
+                        <tr><th>Name</th><th>Approximate Skill Level</th></tr>
+                        <tr><td>Python</td><td>Awesome</td></tr>
+                        <tr><td>Whitespace</td><td>Awesome</td></tr>
+                        <tr><td>Perl 6</td><td>Questionable</td></tr>
+                    </table>
+
+                    <hr>
+
+                    <h4>Software/Libraries</h4>
+                    <table cellpadding="5" rules="cols">
+                        <tr><th>Name</th><th>Approximate Skill Level</th></tr>
+                        <tr><td>Google App Engine</td><td>Awesome</td></tr>
+                        <tr><td>OpenGL</td><td>Awesome</td></tr>
+                        <tr><td>Jquery</td><td>Beginner</td></tr>
+                    </table>
+
+                </div>
+
+            </div>
+        </div> <!-- /tabbable -->
+    </div>
+
+</div>
+{% endblock usercontent %}

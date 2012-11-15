@@ -10,3 +10,22 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Course
+  properties:
+  - name: cid
+  - name: level
+
+- kind: Course
+  properties:
+  - name: level
+  - name: cid
+
+- kind: User
+  properties:
+  - name: email
+  - name: username
+
+- kind: User
+  properties:
+  - name: username_norm
+  - name: username

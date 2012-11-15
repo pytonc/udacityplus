@@ -1,15 +1,67 @@
 {% extends "base.html" %}
 {% block content %}
-    <form action="" method="Post" onsubmit="return validateSignUpForm()">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username"><div id="username_error"></div>
-        <br />
-        <label for="email">Email:</label>
-        <input type="text" id="email" name="email"><div id="email_error"></div>
-        <br />
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password"><div id="password_error"></div>
-        <br />
-        <input type="submit">
-    </form>
+<div class="row">
+    <div class="span5 offset4">
+        <h2>Signup</h2>
+        <form action="" method="post" class="form-horizontal">
+            <fieldset>
+                <div class={% if errors.error_invalid_username or errors.error_user_exists%}"control-group error"
+                {% else %}"control-group"{% endif %}>
+                    <label class="control-label" for="username">Username</label>
+                    <div class="controls">
+                        <input type="text"
+                               name="username"
+                               id="username"
+                               class="input-xlarge focused"
+                               placeholder="Username"
+                               required="required">
+                        <span class="help-inline">{{ errors.error_invalid_username}}</span>
+                        <span class="help-inline">{{ errors.error_user_exists }}</span>
+                    </div>
+                </div>
+                <div class={% if errors.error_email %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label" for="email">Email</label>
+                    <div class="controls">
+                        <input type="text"
+                               name="email"
+                               id="email"
+                               class="input-xlarge focused"
+                               placeholder="Email"
+                               required="required">
+                        <span class="help-inline">{{ errors.error_email }}</span>
+                    </div>
+                </div>
+
+                    <div class={% if errors.error_password %}"control-group error"{% else %}"control-group"{% endif %}>
+                    <label class="control-label" for="password">Repeat password</label>
+                    <div class="controls">
+                        <input type="password"
+                               name="password"
+                               class="input-xlarge focused"
+                               placeholder="Password"
+                               required="required"
+                               id="password">
+                        <span class="help-inline">{{ errors.error_password }}</span>
+                    </div>
+                </div>
+                <div class={% if errors.verify or errors.match%}"control-group error"{% else %}"control-group"{% endif %}>
+                <label class="control-label" for="password_confirm">Password</label>
+                <div class="controls">
+                    <input type="password"
+                           name="password_confirm"
+                           class="input-xlarge focused"
+                           placeholder="Password"
+                           required="required"
+                           id="password_confirm">
+                    <span class="help-inline">{{ errors.error_verify }}</span>
+                    <span class="help-inline">{{ errors.error_match }}</span>
+                </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">Sign up</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
 {% endblock %}

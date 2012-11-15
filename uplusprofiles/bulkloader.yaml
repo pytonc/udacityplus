@@ -1,0 +1,59 @@
+python_preamble:
+- import: base64
+- import: re
+- import: google.appengine.ext.bulkload.transform
+- import: google.appengine.ext.bulkload.bulkloader_wizard
+- import: google.appengine.ext.db
+- import: google.appengine.api.datastore
+- import: google.appengine.api.users
+
+transformers:
+
+- kind: Source
+  connector: csv
+  connector_options:
+    encoding: utf-8
+  property_map:
+    - property: __key__
+      external_name: key
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: name
+      external_name: name
+
+    - property: url
+      external_name: url
+      
+
+- kind: Course
+  connector: csv
+  connector_options:
+    encoding: utf-8
+  property_map:
+    - property: __key__
+      external_name: key
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: cid
+      external_name: cid
+
+    - property: dept
+      external_name: dept
+
+    - property: level
+      external_name: level
+
+    - property: name
+      external_name: name
+
+    - property: number
+      external_name: number
+      import_transform: transform.none_if_empty(int)
+
+    - property: short_desc
+      external_name: description
+
+    - property: source
+      external_name: source
+      import_transform: transform.create_foreign_key('Source')
+      export_transform: transform.key_id_or_name_as_string

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block usercontent %}
+<div class="span7">
+    <div id="displayMessage">
+
+        <h2>{{ message.title }}</h2>
+
+        <br />
+
+        <label for='msg_from'>from:</label>
+        <span id='msg_from'>{{ message.sender }}</span>
+
+        <br/>
+
+        <label for='timestamp'>Created:</label>
+        <span id='timestamp'>{{ message.created.strftime("%B %d, %Y") }}</span>
+
+        <br />
+
+        <div id="message">{{ message.content }}</div>
+        <div><a href="/messages/{{ conv_id }}/{{ message.key.id() }}?show=new">reply</a></div>
+    </div>
+</div>
+{% endblock %}

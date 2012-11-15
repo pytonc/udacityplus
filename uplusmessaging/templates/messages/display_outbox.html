@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Outbox</h2>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>To</th>
+            <th>Date</th>
+        </tr>
+        {% if conversations %}
+        {% for c in conversations %}
+            <tr>
+                <td>{{ c.title }}</td>
+                <td>
+                    {{ c.receiver_name }}
+                </td>
+                <td>{{ c.created.strftime("%B %d") }}</td>
+            </tr>
+            {% for m in c.messages %}
+                <tr>
+                        <td class="preview" colspan="3"><a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>{{ m.content|truncate(140) }}</a></td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        {% endif %}
+    </table>
+    <a href='/messages?show=received'>Check inbox</a>
+    <a href='/messages?show=new'>Send new message</a>
+    <button onclick="getPreviousMessages()">Older</button>
+{% endblock %}

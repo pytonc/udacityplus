@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Conversation
+  properties:
+  - name: receivers_list_norm
+  - name: modified
+    direction: desc
+
 - kind: Message
   properties:
   - name: deleted
@@ -17,87 +23,8 @@ indexes:
   - name: timestamp
     direction: desc
 
-- kind: Message
+- kind: User
   properties:
-  - name: deleteted_by
-  - name: sender
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: receiver
-  - name: receiver_del
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: receiver
-  - name: receiver_deleted
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: receiver
-  - name: stored_by
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: receiver
-  - name: storeded_by=
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: receiver
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: sender_del
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: sender_deleted
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: stored_by
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: storeded_by=
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: timestamp
-
-- kind: Message
-  properties:
-  - name: sender
-  - name: timestamp
-    direction: desc
-
-- kind: Message
-  properties:
-  - name: sender=
-  - name: timestamp
+  - name: username_norm
+  - name: password
+  - name: username
