@@ -1,3 +1,7 @@
 [submodule "uplusmessaging/externals/bcrypt"]
     path = uplusmessaging/externals/bcrypt
     url = https://github.com/erlichmen/py-bcrypt.git
+
+[submodule "uplusprofiles/externals/bcrypt"]
+	path = uplusprofiles/externals/bcrypt
+	url = https://github.com/erlichmen/py-bcrypt.git
