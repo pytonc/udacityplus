@@ -73,8 +73,8 @@ class Conversation(ndb.Model):
          conv_id: Conversation id
          msg_id: Message id to delete
 
-        Returns: ????????
-
+        Returns:
+         #Todo: Should it return something?
         """
         msg = Message.get_by_id(msg_id)
         conv = cls.get_by_id(conv_id)
@@ -123,7 +123,7 @@ class Conversation(ndb.Model):
          key: Conversation key, provide either one, not both
 
         Returns:
-         ?????????
+         #Todo: Should it return something?
         """
         if not bool(conv_id) ^ bool(key):
             raise AttributeError('Provide either conv_id or key but not both')
