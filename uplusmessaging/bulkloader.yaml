@@ -1,0 +1,41 @@
+# "~/google_appengine/appcfg.py" upload_data --config_file=bulkloader.yaml --kind=Course --filename=file_path.csv --url=http://<app>.appspot.com/_ah/remote_api --application=s~<app_id>
+python_preamble:
+- import: base64
+- import: re
+- import: google.appengine.ext.bulkload.transform
+- import: google.appengine.ext.bulkload.bulkloader_wizard
+- import: google.appengine.ext.db
+- import: google.appengine.api.datastore
+- import: google.appengine.api.users
+
+transformers:
+- kind: Course
+  connector: csv
+  connector_options:
+    encoding: utf-8
+    columns: from_header
+
+  property_map:
+    - property: __key__
+      external_name: key
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: number
+      external_name: number
+      import_transform: transform.none_if_empty(int)
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: name
+      external_name: name
+      import_transform: transform.none_if_empty(str)
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: description
+      external_name: description
+      import_transform: transform.none_if_empty(str)
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: level
+      external_name: level
+      import_transform: transform.none_if_empty(str)
+      export_transform: transform.key_id_or_name_as_string

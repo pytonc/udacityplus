@@ -1,4 +1,4 @@
-application: uplusmessagingdemo
+application: messaging-demo
 version: 1
 runtime: python27
 api_version: 1
@@ -9,9 +9,14 @@ handlers:
   static_dir: js
 - url: /stylesheets
   static_dir: stylesheets
+- url: /img
+  static_dir: img
 - url: /.*
   script: main.app
 
 libraries:
 - name: jinja2
   version: latest
+
+builtins:
+- remote_api: on

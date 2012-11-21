@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% import "macros.html" as m %}
+{% block title %}{{ title }}{% endblock %}
 {% block content %}
-    <h1>{{ title }}</h1>
-{% endblock %}
+    {% if username %}
+        {{ super() }}
+        {% block usercontent %}
+            <div class="span7 well">
+            </div>
+        {% endblock usercontent %}
+    {% else %}
+        login or register
+    {% endif %}
+
+{% endblock content %}
+

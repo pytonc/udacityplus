@@ -1,8 +1,21 @@
 from BaseHandler import *
+from controllers.helpers.authentication import Authentication
+from models.User import User
 
 class HomePage(BaseHandler):
     def get(self):
-        template_values = {'title' : self.get_title()}
+        name = self.get_cookie('username')
+        friends = None
+        template_values = {}
+
+        if name:
+            user = User.get_user(name)
+            if user and Authentication.valid_log_token(user.username_norm, user.log_token):
+                friends = user.get_friends()
+                template_values = {'title' : self.get_title(), 'username': name, 'friends': friends}
+            else:
+                self.redirect('/logout')
+
         self.render("index.html", template_values)
 
     def get_title(self):
