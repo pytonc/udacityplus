@@ -2,3 +2,7 @@
 .project
 .pydevproject
 .settings/
+.DS_Store
+.idea
+.idea/*
+bulkloader-*
