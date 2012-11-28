@@ -1,4 +1,4 @@
-application: sandengine
+application: udacityplus_demo
 version: 2-2
 runtime: python27
 api_version: 1
@@ -76,6 +76,18 @@ handlers:
   script: main.app
 #  secure: always
 
+####TODO: should clean this up
+- url: /favicon.png
+  static_files: /img/favicon.png
+  upload: /img/favicon.png
+
+- url: /js
+  static_dir: js
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /img
+  static_dir: img
+
 libraries:
 - name: jinja2
   version: "2.6"
@@ -96,3 +108,6 @@ error_handlers:
 
   - error_code: timeout
     file: boilerplate/templates/errors/timeout.html
+
+builtins:
+- remote_api: on
