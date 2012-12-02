@@ -3,6 +3,8 @@ This is the boilerplate default configuration file.
 Changes and additions to settings should be done in the config module
 located in the application root rather than this config.
 """
+from web.jinja_custom.helpers import is_authenticated
+
 config = {
     'environment': 'localhost',
 
@@ -14,7 +16,7 @@ config = {
                              'cookie_name': 'session_name'},
 
     # jinja2 templates
-    'webapp2_extras.jinja2' : {'template_path': ['templates','boilerplate/templates', 'admin/templates', 'templates'],
+    'webapp2_extras.jinja2' : {'template_path': ['templates','boilerplate/templates', 'admin/templates'],
                                'environment_args': {'extensions': ['jinja2.ext.i18n']}},
 
     # application name
@@ -84,18 +86,19 @@ config = {
     # Enable Federated login (OpenID and OAuth)
     # Google App Engine Settings must be set to Authentication Options: Federated Login
     'enable_federated_login' : True,
-
     # jinja2 base layout template
+
     'base_layout' : 'base.html',
 
     # send error emails to developers
-    'send_mail_developer' : True,
+    'send_mail_developer' : False,
 
     # fellas' list
     'developers' : (
         ('Santa Klauss', 'snowypal@northpole.com'),
         ),
 
-    # ----> ADD MORE CONFIGURATION OPTIONS HERE <----
+    # site title
+    'site_title': 'Udacity+'
 
 } # end config

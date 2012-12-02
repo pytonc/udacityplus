@@ -11,8 +11,6 @@
 # valid_log_token(username, log_token)
 # create_and_save_log_token(user)
 
-
-
 from web.externals.bcrypt import bcrypt as bc
 import uuid
 from web.models import User

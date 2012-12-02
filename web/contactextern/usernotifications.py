@@ -1,7 +1,7 @@
 from google.appengine.api.app_identity import get_default_version_hostname
 from google.appengine.api import mail
 from hashlib import sha1
-from web.settings import MSG_NOTIFY_EMAIL_DISP
+from web_.settings import MSG_NOTIFY_EMAIL_DISP
 
 def create_new_user_confirmation(baseurl):
     token = sha1.hexdigest()

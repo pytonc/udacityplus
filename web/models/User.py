@@ -30,10 +30,10 @@ from web.externals.bcrypt import bcrypt as bc
 import web.models.Details as Details
 from datetime import datetime
 import re
-from web.models import Message
 from web.models.Message import  Conversation
-from web.controllers.helpers.common import adduep
+from web.models import Message
 from web.util.searching import create_user_search_document, add_to_index, find_users, remove_from_index
+from boilerplate.models import User
 
 
 _UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
@@ -43,37 +43,19 @@ _UDOB = r'^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$'
 udob = re.compile(_UDOB)
 
 
-class User(ndb.Model):
-    username        = ndb.StringProperty(required=True)
-    username_norm   = ndb.ComputedProperty(lambda self: self.username.lower())
-    password        = ndb.StringProperty(required=True)
-    email           = ndb.StringProperty(required=True)
-
-    real_name       = ndb.StringProperty(default='')
-    display_name    = ndb.StringProperty()
-
-    created         = ndb.DateTimeProperty(auto_now_add=True)
-    updated         = ndb.DateTimeProperty(auto_now=True)
+class User(User):
+    real_name       = ndb.ComputedProperty(lambda x: ' '.join([x.name, x.last_name]))
 
     friends         = ndb.StringProperty(repeated=True)
-
-    # details
-    forum_name      = ndb.StringProperty()
+    projects        = ndb.JsonProperty()
     short_about     = ndb.StringProperty(default='')
-    short_about     = ndb.StringProperty()
     tools           = ndb.TextProperty(default='')
     dob             = ndb.DateProperty()
-    profile_link    = ndb.StructuredProperty(Details.ExternalProfileLink, repeated=True)
-    location        = ndb.StructuredProperty(Details.Location)
 
-    # TODO: upload to a static directory?
-    avatar          = ndb.BlobProperty()
     avatar_url      = ndb.StringProperty(default="/img/defaultavatar.png")
-    use_gravatar    = ndb.BooleanProperty(default=False)
 
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
-    log_token       = ndb.StringProperty(required=False)
     notify_on_msg   = ndb.BooleanProperty(default=True)
     searchable      = ndb.BooleanProperty(default=True)
 
@@ -84,16 +66,13 @@ class User(ndb.Model):
          instance is saved
         """
         try:
-            doc_id = find_users(self.username_norm).results[0].doc_id
+
+            doc_id = find_users(self.username).results[0].doc_id
         except IndexError:
             doc_id = None
 
         if self.searchable:
-            # TODO: update document by putting one with the same id
-            # TODO: separate log_token to a login tracking subsystem or implement GAE Users. every time a user logs in
-            #       User instance gets saved and _post_put_hook called, etc.
-
-            doc = create_user_search_document(self.username_norm, self.real_name, self.avatar_url, doc_id)
+            doc = create_user_search_document(self.username, self.full_name, self.avatar_url, doc_id)
             add_to_index(doc, 'users')
         elif not self.searchable and doc_id:
             remove_from_index(doc_id, 'users')
@@ -129,118 +108,8 @@ class User(ndb.Model):
         Returns:
          instance of User class for given username or None
         """
-        return cls.query(User.username_norm == username.lower()).get()
+        return User.query(User.username == username).get()
 
-    @classmethod
-    def valid_password(cls, password):
-        """Check if password matches some constraint
-
-        Args:
-         password:  password string to be checked
-
-        Returns:
-         a tuple of
-             True or False, indicates if password fits constraint
-             dictionary of errors, error_password, or empty
-        """
-        p = len(password)
-        if not ( p >= 8 and p < 50):
-            return False, {'error_password': 'Invalid password length'}
-        return True, {}
-
-    @classmethod
-    def valid_passwords(cls, password, confirmation):
-        """Check if password and password confirmation are valid
-
-        Args:
-         password:      password
-         confirmation:  password confirmation, should be the same as password
-
-        returns:
-         tuple of:
-          state:        True or False, indicates if password and confirmation are valid
-          errors:       dictionary of errors: error_password, error_verify, error_match or empty
-        """
-        errors = {}
-        state = True
-
-        if not password or not confirmation:
-            errors['error_password'] = "Enter both password and confirmation"
-            errors['error_verify'] = 'Enter both password and confirmation'
-            state = False
-        if not cls.valid_password(password)[0]:
-            errors['error_password'] = "Enter a valid password."
-            state = False
-        if not cls.valid_password(confirmation)[0]:
-            errors['error_verify'] = "Enter a valid confirmation password."
-            state = False
-        if password and password and password != confirmation:
-            state = False
-            errors['error_match'] = "Passwords do not match."
-
-        return state, errors
-
-    @classmethod
-    def valid_username(cls, username):
-        """Check if username is valid and available
-
-        Args
-         username:  username as string
-
-        Returns
-         tupple of:
-          state:    True or False indicating if username is valid
-          errors;   dictionary of errors, empty or with error_user_exists or error_invalid_username
-        """
-        errors = {}
-        state = True
-        if uname.match(username):
-            users = cls.query(User.username_norm == username.lower()).fetch(1, projection=['username'])
-            if users:
-                errors['error_user_exists'] = 'User already exists'
-                state = False
-        else:
-            errors['error_invalid_username'] = 'Invalid username'
-            state = False
-        return state, errors
-
-    @classmethod
-    def valid_email(cls, email, user=None):
-        #TODO: validate email format (regex?)
-        e = cls.query(User.email == email).get(projection=['username'])
-
-        if e and not user:
-            return False, {'error_email': 'Invalid email'}
-        elif e and user:
-            if e.username == user.username:
-                return True, {}
-            else:
-                return False, {'error_email': 'Invalid email'}
-        return True, {}
-
-    @classmethod
-    def valid(cls, username, email, password):
-        #TODO: check confirmation password, implemented in valid_passwords
-        #TODO: valid_username checks only signup
-        _, u = cls.valid_username(username)
-        _, p = cls.valid_password(password)
-        _, e = cls.valid_email(email)
-        errors = adduep(u, e, p)
-        if not errors:
-            return True, {}
-
-        return False, errors
-
-    @classmethod
-    def adduep(cls, udict, edict, pdict):
-        """Consolidate dictionaries containing user, email, password errors
-        """
-        #TODO: generalize this for an arbitrary number of dicts
-        errors = dict(
-            (n, udict.get(n, '') + pdict.get(n, '') + edict.get(n, ''))
-                for n in set(udict)|set(pdict)|set(edict)
-        )
-        return errors
 
     def recafooble_classes(self, current, pset, completed):
         """Add or remove courses from the profile
@@ -353,20 +222,22 @@ class User(ndb.Model):
         """Add friend to me's friends list and vice versa
 
         Args:
-         me:        current user's username as string
-         friend:    friend's username as string
+         me_id:        current user's id
+         friend_id:    friend's username as string
         """
         #TODO: check if friend exists, etc
         #TODO: friend requests/approvals - right now auto adds to both parties
         #TODO: use transactions
 
-        mes = cls.query(cls.username_norm == me.lower()).get()
+        mes = cls.query(cls.username == me).get()
         if friend not in mes.friends:
-            mes.friends.append(friend.lower())
+            mes.friends.append(friend)
+
             mes.put()
 
         # just auto add me to the other person's list
-        fs = cls.query(cls.username_norm == friend.lower()).get()
+        fs = ndb.Key(User, friend).get()
+        fs = cls.query(cls.username == friend.lower()).get()
         if me not in fs.friends:
             fs.friends.append(me.lower())
 
@@ -380,7 +251,7 @@ class User(ndb.Model):
          None if User's friends list is empty
         """
         if bool(self.friends):
-            f = User.query(User.username_norm.IN(self.friends)).order(-User.username)\
+            f = User.query(User.usenrname.IN(self.friends)).order(-User.username)\
                     .fetch(limit, offset=offset, projection=['username', 'real_name'])
             return f
         return None
@@ -526,7 +397,7 @@ class User(ndb.Model):
          None:  if no user with username was found
          User instance: if insert was successfull
         """
-        u = cls.query(User.username_norm == username.lower()).get()
+        u = cls.query(User.username == username).get()
         if u:
             u.conversations.append(conversation)
             u.put()
@@ -560,18 +431,6 @@ class User(ndb.Model):
         c = Conversation.query(Conversation.receivers_list_norm.IN([username.lower()]))\
         .order(-Conversation.modified)\
         .fetch(limit=limit, offset=offset, keys_only=True)
-        return ndb.get_multi(c)
-
-    def get_conversations(self, limit=10, offset=0):
-        """UNUSED - Get conversations for current User object
-
-        Returns:
-         A list of Conversation objects
-        """
-
-        c = Conversation.query(self.username_norm in Conversation.receivers, keys_only=True)\
-        .order(Conversation.modified)\
-        .limit(limit, offset=offset)
         return ndb.get_multi(c)
 
     @classmethod

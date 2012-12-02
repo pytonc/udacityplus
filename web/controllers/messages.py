@@ -1,22 +1,22 @@
-# Display specific message if message id is given in the 
+# Display specific message if message id is given in the
 # url, otherwise get show param and display inbox, outbox 
 # or render form for a new message.
 #
 # If start and end params are given, in inbox/outbox show 
 # messages from start to end sorted by creation time DESC
 # else use default values defined in model (and temp.js)
+from boilerplate.lib.basehandler import user_required
+from web.models.User import User
+from web.models.Message import Message
 from web.controllers.BaseHandler import *
 from web.controllers.helpers.authentication import Authentication
 from web.models.Message import  Conversation
 from web.contactextern.usernotifications import new_message_notify
 from web.controllers.helpers.errorretrieval import check_valid_receiver
-from web.models import  Message
-from web.models import User
 
 
 class MessagePage(BaseHandler):
-
-    @Authentication.do
+    @user_required
     def get(self, conv_id=None, msg_id=None):
 #       (conv_id and msg_id) or (not conv_id and not msg_id)
         if not bool(conv_id) ^ bool(msg_id):
@@ -92,7 +92,7 @@ class MessagePage(BaseHandler):
                 if user.notify_on_msg:
                     new_message_notify(user.email, conv_id, msg)
 
-    @Authentication.do
+    @user_required
     def post(self, conv_id, msg_id):
         sender   = username = self.get_cookie("username")
         receiver = self.request.get('receiver')

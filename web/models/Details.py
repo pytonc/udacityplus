@@ -1,5 +1,4 @@
 from google.appengine.ext import ndb
-from web.models import Course
 
 
 TOOL_CATEGORIES = ("Languages", "Software/Libraries")
@@ -23,7 +22,7 @@ class Tool(ndb.Model):
     level           = ndb.IntegerProperty(choices=LEVEL_OPTIONS, default=1)
 
 class CourseAttempt(ndb.Model):
-    course          = ndb.KeyProperty(Course)
+    course          = ndb.KeyProperty("Course")
     student         = ndb.KeyProperty('User')
     completed       = ndb.BooleanProperty(default=False)
     start_date      = ndb.DateTimeProperty()

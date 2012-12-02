@@ -1,4 +1,4 @@
-application: udacityplus_demo
+application: udacityplusdemo
 version: 2-2
 runtime: python27
 api_version: 1
@@ -77,16 +77,9 @@ handlers:
 #  secure: always
 
 ####TODO: should clean this up
-- url: /favicon.png
-  static_files: /img/favicon.png
-  upload: /img/favicon.png
-
-- url: /js
-  static_dir: js
-- url: /stylesheets
-  static_dir: stylesheets
-- url: /img
-  static_dir: img
+#- url: /favicon.png
+#  static_files: /img/favicon.png
+#  upload: /img/favicon.png
 
 libraries:
 - name: jinja2
@@ -109,5 +102,3 @@ error_handlers:
   - error_code: timeout
     file: boilerplate/templates/errors/timeout.html
 
-builtins:
-- remote_api: on

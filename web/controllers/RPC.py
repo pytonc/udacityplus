@@ -1,5 +1,5 @@
-from web.controllers.BaseHandler import *
-from web.models import User
+from web.models.User import User
+from boilerplate.handlers import BaseHandler
 
 class RPCPage(BaseHandler):
 	

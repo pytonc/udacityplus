@@ -80,7 +80,7 @@ def valid(username, email, password, confirmation):
 
 def user_exists(username):
     error = {}
-    user = User.query(User.username_norm == username.lower()).fetch(1, projection=['username', 'password'])
+    user = User.query(User.username == username.lower()).fetch(1, projection=['username', 'password'])
     if not user:
         error['error_user_exists'] = 'User does not exist'
         return False, error

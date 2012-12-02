@@ -1,10 +1,7 @@
-from web.controllers import BaseHandler
-from web.models import User
+from boilerplate.lib.basehandler import BaseHandler
+from web.models.User import User
 
 class FriendsController(BaseHandler):
-    def get(self, name, action):
-            pass
-
     def post(self):
         to = self.request.get('to')
         name    = self.request.get('name')

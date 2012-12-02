@@ -3,8 +3,8 @@ from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from web.models.Details import CourseAttempt
-from web.models import Course, User
 from web.models.Course import  Source
+from web.models import User, Course
 from web.tests.testdata import *
 
 

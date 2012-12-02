@@ -4,10 +4,14 @@ import logging
 from google.appengine.api import images
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
-
-from web.controllers.BaseHandler import *
+from boilerplate.lib.basehandler import user_required
+from helpers.common import add_dicts
+#from boilerplate.lib.basehandler import BaseHandler
+from web.controllers.BaseHandler import BaseHandler
 from web.controllers.helpers.validators import *
-from web.models import Project, Course, User
+from web.models.Project import Project
+from web.models.User import User
+from web.models.Course import Course
 
 
 class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
@@ -27,14 +31,16 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         return all, ic, cc
 
-    #@Authentication.do
+    @user_required
     def get(self, username):
         """display profile of user with username, if None, display logged in user
         """
         mode = self.request.get('mode')
         upload_url = ""
 
-        if mode == 'add_project':
+        if not mode:
+            template = 'profile/profile.html'
+        elif mode == 'add_project':
             template = 'profile/add_project.html'
             upload_url = blobstore.create_upload_url('/' + username, max_bytes_per_blob=self.MAX_IMG_SIZE)
         elif mode == 'edit_project':
@@ -45,10 +51,11 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         else:
             template = 'profile/profile.html'
 
+
         user = User.get_user(username)
 
-        if not user:
-            user = User.save(username, '{}@someplace.com'.format(username), 'some long password')
+#        if not user:
+#            user = User.save(username, '{}@someplace.com'.format(username), 'some long password')
 
 
         gravatar = user.avatar_url
@@ -77,7 +84,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                        'upload_url': upload_url,
                        'errors': {}}
 
-            self.render(template, context)
+            self.render_template(template, **context)
         else:
             self.redirect('/logout')
 
@@ -95,13 +102,13 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         if user.email != kwargs['email']:
             valid, e = User.valid_email(kwargs['email'])
 
-        #TODO: should probably rename this, it can add whatever 3 dictionaries
-        errors = User.adduep(p, e, b)
+        errors = add_dicts(p, e, b)
 
         return errors
 
-    #@Authentication.do
+    @user_required
     def post(self, username):
+#        username = kwargs.get('username', None)
         mode = self.request.get('mode')
         if mode == 'add_project':
             blob_info = None
@@ -128,7 +135,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
             short_description = self.request.get('short_description').strip()
             sderror = validate_project_short_description(short_description)
-            
+
             if titleerror or urlerror or sderror or fileerror:
                 if blob_info and not fileerror:
                     # blob was okay but validation of some other field failed
@@ -149,16 +156,16 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                             'urlerror': urlerror,
                             'sderror': sderror,
                             'fileerror': fileerror}
-                self.render(template, context)
+                self.render_template(template, context)
                 return
             else:
                 user = User.get_user(username)
                 project_id = Project.add_project(title=title, screenshot=screenshot,
-                    screenshot_url=screenshot_url, url=url, short_description=short_description, 
+                    screenshot_url=screenshot_url, url=url, short_description=short_description,
                     author=user.key)
 
                 User.add_project(username, project_id)
-                
+
         elif mode == 'edit_project':
             blob_info = None
             screenshot = None
@@ -191,7 +198,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 if blob_info and not fileerror:
                     # same as above
                     Project.remove_screenshot_blob(blob_info.key())
-                
+
                 user = User.get_user(username)
                 projects = Project.get_projects_by_ids(user.projects)
                 upload_url = blobstore.create_upload_url('/' + username, max_bytes_per_blob=self.MAX_IMG_SIZE)
@@ -207,16 +214,16 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                             'urlerror': urlerror,
                             'sderror': sderror,
                             'fileerror': fileerror }
-                self.render(template, context)
+                self.render_template(template, context)
                 return
             else:
-                Project.update_project(project_id, title=title, screenshot=screenshot, 
+                Project.update_project(project_id, title=title, screenshot=screenshot,
                     screenshot_url=screenshot_url, url=url, short_description=short_description)
         elif mode == 'remove_project':
             project_id = self.request.get('project_id')
             Project.remove_project(project_id)
             User.remove_project(username, project_id)
-            
+
         elif mode == 'edit':
             fields = self.get_params_dict((
                 'real_name',
@@ -236,16 +243,18 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             fields['cclasses'] = cclasses
             fields['username'] = username
 
-            user = Key(User, username).get()
+            user = User.get_user(username)
 
-            errors = self.clean_user_data(user, **fields)
+            #TODO: validate edit form
+#            errors = self.clean_user_data(user, **fields)
 
             context = {
-                'errors': errors,
+#                'errors': errors,
                 'user': user
             }
 
-            if not errors:
+            #TODO: if validation passed
+            if True:
                 user.update(**fields)
                 self.redirect('/{}'.format(username))
             else:
@@ -263,7 +272,16 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 context['gravatar'] = user.avatar_url
                 context['friends'] = []
                 context['friend_btn'] = False
-                context['errors'] = errors
-                self.render('profile/edit.html'.format(username), context)
+#                context['errors'] = errors
+                self.render_template('profile/edit.html'.format(username), context)
                 return
         self.redirect('/'+username)
+
+
+class Update(BaseHandler):
+    def get(self, username):
+        self.response.write(username)
+
+#    @user_required
+    def post(self, username):
+        self.response.write(username + " post")

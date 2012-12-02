@@ -11,7 +11,7 @@ class Message(ndb.Model):
 
 
 class Conversation(ndb.Model):
-    owner           = ndb.StringProperty(required=True)
+    owner           = ndb.KeyProperty(kind='User', required=True)
     receivers_list    = ndb.KeyProperty(kind='User', repeated=True)
     receivers_list_norm    = ndb.StringProperty(repeated=True)
     title           = ndb.StringProperty(required=True)

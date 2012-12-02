@@ -1,5 +1,5 @@
-from web.controllers.BaseHandler import *
+from boilerplate.handlers import BaseHandler
 
 class Forbidden(BaseHandler):
     def get(self):
-        self.render("forbidden_resource.html")
+        self.render_template("forbidden_resource.html")
