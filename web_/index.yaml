@@ -23,7 +23,6 @@ indexes:
 
 - kind: User
   properties:
-  - name: username_norm
   - name: username
 
 - kind: Conversation
@@ -41,6 +40,5 @@ indexes:
 
 - kind: User
   properties:
-  - name: username_norm
   - name: password
   - name: username

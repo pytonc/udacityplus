@@ -1,4 +1,4 @@
-from web.controllers.BaseHandler import *
+from web_.BaseHandler import *
 
 class LogoutPage(BaseHandler):
     def get(self):

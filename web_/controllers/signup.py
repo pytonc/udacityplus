@@ -1,7 +1,7 @@
-from web.controllers.BaseHandler import *
+from web.models import User
+from web_.BaseHandler import *
 from web.controllers.helpers.authentication import Authentication as aut
 from web.controllers.helpers.errorretrieval import valid
-from web.models import User
 
 class SignUpPage(BaseHandler):
 

@@ -1,5 +1,4 @@
-from web.controllers.BaseHandler import *
-from web.externals.bcrypt import bcrypt as bc
+from web_.BaseHandler import *
 from web.controllers.helpers.authentication import Authentication as aut
 from web.controllers.helpers.errorretrieval import get_login_errors
 
