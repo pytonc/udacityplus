@@ -2,7 +2,7 @@ from google.appengine.api import search
 import logging
 
 
-def create_user_search_document(username, real_name, avatar_url="/img/defaultavatar.png", doc_id=None):
+def create_user_search_document(username, real_name, avatar_url, doc_id=None):
     """Create a Document that will allow searching for people based on their username and real name
 
     Args:
@@ -40,7 +40,7 @@ def create_user_search_document(username, real_name, avatar_url="/img/defaultava
     return search.Document(doc_id=doc_id,
         fields=[search.TextField(name='username', value=username),
                 search.TextField(name='real_name', value=real_name),
-                search.TextField(name='avatar_url', value=avatar_url),
+                search.TextField(name='gravatar', value=avatar_url),
                 search.TextField(name='tokenized_un', value=tokenized_un),
                 search.TextField(name='tokenized_rn', value=tokenized_rn)])
 
@@ -92,7 +92,7 @@ def find_documents(query_string, limit, index_name="users"):
         options = search.QueryOptions(
             limit=limit,  # the number of results to return
             sort_options=sort,
-            returned_fields=['username', 'real_name', 'avatar_url'])
+            returned_fields=['username', 'real_name', 'gravatar'])
 
         query = search.Query(query_string=query_string, options=options)
 
