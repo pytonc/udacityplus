@@ -15,6 +15,7 @@
      aria-labelledby="send_msg_modal-{{ receiver }}"
      aria-hidden="true">
     <form class="form-horizontal" action="{{ act }}" method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <fieldset>
             <div id="legend" class="">
                 <h2 class="">Send message to {{ receiver }}</h2>

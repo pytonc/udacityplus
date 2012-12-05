@@ -5,6 +5,7 @@
 {% block usercontent %}
 <form class="form-horizontal span7 well" method="POST" action="{{ upload_url }}" enctype="multipart/form-data">
     <fieldset class="bs-docs-example">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div id="legend" class="">
             <legend class="">Add Project</legend>
         </div>

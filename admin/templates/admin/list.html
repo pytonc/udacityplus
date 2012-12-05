@@ -8,6 +8,7 @@
 <div class="navbar">
   <div class="navbar-inner">
     <form method="GET" class="navbar-search">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <span class="badge"> {{ count }}&nbsp</span>
         <input type="text" name="q" value="{{ q or '' }}" class="input-medium search-query" placeholder="{{ _('Search User') }}"></input>
         <button type="submit" title="Search"><i class="icon-search"></i></button>
