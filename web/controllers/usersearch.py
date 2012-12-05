@@ -29,7 +29,7 @@ class Search(webapp2.RequestHandler):
                     person[field.name] = field.value
                 if field.name == 'real_name':
                     person[field.name] = field.value
-                if field.name == 'avatar_url':
+                if field.name == 'gravatar':
                     person[field.name] = field.value
             results['people'].append(person)
 

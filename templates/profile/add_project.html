@@ -41,7 +41,7 @@
             <div class="controls">
                 <input type="text" required="required" id="url" name="url" placeholder="" 
                 class="input-xlarge" maxlength="100"
-                value="{{ url }}">
+                value="{{ proj_url }}">
                 {% if urlerror %}
                 <p class="help-block alert alert-error">
                     {{ urlerror }}
@@ -97,7 +97,5 @@
             setMaxLength();
             $("#short_description").bind("click mouseover keyup change", function(){checkMaxLength(this.id); } )
         });
-
-        
     </script>
 {% endblock %}

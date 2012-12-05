@@ -1,4 +1,11 @@
 {% extends "base.html" %}
+{% block profileavatar %}
+    <h2>User</h2>
+
+    <img src="{{ gravatar }}" height="100%" width="100%" class="img-polaroid">
+    <a href="http://en.gravatar.com/emails/">Change profile picture</a>
+    <hr>
+{% endblock profileavatar %}
 {% block stylesheets %}
     {{ super() }}
     <link href="/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
@@ -7,159 +14,141 @@
     <link href="/css/pagedown.css" media="screen" rel="stylesheet" type="text/css">
 {% endblock stylesheets %}
 {% block usercontent %}
-    <form class="form-horizontal span7 well" method="post" action="{{ url|safe }}">
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-    <fieldset class="bs-docs-example">
-        <div id="legend" class="">
-            <legend class="">Edit user details</legend>
-        </div>
+    <form id="form_edit_profile" action="{{ url|safe }}" method="post" class="form-horizontal span7 well">
+        <fieldset>
 
-        <div class="control-group">
-            <!-- Text input-->
-            <label class="control-label" for="real_name">Real Name</label>
-            <div class="controls">
-                <input type="text" id="real_name" name="real_name" placeholder="Real Name"
-                    required="required" maxlength="50"
-                       class="input-xlarge span8" value="{% if user.real_name %}{{ user.real_name }}{% endif %}">
-                <p class="help-block"></p>
-            </div>
-        </div>
-
-        <div class={% if errors.error_email %}"control-group error"{% else %}"control-group"{% endif %}>
-            <!-- Email-->
-            <label class="control-label" for="email">Email</label>
-            <div class="controls">
-                <input type="text" id="email" name="email" placeholder="Email"
-                    required="required" maxlength="50"
-                       class="input-xlarge span8" value="{{ user.email }}">
-                <span class="help-inline">{{ errors.error_email }}</span>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <!-- About -->
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="username" value="{{ form.username.data }}">
+            {{ macros.field(form.name, label=_("Name"), placeholder=_("Enter your")+" "+_("Name"), class="input-xlarge focused") }}
+            {{ macros.field(form.last_name, label=_("Last Name"), placeholder=_("Enter your")+" "+_("Last Name"), class="input-xlarge focused") }}
+            {{ macros.field(form.country, label=_("Country")) }}
+            {{ macros.field(form.dob, label=_("Date of Birth")) }}
             <div class="control-group">
-                <label class="control-label" for="wmd-input">About</label>
+                <label class="control-label">{% trans %}Email{% endtrans %}:</label>
+                <div class="controls">
+                    {{ email }} (<a href="{{ uri_for('edit-email') }}">{% trans %}Change your email{% endtrans %}</a>)
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <a href="{{ uri_for("edit-password") }}">{% trans %}Change your password{% endtrans %}</a>
+                </div>
+            </div>
+            {% if enable_federated_login %}
+                {% if used_providers %}
+                    <div id="trird_party_login" class="existing-accociation">
+                        <h4>{% trans %}Existing social association{% endtrans %}:</h4>
+                        <table class=" social-login-icons">
+                            {% for provider in used_providers %}
+                                <tr>
+                                    <td><a href="#" class="social-btn social-btn-{{ provider.name }}" title="{{ provider.label }}"></a></td>
+                                    {% if used_providers|length > 1 or local_account %}
+                                        <td><a href="/social_login/{{ provider.name }}/delete" class="btn btn-danger"><i class="icon-trash icon-white"></i>&nbsp;{% trans %}Remove{% endtrans %}</a></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+                {% if unused_providers %}
+                    <div id="trird_party_login" class="form-actions">
+                        <h4>{% trans %}Associate account with{% endtrans %}:</h4>
+                        <div class="social-login-icons">
+                            {% for provider in unused_providers %}
+                                <a href="{{ provider_uris[provider.name] }}" class="social-btn social-btn-{{ provider.name }}" title="{{ provider.label }}">{{ provider.label }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="control-group">
+                <!-- About -->
+                <div class="control-group">
+                    <label class="control-label" for="wmd-input">About</label>
+                    <div class="controls">
+                        <div class="wmd-panel">
+                            <div id="wmd-button-bar-about"></div>
+                            <textarea class="wmd-input span12"
+                                      name="short_about" id="wmd-input-about">{{ user.short_about }}</textarea>
+                        </div>
+                        <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- tools -->
+            <div class="control-group">
+                <label class="control-label" for="wmd-input">Tools</label>
                 <div class="controls">
                     <div class="wmd-panel">
-                        <div id="wmd-button-bar-about"></div>
-                        <textarea class="wmd-input span12"
-                                  name="short_about" id="wmd-input-about">{{ user.short_about }}</textarea>
+                        <div id="wmd-button-bar"></div>
+                        <textarea name="tools" class="wmd-input span12" id="wmd-input">{{ user.tools }}</textarea>
                     </div>
-                    <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
+                    <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
                 </div>
             </div>
-        </div>
 
-        <div class={% if errors.error_date %}"control-group error"{% else %}"control-group"{% endif %}>
-            <!-- Age -->
-            <label class="control-label" for="dob">Date of Birth</label>
-            <div class="controls date" data-date="{{ dob }}" data-date-format="dd-mm-yyyy">
-                <input id="dob"  type="text" name="dob"
-                       value="{% if dob %}{{ dob }}{% endif %}" class="input-xlarge span8">
-                <span class="add-on"><i class="icon-th"></i></span>
-                <span class="help-inline">{{ errors.error_date }}</span>
-            </div>
-        </div>
-
-        <!-- courses -->
-        <div class="control-group">
-            <label class="control-label" for="classes_inprog">Courses in progress</label>
-            <div class="controls">
-                <select name="classes_inprog" class="span8" id="classes_inprog" multiple>
-                    {% for level, courses in courses_all.iteritems() %}
-                    {% if courses %}
-                        <optgroup label="{{ level }}">
-                            {% for course in courses %}
-                                <option value="{{ course.key.id() }}"
-                                        {% if course in courses_incomplete %}selected{% endif %}>
-                                    {{ course.name }} {{ course.dept }} {{ course.number }}
-                                </option>
-                            {% endfor %}
-                        </optgroup>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="classes_completed">Courses completed</label>
-            <div class="controls">
-                <select name="classes_completed" class="span8" id="classes_completed" multiple>
-                    {% for level, courses in courses_all.iteritems() %}
-                        {% if courses %}
-                        <optgroup label="{{ level }}">
-                            {% for course in courses %}
-                                <option value="{{ course.key.id() }}"
-                                        {% if course in courses_completed %}selected{% endif %}>
-                                    {{ course.name }} {{ course.dept }} {{ course.number }}
-                                </option>
-                            {% endfor %}
-                        </optgroup>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <!-- tools -->
-        <div class="control-group">
-            <label class="control-label" for="wmd-input">Tools</label>
-            <div class="controls">
-                <div class="wmd-panel">
-                    <div id="wmd-button-bar"></div>
-                    <textarea name="tools" class="wmd-input span12" id="wmd-input">{{ user.tools }}</textarea>
+            <div class="control-group">
+                <label class="control-label" for="classes_inprog">Courses in progress</label>
+                <div class="controls">
+                    <select name="classes_inprog" class="span8" id="classes_inprog" multiple>
+                        {% for level, courses in courses_all.iteritems() %}
+                            {% if courses %}
+                                <optgroup label="{{ level }}">
+                                    {% for course in courses %}
+                                        <option value="{{ course.key.id() }}"
+                                                {% if course in courses_incomplete %}selected{% endif %}>
+                                            {{ course.name }} {{ course.dept }} {{ course.number }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
-                <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
             </div>
-        </div>
-
-        <!-- Password-->
-        <div class={% if errors.error_password %}"control-group error"{% else %}"control-group"{% endif %}>
-            <label class="control-label" for="password">Password</label>
-            <div class="controls">
-                <input id="password" name="password" type="password" placeholder="Password"
-                    maxlength="50" class="input-xlarge span8">
-                <span class="help-inline">{{ errors.error_password }}</span>
-                <p class="help-block">Minimum 8 characters</p>
+            <div class="control-group">
+                <label class="control-label" for="classes_completed">Courses completed</label>
+                <div class="controls">
+                    <select name="classes_completed" class="span8" id="classes_completed" multiple>
+                        {% for level, courses in courses_all.iteritems() %}
+                            {% if courses %}
+                                <optgroup label="{{ level }}">
+                                    {% for course in courses %}
+                                        <option value="{{ course.key.id() }}"
+                                                {% if course in courses_completed %}selected{% endif %}>
+                                            {{ course.name }} {{ course.dept }} {{ course.number }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
-
-        <div class={% if errors.error_verify %}"control-group error"{% else %}"control-group"{% endif %}>
-            <!-- confirm password-->
-            <label class="control-label" for="password_confirm">Confirm Password</label>
-            <div class="controls">
-                <input type="password" name="password_confirm" placeholder="Confirm password"
-                       maxlength="50" id="password_confirm" class="input-xlarge span8">
-                <span class="help-inline">{{ errors.error_verify }}</span>
-            </div>
-        </div>
-
+            {{ macros.field(form.notify_on_msg, label=_("Notify user on new message")) }}
+            {{ macros.field(form.searchable, label=_("Make profile serachable")) }}
+            {{ macros.field(form.show_friends, label=_("Show friends")) }}
+{#            {{ macros.field(form.show_friends, label=_("Show friends"), checked=user.show_friends) }}#}
+       </fieldset>
         <div class="control-group">
-            <label class="control-label">Options</label>
             <div class="controls">
-                <!-- Options -->
-                <label class="checkbox">
-                    <input type="checkbox" name="notify_on_msg" id="notify_on_msg"
-                           {% if user.notify_on_msg %}checked{% endif %}>
-                    Send email on new message
-                </label>
+                <a href="{{ uri_for("edit-password") }}">{% trans %}Change your password{% endtrans %}</a>
             </div>
-
         </div>
 
+        <input type="hidden" name="mode" value="edit"/>
         <div class="control-group">
             <label class="control-label"></label>
 
             <!-- Button -->
             <div class="controls">
-                <input type="submit" class="btn btn-primary" value="Save">
+                <input type="submit" class="btn btn-primary" value="Update Profile">
             </div>
         </div>
+    </form>
 
-        <input type="hidden" name="mode" value="edit"/>
-    </fieldset>
-</form>
 {% endblock usercontent%}
 {% block js %}
     {{ super() }}
@@ -182,5 +171,37 @@
             var editor2 = new Markdown.Editor(converter1, '-about')
             editor2.run();
         })();
+    </script>
+    <script type="text/javascript">
+        $().ready(function() {
+            $("#form_edit_profile").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                rules: {
+{#                    password: 'required',#}
+                    c_password: {
+                        required: "#password:filled",
+                        equalTo: '#password'
+                    },
+                    dob: {
+                        date: true
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+            $("#password").passStrength({
+                shortPassText: '{% trans %}Short Password{% endtrans %}',
+                badPassText: '{% trans %}Insecure Password{% endtrans %}',
+                goodPassText: '{% trans %}Good Password{% endtrans %}',
+                strongPassText: '{% trans %}Secure Password{% endtrans %}'
+            });
+{#            {% if country != "" %}#}
+{#                $('#country option[value="{{ country }}"]').attr("selected",true);#}
+{#            {% endif %}#}
+        });
     </script>
 {% endblock %}

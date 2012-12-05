@@ -5,14 +5,14 @@ from google.appengine.api import images
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from boilerplate.lib.basehandler import user_required
-from helpers.common import add_dicts
 #from boilerplate.lib.basehandler import BaseHandler
 from web.controllers.BaseHandler import BaseHandler
 from web.controllers.helpers.validators import *
 from web.models.Project import Project
 from web.models.User import User
 from web.models.Course import Course
-
+import webapp2
+from web.util import forms
 
 class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
     MAX_IMG_SIZE = 1048576 # in bytes
@@ -30,6 +30,13 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         ic = get_multi([c.course for c in all if c.completed == False])
 
         return all, ic, cc
+
+    @webapp2.cached_property
+    def form(self):
+        if self.is_mobile:
+            return forms.EditProfileForm(self)
+        else:
+            return forms.EditProfileForm(self)
 
     @user_required
     def get(self, username):
@@ -51,30 +58,23 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         else:
             template = 'profile/profile.html'
 
+        if self.user:
+            user = User.get_by_id(long(self.user_id))
+        else:
+            user = User.get_user(username)
 
-        user = User.get_user(username)
+        self.form.process(obj=user)
 
-#        if not user:
-#            user = User.save(username, '{}@someplace.com'.format(username), 'some long password')
-
-
-        gravatar = user.avatar_url
         friends = []
 
         if user:
             all, ic, cc = self.organize_courses_for(user)
 
-            if user.dob:
-                dob = user.dob.strftime('%m/%d/%Y')
-            else:
-                dob = None
-
             projects = Project.get_projects_by_ids(user.projects)
 
-            context = {'user': user,
-                       'dob': dob,
-                       'username': username,
-                       'gravatar': gravatar,
+            context = {
+                        'user': user,
+                       'gravatar': user.gravatar,
                        'friends': friends,
                        'friend_btn': False,
                        'courses_all': Course.courses_to_dict(),
@@ -82,33 +82,14 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                        'courses_incomplete': ic,
                        'projects': projects,
                        'upload_url': upload_url,
-                       'errors': {}}
+            }
 
             self.render_template(template, **context)
         else:
             self.redirect('/logout')
 
-    def clean_user_data(self, user, **kwargs):
-        if not kwargs['password'] and not kwargs['password_confirm']:
-            del kwargs['password']
-            del kwargs['password_confirm']
-            p = {}
-        else:
-            _, p = User.valid_passwords(kwargs['password'], kwargs['password_confirm'])
-        _, e = User.valid_email(kwargs['email'], user)
-        _, b = User.valid_date(kwargs['dob'])
-
-
-        if user.email != kwargs['email']:
-            valid, e = User.valid_email(kwargs['email'])
-
-        errors = add_dicts(p, e, b)
-
-        return errors
-
     @user_required
     def post(self, username):
-#        username = kwargs.get('username', None)
         mode = self.request.get('mode')
         if mode == 'add_project':
             blob_info = None
@@ -130,7 +111,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             title = self.request.get('title').strip()
             titleerror = validate_project_title(title)
 
-            url = self.request.get('url').strip()
+            url = self.request.get('proj_url').strip()
             urlerror = validate_project_url(url)
 
             short_description = self.request.get('short_description').strip()
@@ -149,7 +130,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 context = { 'user': user,
                             'username': username,
                             'title': title,
-                            'url': url,
+                            'proj_url': url,
                             'short_description': short_description,
                             'upload_url': upload_url,
                             'titleerror': titleerror,
@@ -188,7 +169,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             title = self.request.get('title').strip()
             titleerror = validate_project_title(title)
 
-            url = self.request.get('url').strip()
+            url = self.request.get('proj_url').strip()
             urlerror = validate_project_url(url)
 
             short_description = self.request.get('short_description').strip()
@@ -206,7 +187,7 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
                 context = { 'user': user,
                             'username': username,
                             'title': title,
-                            'url': url,
+                            'proj_url': url,
                             'short_description': short_description,
                             'projects': projects,
                             'upload_url': upload_url,
@@ -225,17 +206,14 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             User.remove_project(username, project_id)
 
         elif mode == 'edit':
+            if not self.form.validate():
+                return self.get(username)
+#                self.redirect('/'+username)
+
             fields = self.get_params_dict((
-                'real_name',
-                'email',
                 'short_about',
-                'dob',
                 'tools',
-                'password',
-                'password_confirm',
-                'notify_on_msg'
                 ))
-            logging.error(fields)
 
             iclasses = self.request.get_all('classes_inprog')
             cclasses = self.request.get_all('classes_completed')
@@ -245,43 +223,8 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
             user = User.get_user(username)
 
-            #TODO: validate edit form
-#            errors = self.clean_user_data(user, **fields)
+            user.update(self.form, **fields)
+            self.redirect('/{}'.format(username))
 
-            context = {
-#                'errors': errors,
-                'user': user
-            }
+        self.redirect('/{}'.format(username))
 
-            #TODO: if validation passed
-            if True:
-                user.update(**fields)
-                self.redirect('/{}'.format(username))
-            else:
-
-                if user.dob:
-                    dob = user.dob.strftime('%m/%d/%Y')
-                else:
-                    dob = None
-                all, ic, cc = self.organize_courses_for(user)
-                context['courses_all'] = Course.courses_to_dict()
-                context['courses_completed'] = cc
-                context['courses_incomplete'] = ic
-                context['dob'] = dob
-                context['username'] = username
-                context['gravatar'] = user.avatar_url
-                context['friends'] = []
-                context['friend_btn'] = False
-#                context['errors'] = errors
-                self.render_template('profile/edit.html'.format(username), context)
-                return
-        self.redirect('/'+username)
-
-
-class Update(BaseHandler):
-    def get(self, username):
-        self.response.write(username)
-
-#    @user_required
-    def post(self, username):
-        self.response.write(username + " post")
