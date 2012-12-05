@@ -22,25 +22,29 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
-from google.appengine.ext.ndb import QueryOptions
+
 
 from google.appengine.ext import  ndb
+from google.appengine.ext.ndb import QueryOptions
 from google.appengine.ext.ndb.key import Key
-from web.externals.bcrypt import bcrypt as bc
-import web.models.Details as Details
-from datetime import datetime
-import re
+
+# messaging
 from web.models.Message import  Conversation
-from web.models import Message
-from web.util.searching import create_user_search_document, add_to_index, find_users, remove_from_index
+from web.models.Message import Message
+import web.models.Details as Details
+
+# boilerplate
 from boilerplate.models import User
+from wtforms.validators import ValidationError
 
+# search index in _post_put_hool
+from web.util.searching import create_user_search_document
+from web.util.searching import add_to_index
+from web.util.searching import find_users
+from web.util.searching import remove_from_index
 
-_UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
-uname = re.compile(_UNAMEP)
-
-_UDOB = r'^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$'
-udob = re.compile(_UDOB)
+# gravatar
+from web.util.common import get_gravatar
 
 
 class User(User):
@@ -51,8 +55,6 @@ class User(User):
     short_about     = ndb.StringProperty(default='')
     tools           = ndb.TextProperty(default='')
     dob             = ndb.DateProperty()
-
-    avatar_url      = ndb.StringProperty(default="/img/defaultavatar.png")
 
     # settings
     show_friends    = ndb.BooleanProperty(default=False)
@@ -72,31 +74,14 @@ class User(User):
             doc_id = None
 
         if self.searchable:
-            doc = create_user_search_document(self.username, self.full_name, self.avatar_url, doc_id)
+            doc = create_user_search_document(self.username, self.real_name, self.gravatar, doc_id)
             add_to_index(doc, 'users')
         elif not self.searchable and doc_id:
             remove_from_index(doc_id, 'users')
 
-    @classmethod
-    def _pre_delete_hook(cls, key):
-        # TODO: handle user deletions from index
-        pass
-
-
-    @classmethod
-    def save(cls, username, email, password):
-        """Save a user object
-
-        Returns:
-         The saved User object
-        """
-        if cls.valid(username, email, password):
-            password = bc.hashpw(password, bc.gensalt())
-            # call to create and save log token is in signup controller
-            user = cls(id = username, username = username, password = password, email = email)
-            user.put()
-            return user
-        return False
+    @property
+    def gravatar(self):
+        return get_gravatar(self.email, self.username)
 
     @classmethod
     def get_user(cls, username):
@@ -134,7 +119,7 @@ class User(User):
         if new:
             self.add_courses(new, compd)
 
-    def update(self, **kwargs):
+    def update(self, form, **kwargs):
         """Update user fields
 
         Args:
@@ -154,40 +139,12 @@ class User(User):
                 self.recafooble_classes(l,
                     [ndb.Key('Course', k) for k in kwargs[t]], t)
 
-        if kwargs.has_key('dob'):
-            kwargs['dob'] = datetime.strptime(kwargs['dob'], '%m/%d/%Y')
-        if kwargs.has_key('notify_on_msg'):
-            kwargs['notify_on_msg'] = kwargs['notify_on_msg'] == 'on'
-
+        form.populate_obj(self)
         for k, v in kwargs.iteritems():
             if hasattr(self, k):
-                if k != 'password':
                     setattr(self, k, v)
-                else:
-                    setattr(self, k, bc.hashpw(kwargs['password'], bc.gensalt()))
+
         self.put()
-
-    @classmethod
-    def valid_date(cls, date):
-        if udob.match(date):
-            return True, {}
-        return False, {'error_date': 'Invalid date format, use mm/dd/yyyy'}
-
-    @classmethod
-    def save(cls, username, email, password, *args):
-        """Save a user object
-
-        Returns:
-         The saved User object
-        """
-        valid, errors = cls.valid(username, email, password)
-        if valid:
-            password = bc.hashpw(password, bc.gensalt())
-            # call to create and save log token is in signup controller
-            user = cls(id = username, username = username, password = password, email = email)
-            user.put()
-            return user
-        return False
 
     @classmethod
     def add_project(cls, username, project_id):
