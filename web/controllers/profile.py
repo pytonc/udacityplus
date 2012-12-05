@@ -47,14 +47,14 @@ class ProfilePage(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         if not mode:
             template = 'profile/profile.html'
+        elif mode == 'edit':
+            template = 'profile/edit.html'
         elif mode == 'add_project':
             template = 'profile/add_project.html'
             upload_url = blobstore.create_upload_url('/' + username, max_bytes_per_blob=self.MAX_IMG_SIZE)
         elif mode == 'edit_project':
             template = 'profile/edit_project.html'
             upload_url = blobstore.create_upload_url('/' + username, max_bytes_per_blob=self.MAX_IMG_SIZE)
-        elif mode == 'edit':
-            template = 'profile/edit.html'
         else:
             template = 'profile/profile.html'
 
