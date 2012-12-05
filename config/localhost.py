@@ -3,7 +3,7 @@ This is the boilerplate default configuration file.
 Changes and additions to settings should be done in the config module
 located in the application root rather than this config.
 """
-from web.jinja_custom.helpers import is_authenticated
+
 
 config = {
     'environment': 'localhost',
@@ -99,6 +99,7 @@ config = {
         ),
 
     # site title
-    'site_title': 'Udacity+'
+    'site_title': 'Udacity+',
+    'gravatar_base_url': "http://www.gravatar.com/avatar/"
 
 } # end config
