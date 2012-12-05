@@ -1,6 +1,5 @@
 #TODO: This is duplicated in models/User.py, organize this
 import re
-from web.controllers.helpers.common import add_dicts
 from web.externals.bcrypt import bcrypt as bc
 from web.models import User
 
