@@ -1,6 +1,6 @@
 function userFormatResult(person) {
     var markup = "<table class='psearch-result'><tr>";
-    markup += "<td class='psearch-avatar'><img src='" + person.avatar_url + "'/></td>"
+    markup += "<td class='psearch-avatar'><img src='" + person.gravatar + "'/></td>"
     markup += "<td class='psearch-info'><div class='psearch-username'>"
     markup += "<a href='" + person.username + "'>" + person.username + "</a></div>";
 
