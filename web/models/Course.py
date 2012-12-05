@@ -58,3 +58,24 @@ class Course(ndb.Model):
             memcache.add('courses_by_level_cid', courses, time=1814400, namespace='udacityplus')
 
             return courses
+
+    @classmethod
+    def courses_to_optgroup(cls):
+        courses = memcache.get('courses_by_level_cid_lt', namespace='udacityplus')
+        if courses:
+            return courses
+        else:
+            crquery = Course.query().order(Course.cid)
+
+            courses = []
+            for level in LEVELS:
+                co = []
+                for cr in crquery:
+                    if cr.level == level:
+                        co.append(cr)
+                courses.append((level, co))
+
+            # store for 3 weeks
+            memcache.add('courses_by_level_cid_lt', courses, time=1814400, namespace='udacityplus')
+
+            return courses
