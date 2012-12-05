@@ -1,3 +1,0 @@
-[submodule "web/externals/bcrypt"]
-	path = web/externals/bcrypt
-	url = https://github.com/erlichmen/py-bcrypt.git
