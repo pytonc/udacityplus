@@ -24,9 +24,7 @@
                     <a href="{{ uri_for("edit-password") }}">{% trans %}Change your password{% endtrans %}</a>
                 </div>
             </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">{% trans %}Update Profile{% endtrans %}</button>
-            </div>
+
             {% if enable_federated_login %}
 	            {% if used_providers %}
 	                <div id="trird_party_login" class="existing-accociation">
