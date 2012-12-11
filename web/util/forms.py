@@ -8,18 +8,25 @@ from boilerplate import forms
 from web.models.Course import Course
 import re
 from datetime import date
-
+from web.models.User import User
 
 _UDOB = '^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.]((?:19|20)\d\d)$'
 udob = re.compile(_UDOB)
+
+_UNAMEP = r'^[A-Za-z0-9_-]{4,21}$'
+uname = re.compile(_UNAMEP)
+
 TEXTAREA_MAXLENGTH=2000
 
-class OptionsMixin(forms.BaseForm):
-    notify_on_msg = fields.BooleanField(u'Send email on new message')
-    searchable = fields.BooleanField(u'Available in search')
-    show_friends = fields.BooleanField(u'Show friends')
+class SettingsMixin(forms.BaseForm):
+    notify_on_msg = fields.BooleanField(_('Send email on new message'))
+    searchable = fields.BooleanField(_('Available in search'))
+    show_friends = fields.BooleanField(_('Show friends'))
 
-class EditProfileForm(forms.EditProfileForm, OptionsMixin):
+class EditSettingsForm(SettingsMixin):
+    pass
+
+class EditProfileForm(forms.EditProfileForm, SettingsMixin):
     # needs formatting
 #    aboutd = fields.TextAreaField(_('About'), [validators.Length(max=TEXTAREA_MAXLENGTH)], id='wmd-input-about')
 #    tools = about = fields.TextAreaField(_('Tools'), [validators.Length(max=TEXTAREA_MAXLENGTH)], id='wmd-input-tools')
@@ -39,3 +46,22 @@ class EditProfileForm(forms.EditProfileForm, OptionsMixin):
         else:
             m, d, y = map(int, udob.match(field.raw_data[0]).groups())
             return date(y, m, d)
+
+class MessageForm(forms.BaseForm):
+    sender = fields.TextField(_('Sender'), [validators.Length(max=forms.FIELD_MAXLENGTH)])
+    receiver = fields.TextField(_('Receiver'), [validators.Required(), validators.Length(max=forms.FIELD_MAXLENGTH)])
+    title = fields.TextField(_('Title'), [validators.Required(), validators.Length(max=forms.FIELD_MAXLENGTH)])
+    content = fields.TextAreaField(_('Sender'), [validators.Required(), validators.Length(max=TEXTAREA_MAXLENGTH)])
+
+    def validate_receiver(form, field):
+        if not field.raw_data or isinstance(field.raw_data[0], basestring) and not field.raw_data[0].strip():
+            field.errors[:] = []
+            raise validators.StopValidation()
+        if not uname.match(field.raw_data[0]):
+            raise validators.ValidationError("Bad username format.")
+        elif not bool(User.query(User.username == field.raw_data[0]).fetch(1, projection=['email'])):
+            raise validators.ValidationError("User does not exist")
+        elif form.sender.data != field.raw_data[0] and \
+             field.raw_data[0] not in User.get_user(form.sender.data).friends:
+            raise validators.ValidationError("You cannot message this user")
+        return field.raw_data[0]
