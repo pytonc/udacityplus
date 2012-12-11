@@ -22,7 +22,7 @@
 # bcrypt.gensalt() is used for creating tokens
 # tokens in database are hashed with bcrypt
 # new token is generated with every new login
-
+from google.appengine.api import memcache
 
 from google.appengine.ext import  ndb
 from google.appengine.ext.ndb import QueryOptions
@@ -48,7 +48,7 @@ from web.util.common import get_gravatar
 
 
 class User(User):
-    real_name       = ndb.ComputedProperty(lambda x: ' '.join([x.name, x.last_name]))
+    real_name       = ndb.ComputedProperty(lambda x: ''.join([x.name, ' ', x.last_name] if x.name and x.last_name else ''))
 
     friends         = ndb.StringProperty(repeated=True)
     projects        = ndb.JsonProperty()
@@ -67,6 +67,7 @@ class User(User):
         """Post put hook, adds user's username and real name to search index. This fires every time a user
          instance is saved
         """
+        #TODO: this doesn't fire when user is registered, only on profile edit
         try:
 
             doc_id = find_users(self.username).results[0].doc_id
@@ -186,6 +187,8 @@ class User(User):
         #TODO: friend requests/approvals - right now auto adds to both parties
         #TODO: use transactions
 
+        memcache.delete('friends', namespace=me)
+
         mes = cls.query(cls.username == me).get()
         if friend not in mes.friends:
             mes.friends.append(friend)
@@ -208,8 +211,11 @@ class User(User):
          None if User's friends list is empty
         """
         if bool(self.friends):
-            f = User.query(User.usenrname.IN(self.friends)).order(-User.username)\
-                    .fetch(limit, offset=offset, projection=['username', 'real_name'])
+            f = memcache.get('friends', namespace=self.username)
+            if not f:
+                f = User.query(User.username.IN(self.friends)).order(-User.username)\
+                        .fetch(limit, offset=offset)
+                memcache.set('friends', f, namespace=self.username, time=1440)
             return f
         return None
 
@@ -407,8 +413,8 @@ class User(User):
         """
         #TODO: check if sender and receiver aren't the same person, if so, add only once
 
-        skey = ndb.Key('User', sender)
-        rkey = ndb.Key('User', receiver)
+        skey = cls.get_user(sender).key
+        rkey = cls.get_user(receiver).key
 
         if sender == receiver:
             rl = [skey]
@@ -418,7 +424,7 @@ class User(User):
             rln = [sender, receiver]
 
         conv = Conversation(
-            owner = sender,
+            owner = skey,
             receivers_list = rl,
             receivers_list_norm = rln,
             title = title,
