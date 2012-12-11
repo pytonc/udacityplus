@@ -1,3 +1,5 @@
+__author__ = "Anthony, Jan Zegan"
+
 import urllib
 import logging
 import webapp2

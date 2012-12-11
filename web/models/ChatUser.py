@@ -1,12 +1,17 @@
+__author__ = "Anthony, Jan Zegan"
+
 import json
 from google.appengine.ext import  ndb
 from google.appengine.api import memcache
 from web.util.chat import user_key
+from web.models.User import User
 import logging
+
 
 class ChatUser(ndb.Model):
     '''A user'''
     # key_name is username.lower()
+    user = ndb.KeyProperty(kind=User)
     username = ndb.StringProperty(required = True) # case SeNsItIvE
     joined = ndb.DateTimeProperty(auto_now_add = True)
     identifier = ndb.StringProperty(required = True) # Session specific
@@ -14,6 +19,7 @@ class ChatUser(ndb.Model):
     channels = ndb.TextProperty(required = True) # JSON array
     contacts = ndb.TextProperty(required = True) # JSON array
     connected = ndb.BooleanProperty(default = False)
+
     def store(self):
         '''Store in memcache and datastore'''
         memcache.set(user_key(self.key.id()), self)

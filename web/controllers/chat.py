@@ -1,3 +1,6 @@
+__author__ = "rrandom, Anthony, Jan Zegan"
+
+
 from web.controllers.BaseHandler import BaseHandler
 from web.models.ChatUser import ChatUser
 from web.util import chat
