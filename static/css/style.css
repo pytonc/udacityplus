@@ -11,7 +11,7 @@ dt,dd {
   padding-top: 5px;
   margin-bottom: 10px;;
 }
-.home_bp{background:transparent url(../img/logo.png) top center no-repeat;padding-top:20em;text-align:center}.home_bp h1{font-size:1.6em}.home_bp p{font-size:1.2em}
+.home_bp{background:transparent url(/img/logo.png) top center no-repeat;padding-top:20em;text-align:center}.home_bp h1{font-size:1.6em}.home_bp p{font-size:1.2em}
 
 .psearch-result td {vertical-align: top }
 .psearch-avatar { width: 50px; }
@@ -22,3 +22,14 @@ dt,dd {
 .select2-highlighted .psearch-realname{ font-size: .8em; color: #eee; }
 .bigdrop.select2-container .select2-results {max-height: 300px;}
 .bigdrop .select2-results {max-height: 300px;}
+
+.dropdown-menu .divider {
+    background-color: #E5E5E5;
+    border-bottom: 1px solid #FFFFFF;
+    height: 1px;
+    margin: 0px;
+    overflow: hidden;
+}
+.dropdown-menu .opt{
+    margin-left: -50px;
+}
