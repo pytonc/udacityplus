@@ -3,7 +3,7 @@ __author__ = "Anthony, Jan Zegan"
 import json
 from google.appengine.ext import  ndb
 from google.appengine.api import memcache
-from web.util.chat import user_key
+from web.util.common import user_key
 from web.models.User import User
 import logging
 

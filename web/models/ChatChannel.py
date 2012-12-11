@@ -3,7 +3,7 @@ __author__ = "Anthony, rrandom, Jan Zegan"
 import json
 from google.appengine.ext import  ndb
 from google.appengine.api import memcache
-from web.util.chat import channel_key
+from web.util.common import channel_key
 
 class ChatChannel(ndb.Model):
     '''A chat channel'''

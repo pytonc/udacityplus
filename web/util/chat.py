@@ -1,8 +1,8 @@
-import urllib
+__author__ = "rrandom, Jin Koo, Anthony, Jan Zegan"
+
 import logging
 import re
 import json
-import webapp2
 from google.appengine.api import channel as channel_api # 'channel' is kind of ambiguous in context
 from google.appengine.api import memcache
 from web.models.ChatChannel import ChatChannel
@@ -18,7 +18,7 @@ def user_join(username, channelname):
             channelerror="Channel must consist of 3-20 alpha_numeric characters and start with a #"
             channel_api.send_message(username, "NOTICE "+channelerror)
             return
-        channel = ChatChannel(key_name=channelname.lower(),
+        channel = ChatChannel(id=channelname,
             channelname=channelname,
             users=json.dumps([ ])
         )
@@ -113,47 +113,16 @@ def user_pong(username, args):
     # Do nothing, since we have not yet implemented PING/PONG
     pass
 
-class Connect(webapp2.RequestHandler):
-    def post(self):
-        # Not everything causes a proper disconnect
-        username = self.request.get('from')
-        user = get_user(username)
-        if user and user.startingchannel:
-            user_join(username, user.startingchannel) # Join default channel
-        user = get_user(username) # To prevent overwriting
-        user.connected = True
-        user.store()
-        logging.info("Connected: "+username)
-        logging.warning("End of CONNECT, %s's channels are: "%username+', '.join(get_user(username).get_channel_names()))
-
-class Disconnect(webapp2.RequestHandler):
-    def post(self):
-        # Have to propagate to all the channels the user was in
-        username = self.request.get("from")
-        user = get_user(username)
-        if user.connected:
-            user_quit(username, "")
-        clear_user(username)
-        logging.info("Disconnected: "+username)
-
-class TokenexpireHandler(webapp2.RequestHandler):
-    def post(self):
-        ##handle token expire
-        username = urllib.unquote(self.request.get('username'))
-        token = channel_api.create_channel(username)
-        logging.info("this is a new token. :"+token)
-        self.response.out.write(token)
-
 def user_key(username):
     '''user_key function is for key consistency'''
-    return "user/"+username.lower()
+    return "user/"+username
 
 def get_user(username):
     '''Get a user from memcache or datastore, returns None if user does not exist'''
     key = user_key(username)
     user = memcache.get(key)
     if not user:
-        user = ChatUser.get_by_id(username.lower())
+        user = ChatUser.get_by_id(username)
         if user:
             memcache.set(key, user)
         else:
@@ -165,20 +134,20 @@ def clear_user(username):
     '''Removes a user from datastore and from memcache'''
     user = get_user(username)
     if user:
-        user.delete()
+        user.key.delete()
         memcache.set(user_key(username), "placeholder to reduce memcache misses")
         logging.info("Removed "+username)
 
 def channel_key(channelname):
     '''For consistency'''
-    return "channel/"+channelname.lower()
+    return "channel/"+channelname
 
 def get_channel(channelname):
     '''Get a channel from memcache or datastore, returns None if channel does not exist'''
     key = channel_key(channelname)
     channel = memcache.get(key)
     if not channel:
-        channel = ChatChannel.get_by_id(channelname.lower())
+        channel = ChatChannel.get_by_id(channelname)
         if channel:
             memcache.set(key, channel)
         else:
@@ -190,5 +159,5 @@ def clear_channel(channelname):
     '''Removes a channel from datastore and from memcache'''
     channel = get_channel(channelname)
     if channel:
-        channel.delete()
+        channel.key.delete()
         memcache.set(channel_key(channelname), "placeholder to reduce memcache misses")

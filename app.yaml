@@ -26,6 +26,9 @@ builtins:
 - appstats: on #/_ah/stats/
 - remote_api: on #/_ah/remote_api/
 
+inbound_services:
+- channel_presence
+
 handlers:
 - url: /admin/.*
   script: main.app
@@ -35,6 +38,10 @@ handlers:
   mime_type: image/vnd.microsoft.icon
   static_files: static/favicon.ico
   upload: static/favicon.ico
+
+- url: /favicon.png
+  static_files: /img/favicon.png
+  upload: /img/favicon.png
 
 - url: /apple-touch-icon\.png
   static_files: static/apple-touch-icon.png
@@ -74,12 +81,7 @@ handlers:
 
 - url: /.*
   script: main.app
-#  secure: always
-
-####TODO: should clean this up
-#- url: /favicon.png
-#  static_files: /img/favicon.png
-#  upload: /img/favicon.png
+  secure: always
 
 libraries:
 - name: jinja2

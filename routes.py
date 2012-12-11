@@ -19,12 +19,15 @@ secure_scheme = 'https'
 
 _routes = [
     RedirectRoute('/', home.UserHomePage, name='home', strict_slash=True),
-#    (r'/forbidden', forbidden.Forbidden),
     RedirectRoute('/messages', messages.MessagePage, name="messages", strict_slash=True),
     RedirectRoute('/messages/<conv_id:[0-9]*>/<msg_id:[0-9]*>', messages.MessagePage, name="message", strict_slash=True),
     RedirectRoute('/friends', friends.FriendsController, name='friends', strict_slash=True),
-    RedirectRoute('/chat/<room:\w+>', chat.Chat, name='chat', strict_slash=True),
+    RedirectRoute('/chat/<channelname:\w+>', chat.Chat, name='chat', strict_slash=True),
     RedirectRoute('/search', usersearch.Search, name="search", strict_slash=True),
+    RedirectRoute('/communication', chat.Communication, name='chat-communication', strict_slash=True),
+    RedirectRoute('/tokenexpireHandler',chat.TokenexpireHandler, name='tokenexpire', strict_slash=True),
+    ('/_ah/channel/connected/?', chat.Connect),
+    ('/_ah/channel/disconnected/?', chat.Disconnect),
 
     RedirectRoute(r'/settings', usersettings.UserSettings, name="settings", strict_slash=True),
 

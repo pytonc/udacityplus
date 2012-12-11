@@ -1,0 +1,73 @@
+/* Some clever person who knows bootstrap can fix this later */
+.nomargin {
+    margin-left: 0px;
+    margin-top: 0px;
+}
+
+#whole-chatbox {
+    background-color: #fff;
+    margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+    -webkit-border-radius: 0 0 6px 6px;
+    -moz-border-radius: 0 0 6px 6px;
+    border-radius: 0 0 6px 6px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    width: 670px;
+    border: 1px solid;
+}
+
+#chatclient {
+    width: 670px;
+}
+
+#channelpanes {
+    margin-top: -20px;
+    height: 540px;
+}
+
+#chatarea {
+    width: 514px; /* 75%-2*5px padding-1px border */
+    height: 540px;
+    overflow-y: scroll;
+    padding: 5px;
+    border-right: 1px solid #DDDDDD;
+}
+
+#userarea {
+    width: 135px; /* 25%-2*5px padding */
+    height: 540px;
+    padding: 5px;
+}
+
+div#inputs {
+    height: auto;
+}
+
+div#textinput {
+    width: 500px; /* 75%-2*5px padding-1px border */
+    padding: 5px;
+    border-top: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    height: auto;
+}
+
+div#spare {
+    width: 135px; /* 25%-2*5px padding */
+    border-top: 1px solid #DDDDDD;
+    padding: 5px;
+    height: auto;
+}
+
+input#chatinput {
+    width: 459px;
+}
+
+input.virgin-textinput {
+    color: #A0A0A0;
+}
+
+li.highlighted a {
+    color: #FF1010;
+    background-color: #60FF60;
+}
