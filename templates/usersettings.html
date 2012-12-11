@@ -6,6 +6,7 @@
     <form id="form_send_message" method="post" class="form-horizontal">
         <fieldset>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            {{ macros.field(form.public, label=_("Profile is public")) }}
             {{ macros.field(form.notify_on_msg, label=_("Would you like to be notified if somebody sends you a message?")) }}
             {{ macros.field(form.searchable, label=_("Make profile serachable")) }}
             {{ macros.field(form.show_friends, label=_("Show friends")) }}

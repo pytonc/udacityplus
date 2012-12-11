@@ -127,6 +127,7 @@
                     </select>
                 </div>
             </div>
+            {{ macros.field(form.public, label=_("Profile is public")) }}
             {{ macros.field(form.notify_on_msg, label=_("Notify user on new message")) }}
             {{ macros.field(form.searchable, label=_("Make profile serachable")) }}
             {{ macros.field(form.show_friends, label=_("Show friends")) }}

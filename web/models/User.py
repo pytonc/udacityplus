@@ -36,6 +36,7 @@ class User(User):
     show_friends    = ndb.BooleanProperty(default=False)
     notify_on_msg   = ndb.BooleanProperty(default=True)
     searchable      = ndb.BooleanProperty(default=True)
+    public          = ndb.BooleanProperty(default=True)
 
     conversations   = ndb.KeyProperty(kind='Conversation', repeated=True)
 
@@ -173,9 +174,9 @@ class User(User):
 
         # just auto add me to the other person's list
         fs = ndb.Key(User, friend).get()
-        fs = cls.query(cls.username == friend.lower()).get()
+        fs = cls.query(cls.username == friend).get()
         if me not in fs.friends:
-            fs.friends.append(me.lower())
+            fs.friends.append(me)
 
             fs.put()
 
@@ -367,7 +368,7 @@ class User(User):
         limit = int(limit) if limit else 10
         offset = int(offset) if offset else 0
 
-        c = Conversation.query(Conversation.receivers_list_norm.IN([username.lower()]))\
+        c = Conversation.query(Conversation.receivers_list_norm.IN([username]))\
         .order(-Conversation.modified)\
         .fetch(limit=limit, offset=offset, keys_only=True)
         return ndb.get_multi(c)

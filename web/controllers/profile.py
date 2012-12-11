@@ -50,7 +50,12 @@ class ProfilePage(BaseHandler):
         if user:
             if username != user.username:
                 profile = User.get_user(username)
-                if not profile:
+                if not profile or \
+                   (profile.public == False and \
+                    profile.username != user.username and \
+                    profile.username not in user.friends):
+
+                    #TODO: redirect to profile forbidden page
                     return self.abort(404)
             else:
                 profile = user
@@ -74,7 +79,7 @@ class ProfilePage(BaseHandler):
 
             self.render_template(template, **context)
         else:
-            self.redirect(self.uri_for('profile', page=username))
+            self.redirect(self.uri_for('login'))
 
     @user_required
     def post(self, username):

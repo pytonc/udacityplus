@@ -19,6 +19,7 @@ uname = re.compile(_UNAMEP)
 TEXTAREA_MAXLENGTH=2000
 
 class SettingsMixin(forms.BaseForm):
+    public = fields.BooleanField(_("Profile is visible"))
     notify_on_msg = fields.BooleanField(_('Send email on new message'))
     searchable = fields.BooleanField(_('Available in search'))
     show_friends = fields.BooleanField(_('Show friends'))
