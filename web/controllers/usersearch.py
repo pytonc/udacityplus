@@ -1,7 +1,6 @@
 from boilerplate.lib.basehandler import user_required
 from boilerplate.lib.basehandler import BaseHandler
 from web.util.searching import find_users
-import webapp2
 import urllib2
 import json
 import logging
