@@ -1,12 +1,14 @@
+from boilerplate.lib.basehandler import user_required
+from boilerplate.lib.basehandler import BaseHandler
 from web.util.searching import find_users
 import webapp2
 import urllib2
 import json
 import logging
 
-
-class Search(webapp2.RequestHandler):
-    def get(self):
+class Search(BaseHandler):
+    @user_required
+    def post(self):
         """Returns a jsonp object containing user search results
         """
         term = urllib2.unquote(self.request.get('q'))
