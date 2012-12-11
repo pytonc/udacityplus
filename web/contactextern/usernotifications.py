@@ -1,7 +1,7 @@
 from google.appengine.api.app_identity import get_default_version_hostname
 from google.appengine.api import mail
 from hashlib import sha1
-from web_.settings import MSG_NOTIFY_EMAIL_DISP
+import webapp2
 
 def create_new_user_confirmation(baseurl):
     token = sha1.hexdigest()
@@ -11,6 +11,8 @@ def create_new_user_confirmation(baseurl):
 def new_message_notify(email, conv_id, message):
 #    url = uri_for('messages', conv_id, message.key.id())
     host = get_default_version_hostname()
+    request = webapp2.get_request()
+    MSG_NOTIFY_EMAIL_DISP = request.app.config.get('MSG_NOTIFY_EMAIL_DISP')
     url = "/".join([host, 'messages', str(conv_id),str(message.key.id())])
 
     if not mail.is_email_valid(email):
