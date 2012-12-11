@@ -17,7 +17,15 @@ config = {
 
     # jinja2 templates
     'webapp2_extras.jinja2' : {'template_path': ['templates','boilerplate/templates', 'admin/templates'],
-                               'environment_args': {'extensions': ['jinja2.ext.i18n']}},
+                               'environment_args': {
+                                   'extensions': ['jinja2.ext.i18n']
+                                },
+
+                                'globals': {
+                                    'site_name': 'Udacity+',
+                                    'meetups_url': 'http://www.meetup.com/Udacity/',
+                                    }
+                               },
 
     # application name
     'app_name' : "Udacity+",
@@ -99,7 +107,8 @@ config = {
         ),
 
     # site title
-    'site_title': 'Udacity+',
-    'gravatar_base_url': "http://www.gravatar.com/avatar/"
+    'gravatar_base_url': "http://www.gravatar.com/avatar/",
+    'MSG_NOTIFY_EMAIL': 'uplusumessaging@uplus.com',
+    'MSG_NOTIFY_EMAIL_DISP': "Udacity+ <uplusumessaging@uplus.com>",
 
 } # end config
