@@ -13,14 +13,15 @@
         <div class="navbar navbar-static-top" style="margin: -1px -1px 0;">
             <div class="navbar-inner">
                 <div class="container" style="width: auto; padding: 0 20px;">
-                    <a class="brand" href="#">{{ user.real_name or user.username }}</a>
+                    <a class="brand" href="{{ uri_for('profile', username=profile.username) }}">
+                        {{ profile.real_name or profile.username }}</a>
                     <div class="btn-group">
-                        {% if user.username == username %}
-                        <a href="/{{ user.username }}?mode=edit" class="btn" type="button"><i class="icon-edit"></i> Edit Profile</a>
+                        {% if profile.username == username %}
+                        <a href="/{{ profile.username }}?mode=edit" class="btn" type="button"><i class="icon-edit"></i> Edit Profile</a>
                         {% elif friend_btn %}
                         <form action="/friends" method="post" style="margin: 0;">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                            <input type="text" name="name" value="{{ user.username }}" class="hidden" style="display: none;"/>
+                            <input type="text" name="name" value="{{ profile.username }}" class="hidden" style="display: none;"/>
                             <input type="text" name="to" value="{{ username }}" class="hidden" style="display: none;"/>
                             <input type="text" name="action" value="add" class="hidden" style="display: none;"/>
                             <button type="submit" class="btn"><i class="icon-user"></i> Add Friend</button>
@@ -46,15 +47,15 @@
 
             <div class="tab-content">
 
-                <div class="tab-pane" id="aboutyou">{{ user.short_about }}</div>
+                <div class="tab-pane" id="aboutyou">{{ profile.short_about }}</div>
 
                 <div class="tab-pane active" id="projects">
-                    {% if user.username == username %}
+                    {% if profile.username == username %}
                         <div class="pull-right">
-                            <a href="/{{ user.username }}?mode=add_project" class="btn btn-mini" type="button">
+                            <a href="{{ uri_for('project_view', username=profile.username, mode='add') }}" class="btn btn-mini" type="button">
                                 <i class="icon-plus"></i> Add
                             </a>
-                            <a href="/{{ user.username }}?mode=edit_project" class="btn btn-mini" type="button">
+                            <a href="{{ uri_for('project_view', username=profile.username, mode='edit') }}" class="btn btn-mini" type="button">
                                 <i class="icon-edit"></i> Edit
                             </a>
                         </div>
@@ -97,7 +98,7 @@
                         <h4>Courses I'm Working On...</h4>
                         <ul>
                             {% for course in courses_incomplete %}
-                            <li><a href="#">{{ course.name }}</a></li>
+                            <li><a href="{{ course.url }}">{{ course.name }}</a></li>
                             {% endfor %}
                         </ul>
                     {% else %}
@@ -110,7 +111,7 @@
                         <h4>Courses I've Completed...</h4>
                         <ul>
                             {% for course in courses_completed %}
-                                <li><a href="#">{{ course.name }}</a></li>
+                                <li><a href="{{ course.url }}">{{ course.name }}</a></li>
                             {% endfor %}
                         </ul>
                     {% else %}
@@ -119,7 +120,7 @@
 
                 </div>
 
-                <div class="tab-pane" id="tools">{{ user.tools }}</div>
+                <div class="tab-pane" id="tools">{{ profile.tools }}</div>
 
             </div>
         </div> <!-- /tabbable -->
