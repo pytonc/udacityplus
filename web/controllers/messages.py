@@ -11,7 +11,6 @@ from web.models.Message import Message
 from web.controllers.BaseHandler import *
 from web.models.Message import  Conversation
 from web.contactextern.usernotifications import new_message_notify
-from web.controllers.helpers.errorretrieval import check_valid_receiver
 from web.util import forms
 import webapp2
 
