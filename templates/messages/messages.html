@@ -26,7 +26,7 @@
                 {% for m in c.messages %}
                     <tr {% if m.sender != username and not m.read %}class="info"{% endif %}>
                         <td class="preview" colspan="3">
-                            <a href='/messages/{{ c.key.id() }}/{{ m.key.id() }}'>
+                            <a href='{{ uri_for('message', conv_id=c.key.id(), msg_id=m.key.id()) }}'>
                                 {{ m.content|truncate(140) }}
                             </a>
                         </td>
@@ -35,7 +35,7 @@
             {% endfor %}
         {% endif %}
     </table>
-    <a href='/messages?show=new'>Send new message</a>
+    <a href='{{ uri_for('messages', show="new") }}'>Send new message</a>
     <button onclick="getPreviousMessages()">Older</button>
     <button onclick="getNewerMessages()">Newer</button>
 </div>
