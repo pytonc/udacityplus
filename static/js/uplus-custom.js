@@ -35,15 +35,15 @@ function getCookie(c_name) {
     }
 }
 
-function removeSelectedProject(username) { 
+function removeSelectedProject(username, csrf_token) {
     var form = document.createElement('form');
     form.setAttribute('method', 'POST');
-    form.setAttribute('action', '/' + username);
+    form.setAttribute('action', '/' + username + '/project/delete');
     
     var hiddenField1 = document.createElement('input');
     hiddenField1.setAttribute('type', 'hidden');
-    hiddenField1.setAttribute('name', 'mode');
-    hiddenField1.setAttribute('value', 'remove_project');
+    hiddenField1.setAttribute('name', '_csrf_token');
+    hiddenField1.setAttribute('value', csrf_token);
 
     var hiddenField2 = document.createElement('input');
     hiddenField2.setAttribute('type', 'hidden');
@@ -70,7 +70,7 @@ function loadSelectedProject(self, index) {
     }
      
     document.getElementById("title").value = js_title[project_index];
-    document.getElementById("url").value = js_url[project_index];
+    document.getElementById("proj_url").value = js_url[project_index];
     document.getElementById("short_description").value = js_short_description[project_index];
     setCookie('sel_i', project_index.toString());
 }
