@@ -7,7 +7,7 @@ RedirectRoute: http://webapp-improved.appspot.com/api/webapp2_extras/routes.html
 
 from webapp2_extras.routes import RedirectRoute
 from web.controllers import home
-#from web import handlers
+from web.controllers import chat
 from web.controllers import profile
 from web.controllers import friends
 from web.controllers import messages
@@ -20,10 +20,12 @@ secure_scheme = 'https'
 _routes = [
     RedirectRoute('/', home.UserHomePage, name='home', strict_slash=True),
 #    (r'/forbidden', forbidden.Forbidden),
-    RedirectRoute(r'/messages', messages.MessagePage, name="messages", strict_slash=True),
-    RedirectRoute(r'/messages/<conv_id:[0-9]*>/<msg_id:[0-9]*>', messages.MessagePage, name="message", strict_slash=True),
-    (r'/friends', friends.FriendsController),
-    RedirectRoute(r'/search', usersearch.Search, name="search", strict_slash=True),
+    RedirectRoute('/messages', messages.MessagePage, name="messages", strict_slash=True),
+    RedirectRoute('/messages/<conv_id:[0-9]*>/<msg_id:[0-9]*>', messages.MessagePage, name="message", strict_slash=True),
+    RedirectRoute('/friends', friends.FriendsController, name='friends', strict_slash=True),
+    RedirectRoute('/chat/<room:\w+>', chat.Chat, name='chat', strict_slash=True),
+    RedirectRoute('/search', usersearch.Search, name="search", strict_slash=True),
+
     RedirectRoute(r'/settings', usersettings.UserSettings, name="settings", strict_slash=True),
 
     RedirectRoute('/<username:\w+>/project/<mode:\w+>', profile.Projects,
