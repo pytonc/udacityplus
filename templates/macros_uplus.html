@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 {% macro input(type, name, id, value, placeholder) -%}
 <input type="{{ type }}" name="{{ name }}" id="{{ id }}" required="required" placeholder="{{ placeholder }}"
        class="input-xlarge focused"
@@ -7,50 +9,57 @@
         />
 {%- endmacro %}
 
-{% macro sendMsgModal(modal_label, sender, receiver, act)-%}
-<div class="modal hide fade"
-     id="{{ modal_label }}"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="send_msg_modal-{{ receiver }}"
-     aria-hidden="true">
-    <form class="form-horizontal" action="{{ act }}" method="post">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        <fieldset>
-            <div id="legend" class="">
-                <h2 class="">Send message to {{ receiver }}</h2>
-            </div>
-            <div class="control-group">
-                <input type="hidden" value="{{ receiver }}" name="receiver"/>
-                <input type="hidden" value="{{ sender }}" name="username"/>
 
-                <label class="control-label" for="title_{{ receiver }}">Title</label>
-                <div class="controls">
-                    <input type="text" placeholder="Title" id="title_{{ receiver }}"
-                           name="title" class="input-xlarge" required="required">
+{% macro friend_list(message_form, friends, sender)-%}
+<form id="form_send_msg_sidebar" class="form-horizontal ajax" action="{{ uri_for('messages') }}" method="post">
+    <div id="filter_friends">
+        <input type="text" class="search span12" placeholder="Find contact">
+        <ul class="list dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+            {% for friend in friends %}
+            <li class="dropdown-submenu" role="menuitem">
+                <a class="ident" tabindex="-1" href="{{ uri_for('profile', username=friend.username) }}">{{ friend.real_name or friend.username }}</a>
+                <ul class="dropdown-menu opt">
+                    <li><a data-toggle="modal"
+                           href="#responsive-{{ friend.username }}"
+                           role="button">Send Message</a>
+                    </li>
+                    <li><a tabindex="-1" href="#">Chat</a></li>
+                </ul>
+                <div id="responsive-{{ friend.username }}" class="modal hide fade" tabindex="-1" data-width="760">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3>Send Message</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row-fluid">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <fieldset>
+                                <input type="hidden" name="{{ message_form.sender.id }}" value="{{ sender }}">
+                                <input type="hidden" name="{{ message_form.receiver.id }}" value="{{ friend.username }}">
+                                {{ macros.field(message_form.title, label=_("Title"), placeholder=_("Title"),
+                                        class="input-xlarge focused") }}
+                                {{ macros.field(message_form.content, label=_("Content"), placeholder=_("Message"),
+                                        class="input-xlarge focused") }}
+
+                                <div class="control-group">
+                                    <!-- Button -->
+                                    <div class="modal-footer">
+                                        <button type="button" data-dismiss="modal" class="btn">Close</button>
+                                        <input type="submit" name="Send" class="btn btn-primary">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="control-group">
-
-                <!-- Textarea -->
-                <label class="control-label" for="content_{{ receiver }}">Message</label>
-                <div class="controls">
-                    <textarea name='content' id='content_{{ receiver }}' required="required" class="input-xlarge"></textarea>
-                </div>
-            </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label"></label>
-
-            <!-- Button -->
-            <div class="modal-footer">
-                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                <button class="btn btn-primary">Send</button>
-            </div>
-
-        </fieldset>
-    </form>
-</div>
+            <div class="divider" role="menuitem"></div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</form>
 {% endmacro -%}
+
+
+
+
