@@ -16,6 +16,7 @@ class Course(ndb.Model):
     name        = ndb.StringProperty(required=True)
     level       = ndb.StringProperty(choices=LEVELS)
     short_desc  = ndb.StringProperty()
+    url         = ndb.StringProperty()
     long_desc   = ndb.TextProperty()
     source      = ndb.KeyProperty(Source)
 

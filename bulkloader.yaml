@@ -53,6 +53,9 @@ transformers:
     - property: short_desc
       external_name: description
 
+    - property: url
+      external_name: url
+
     - property: source
       external_name: source
       import_transform: transform.create_foreign_key('Source')
