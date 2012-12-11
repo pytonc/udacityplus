@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Conversation
+  properties:
+  - name: receivers_list_norm
+  - name: modified
+    direction: desc
+
 - kind: User
   properties:
   - name: __key__
@@ -23,6 +29,11 @@ indexes:
 
 - kind: User
   properties:
+  - name: email
+  - name: friends
+
+- kind: User
+  properties:
   - name: last_name
   - name: __key__
     direction: desc
@@ -32,3 +43,50 @@ indexes:
   - name: username
   - name: __key__
     direction: desc
+
+- kind: User
+  properties:
+  - name: username
+  - name: email
+
+- kind: User
+  properties:
+  - name: username
+  - name: email
+  - name: friends
+
+- kind: User
+  properties:
+  - name: username
+  - name: email
+  - name: name
+
+- kind: User
+  properties:
+  - name: username
+  - name: email, friends
+
+- kind: User
+  properties:
+  - name: username
+  - name: email, password
+
+- kind: User
+  properties:
+  - name: username
+  - name: friends
+
+- kind: User
+  properties:
+  - name: username
+  - name: real_name
+
+- kind: User
+  properties:
+  - name: username
+  - name: username, email
+
+- kind: User
+  properties:
+  - name: username
+  - name: username, password
