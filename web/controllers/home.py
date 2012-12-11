@@ -1,4 +1,4 @@
-from boilerplate.lib.basehandler import BaseHandler
+from web.controllers.BaseHandler import BaseHandler
 from web.models.User import User
 
 class UserHomePage(BaseHandler):
