@@ -80,3 +80,7 @@ class Course(ndb.Model):
             memcache.add('courses_by_level_cid_lt', courses, time=1814400, namespace='udacityplus')
 
             return courses
+
+    @classmethod
+    def available_course_ids(cls):
+        return (c.cid for c in cls.query().fetch(projection=['cid']))
