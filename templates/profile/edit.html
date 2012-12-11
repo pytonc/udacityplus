@@ -172,36 +172,4 @@
             editor2.run();
         })();
     </script>
-    <script type="text/javascript">
-        $().ready(function() {
-            $("#form_edit_profile").validate({
-                submitHandler: function(form) {
-                    form.submit();
-                },
-                rules: {
-{#                    password: 'required',#}
-                    c_password: {
-                        required: "#password:filled",
-                        equalTo: '#password'
-                    },
-                    dob: {
-                        date: true
-                    }
-                },
-                errorPlacement: function(error, element) {
-                    element.parent().parent().addClass("error");
-                    error.addClass("help-inline").appendTo( element.parent() );
-                }
-            });
-            $("#password").passStrength({
-                shortPassText: '{% trans %}Short Password{% endtrans %}',
-                badPassText: '{% trans %}Insecure Password{% endtrans %}',
-                goodPassText: '{% trans %}Good Password{% endtrans %}',
-                strongPassText: '{% trans %}Secure Password{% endtrans %}'
-            });
-{#            {% if country != "" %}#}
-{#                $('#country option[value="{{ country }}"]').attr("selected",true);#}
-{#            {% endif %}#}
-        });
-    </script>
 {% endblock %}
