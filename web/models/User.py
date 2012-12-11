@@ -1,27 +1,3 @@
-# Simple user model that we can use
-# in further development of pm part
-#
-# Some helpful static methods added
-#
-#
-# VALIDATORS
-#
-# valid_password()
-# valid_username()
-# valid_email()
-# valid() - check all above
-#
-#
-# SAVE
-# 
-# save() - save and return user if valid() else False
-#
-#
-# LOG TOKEN
-#
-# bcrypt.gensalt() is used for creating tokens
-# tokens in database are hashed with bcrypt
-# new token is generated with every new login
 from google.appengine.api import memcache
 
 from google.appengine.ext import  ndb
