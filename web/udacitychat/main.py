@@ -8,7 +8,7 @@ import json
 import webapp2
 import jinja2
 from google.appengine.api import channel as channel_api # 'channel' is kind of ambiguous in context
-from google.appengine.ext import db
+from google.appengine.ext import  ndb
 from google.appengine.api import memcache
 
 # This section will eventually get moved to a Handler class
@@ -28,19 +28,19 @@ def render(template, **kw):
     return(render_str(template, **kw))
 # End Handler
 
-class ChatUser(db.Model):
+class ChatUser(ndb.Model):
     '''A user'''
     # key_name is username.lower()
-    username = db.StringProperty(required = True) # case SeNsItIvE
-    joined = db.DateTimeProperty(auto_now_add = True)
-    identifier = db.StringProperty(required = True) # Session specific
-    startingchannel = db.TextProperty(required = False)
-    channels = db.TextProperty(required = True) # JSON array
-    contacts = db.TextProperty(required = True) # JSON array
-    connected = db.BooleanProperty(default = False)
+    username = ndb.StringProperty(required = True) # case SeNsItIvE
+    joined = ndb.DateTimeProperty(auto_now_add = True)
+    identifier = ndb.StringProperty(required = True) # Session specific
+    startingchannel = ndb.TextProperty(required = False)
+    channels = ndb.TextProperty(required = True) # JSON array
+    contacts = ndb.TextProperty(required = True) # JSON array
+    connected = ndb.BooleanProperty(default = False)
     def store(self):
         '''Store in memcache and datastore'''
-        memcache.set(user_key(self.key().name()), self)
+        memcache.set(user_key(self.key.id()), self)
         self.put()
     def get_contact_names(self):
         '''Get the usernames of this user's contacts'''
@@ -90,15 +90,15 @@ class ChatUser(db.Model):
             self.channels = json.dumps(channels)
             self.store()
 
-class ChatChannel(db.Model):
+class ChatChannel(ndb.Model):
     '''A chat channel'''
     # key_name is channelname.lower()
-    channelname = db.StringProperty(required = True) # case SeNsItIvE
-    created = db.DateTimeProperty(auto_now_add = True)
-    users = db.TextProperty(required = False) # JSON array
+    channelname = ndb.StringProperty(required = True) # case SeNsItIvE
+    created = ndb.DateTimeProperty(auto_now_add = True)
+    users = ndb.TextProperty(required = False) # JSON array
     def store(self):
         '''Store in memcache and datastore'''
-        memcache.set(channel_key(self.key().name()), self)
+        memcache.set(channel_key(self.key.id()), self)
         self.put()
     def get_user_names(self):
         '''Returns a list of all the users in this channel'''
@@ -291,7 +291,7 @@ def get_user(username):
     key = user_key(username)
     user = memcache.get(key)
     if not user:
-        user = ChatUser.get_by_key_name(username.lower())
+        user = ChatUser.get_by_id(username.lower())
         if user:
             memcache.set(key, user)
         else:
@@ -316,7 +316,7 @@ def get_channel(channelname):
     key = channel_key(channelname)
     channel = memcache.get(key)
     if not channel:
-        channel = ChatChannel.get_by_key_name(channelname.lower())
+        channel = ChatChannel.get_by_id(channelname.lower())
         if channel:
             memcache.set(key, channel)
         else:
@@ -360,7 +360,7 @@ class Main(webapp2.RequestHandler):
             token = channel_api.create_channel(username) # Expires after 120 minutes
             logging.info("%s is a token. type of token: %s"%(token,type(token)))
             identifier = os.urandom(16).encode('hex')
-            user = ChatUser(key_name=username.lower(),
+            user = ChatUser(id=username.lower(),
                             username=username,
                             identifier=identifier,
                             startingchannel=channelname,
