@@ -1,7 +1,8 @@
-from boilerplate.lib.basehandler import BaseHandler
+from boilerplate.lib.basehandler import BaseHandler, user_required
 from web.models.User import User
 
 class FriendsController(BaseHandler):
+    @user_required
     def post(self):
         to = self.request.get('to')
         name    = self.request.get('name')
