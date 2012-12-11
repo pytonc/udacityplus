@@ -9,10 +9,11 @@ from boilerplate.lib.basehandler import user_required
 from web.models.User import User
 from web.models.Message import Message
 from web.controllers.BaseHandler import *
-from web.controllers.helpers.authentication import Authentication
 from web.models.Message import  Conversation
 from web.contactextern.usernotifications import new_message_notify
 from web.controllers.helpers.errorretrieval import check_valid_receiver
+from web.util import forms
+import webapp2
 
 
 class MessagePage(BaseHandler):
@@ -20,56 +21,47 @@ class MessagePage(BaseHandler):
     def get(self, conv_id=None, msg_id=None):
 #       (conv_id and msg_id) or (not conv_id and not msg_id)
         if not bool(conv_id) ^ bool(msg_id):
-            username = self.get_cookie("username")
+
             show, start, end, thread, id = self.get_params(["show", "from", "to", "thread", "id"])
 
-            me = User.get_user(username)
-            friends = me.get_friends()
 
             if show in ('all', 'new') or not show:
                 if show == 'new':
-                    self.show_form_for_new_message(conv_id, msg_id, friends)
+                    self.show_form_for_new_message(conv_id, msg_id)
                 elif show == 'all' or not (show or conv_id or msg_id):
-                    self.display_messages(username, start, end, friends)
+                    self.display_messages(self.username, start, end)
                 elif conv_id and msg_id:
-                    self.display_message(int(msg_id), int(conv_id), friends)
+                    self.display_message(int(msg_id), int(conv_id))
             else:
                 self.response.out.write("invalid url")
 
-
-    def display_message(self, msg_id, conv_id, friends):
-        username = self.get_cookie("username")
+    @user_required
+    def display_message(self, msg_id, conv_id):
         conv = Conversation.get_by_id(conv_id)
-        if username not in conv.receivers_list_norm:
+        if self.username not in conv.receivers_list_norm:
             self.abort(403)
         else:
             message = Message.get_by_id(msg_id)
-            if message.sender != username:
+            if message.sender != self.username:
                 message.read = True
-            message.put()
+                message.put()
 
             template_values = { 'message' : message,
                                 'conv_id': conv_id,
-                                'username': username,
-                                'friends': friends}
+                                'username': self.username,}
 
-            self.render("messages/display_message.html", template_values)
+            self.render_template("messages/display_message.html", **template_values)
 
-    def display_messages(self, username, start, end, friends):
+    def display_messages(self, username, start, end):
         conv = User.get_conversations_for(username, start, end)
 
-        template_values = { "conversations" : conv, "username": username, 'friends': friends}
-        self.render("messages/messages.html", template_values)
+        template_values = { "conversations" : conv, "username": username}
+        self.render_template("messages/messages.html", **template_values)
 
-    def show_form_for_new_message(self, thread=None, id=None, friends=None, errors=None):
+    def show_form_for_new_message(self, thread=None, id=None):
         """Shows a form for a brand new message and a reply if given thread and id
         """
-        username = self.get_cookie('username')
-        if not friends:
-            user = User.get_user(username)
-            friends = user.get_friends()
-
-        context = {'friends': friends, 'username': username, 'errors': errors}
+        context = {'username': self.username}
 
         if id and thread:
             id = int(id)
@@ -78,13 +70,13 @@ class MessagePage(BaseHandler):
             msg = Message.get_by_id(id)
             conv = Conversation.get_by_id(thread)
 
-            context['receiver'] = msg.sender
-            context['title'] = conv.title
+            self.form.receiver.data = msg.sender
+            self.form.title.data = conv.title
 
-        self.render("messages/new_message.html", context)
+        self.render_template("messages/new_message.html", **context)
 
     def notify_user(self, sender, conv_id, msg):
-        #TODO: use task queue
+        #TODO: use boilerplate/task queue
         conv = Conversation.get_by_id(int(conv_id))
         for uname in conv.receivers_list_norm:
             if uname != sender:
@@ -93,32 +85,26 @@ class MessagePage(BaseHandler):
                     new_message_notify(user.email, conv_id, msg)
 
     @user_required
-    def post(self, conv_id, msg_id):
-        sender   = username = self.get_cookie("username")
-        receiver = self.request.get('receiver')
-        title    = self.request.get('title')
-        content  = self.request.get('content')
+    def post(self, conv_id=None, msg_id=None):
+        if not self.form.validate():
+            return self.show_form_for_new_message()
 
-        sender = sender.lower()
-        receiver = receiver.lower()
+        # Adds a new message to conversation
+        if conv_id and msg_id and conv_id.isdigit() and msg_id.isdigit():
 
-        vr, err = check_valid_receiver(receiver)
-        if vr:
-            # Adds a new message to conversation
-            if conv_id and msg_id:
-                msg = Conversation.add_new_message(sender, content, conv_id=conv_id)
-                self.notify_user(sender, conv_id, msg)
+            msg = Conversation.add_new_message(self.form.sender.data, self.form.content.data, conv_id=conv_id)
+            self.notify_user(self.form.sender.data, conv_id, msg)
 
-            # Adds a new conversation with first message
-            elif receiver and title and content:
-                (conv, msg) = User.add_new_conversation(sender, receiver, title, content)
-                self.notify_user(sender, conv.key.id(), msg)
-            else:
-                self.response.out.write("Error in Messages.post()")
-
-            if self.request.path.startswith('/messages'):
-                self.redirect('/messages?show=all')
-            else:
-                self.redirect(self.request.referer)
+        # new conversation: adds a new conversation with first message
+        elif self.form.receiver.data and self.form.title.data and self.form.content.data:
+            data = [self.form.data.get(i) for i in ('sender', 'receiver', 'title', 'content')]
+            (conv, msg) = User.add_new_conversation(*data)
+            self.notify_user(self.form.sender.data, conv.key.id(), msg)
         else:
-            self.show_form_for_new_message(errors=err)
+            self.response.out.write("Error in Messages.post()")
+
+        self.redirect(self.request.referer)
+
+    @webapp2.cached_property
+    def form(self):
+        return forms.MessageForm(self)
