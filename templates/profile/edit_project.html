@@ -26,7 +26,7 @@
             <hr/>
 
             <div>
-                <a href="javascript:removeSelectedProject(&quot;{{ username }}&quot;)" 
+                <a href="javascript:removeSelectedProject(&quot;{{ username }}&quot;, &quot;{{ csrf_token() }}&quot;)"
                 class="btn pull-right" type="button" id="delete">
                     <i class="icon-trash"></i>
                 </a>
@@ -60,9 +60,9 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="url">Visit/Download Url</label>
+                <label class="control-label" for="proj_url">Visit/Download Url</label>
                 <div class="controls">
-                    <input type="text" required="required" id="url" name="url" class="input-xlarge" maxlength="100"
+                    <input type="text" required="required" id="proj_url" name="proj_url" class="input-xlarge" maxlength="100"
                     value="{{ proj_url }}">
                     {% if urlerror %}
                     <p class="help-block alert alert-error">
