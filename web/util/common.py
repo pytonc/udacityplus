@@ -25,8 +25,8 @@ def get_gravatar(email, username):
         gravatar_url = request.app.config.get('gravatar_base_url') + md5(email).hexdigest() + "?"
         gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
-        # 2 hour expire
-        memcache.set('gravatar', gravatar_url, namespace=username, time=1)
+        # 2 week expire
+        memcache.set('gravatar', gravatar_url, namespace=username, time=1209600)
 
 
     return gravatar_url
