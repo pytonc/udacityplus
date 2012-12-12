@@ -19,7 +19,7 @@ class UserHomePage(BaseHandler):
                     "userinfo_logout-url" : self.auth_config['logout_url'],
                     "friends": user_info.get_friends()
                     }
-                return self.render_template('home.html', **params)
+                return self.render_template('userhome.html', **params)
             except (AttributeError, KeyError), e:
                 return "Secure zone error:" + " %s." % e
         else:
