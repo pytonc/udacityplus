@@ -1,21 +1,10 @@
 {% extends base_layout %}
 
-{% block header_title_lead %}{% endblock %}
-
 {% block content %}
+<div class="span12 well">
 
-    {% if user_id %}
-        {{ super() }}
-        {% block usercontent %}
-            <div class="span7 well">
-            </div>
-        {% endblock usercontent %}
-    {% else %}
-        <p>Not logged in</p>
-
-    {% endif %}
-
-{% endblock %}
+</div>
+{% endblock content %}
 
 {% block mediaJS %}
     <script type="text/javascript">
@@ -56,4 +45,3 @@
         });
     </script>
 {% endblock %}
-
