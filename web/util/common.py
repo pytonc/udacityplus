@@ -40,7 +40,7 @@ def channel_key(channelname):
     return "channel/"+channelname
 
 def available_chat_rooms(username, current):
-    rooms = [attempt.course.get().cid for attempt in current]
+    rooms = sorted(set((attempt.course.get().cid for attempt in current)))
     # keep for two weeks
     memcache.set('chat_rooms', rooms, namespace=username, time=1209600)
 
