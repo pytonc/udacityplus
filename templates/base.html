@@ -96,10 +96,24 @@
                                 <li><a href="{{ uri_for('settings') }}"><i class="icon-wrench"></i>Settings</a></li>
 
                                 <li class="nav-header">Groups</li>
+                                {% if user_id %}
+                                {% for course in user_courses %}
+                                <li>
+                                    <form method="post" style="margin: 0; padding: 0" action="{{ uri_for('chat', channelname=course) }}">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn btn-link" style="padding: 0; margin-left: 0" type="submit" name="{{ course }}"><i class="icon-user"></i>{{ course }}</button>
+                                    </form>
+                                </li>
 
-                                <li><a href="#"><i class="icon-user"></i>CS212 PS5</a></li>
-                                <li><a href="#"><i class="icon-user"></i>Contest Project</a></li>
+{#                                    <li>#}
+{#                                        <a class="chatroom" href="{{ uri_for('chat', channelname=course) }}">#}
+{#                                            <i class="icon-user"></i>{{ course }}#}
+{#                                        </a>#}
+{#                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">#}
+{#                                    </li>#}
 
+                                {% endfor %}
+                                {% endif %}
                             </ul>
                         {% endblock sidebarnav %}
                     </div>
@@ -115,7 +129,7 @@
                 {% block peerlist %}
                 <div class="span3 well sidebar-nav">
                     <h2>Peers</h2>
-                    {% if friends %}
+                    {% if user_id and friends %}
                     {{ m.friend_list(message_form, friends, username) }}
                     {% endif %}
             {% endblock peerlist %}
@@ -124,10 +138,8 @@
     </div>
 {% endblock content %}
 {% block footer %}
-    <footer>
-        <p>
-        Footer <br/>
-        </p>
+    <footer class="span12 well">
+
     </footer>
 {% endblock %}
 </body>
@@ -176,7 +188,6 @@
 
         var featureList = new List('filter_friends', options);
     </script>
-{#    <script type="text/javascript">$(".alert").alert()</script>#}
 {% endblock js %}
 {% block mediaJS %}{% endblock %}
 </html>
