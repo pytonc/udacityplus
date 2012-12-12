@@ -12,7 +12,7 @@ config = {
     'webapp2_extras.sessions' : {'secret_key': '_PUT_KEY_HERE_YOUR_SECRET_KEY_'},
 
     # webapp2 authentication
-    'webapp2_extras.auth' : {'user_model': 'boilerplate.models.User',
+    'webapp2_extras.auth' : {'user_model': 'web.models.User.User',
                              'cookie_name': 'session_name'},
 
     # jinja2 templates
