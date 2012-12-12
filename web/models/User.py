@@ -20,7 +20,7 @@ from web.util.searching import find_users
 from web.util.searching import remove_from_index
 
 # gravatar
-from web.util.common import get_gravatar
+from web.util.common import get_gravatar, available_chat_rooms
 
 
 class User(User):
@@ -57,9 +57,19 @@ class User(User):
         elif not self.searchable and doc_id:
             remove_from_index(doc_id, 'users')
 
+        available_chat_rooms(self.username, self.get_all_courses())
+
     @property
     def gravatar(self):
         return get_gravatar(self.email, self.username)
+
+
+    @property
+    def chat_rooms(self):
+        rooms = memcache.get('chat_rooms', namespace=self.username)
+        if not rooms:
+            rooms = available_chat_rooms(self.username, self.get_all_courses())
+        return rooms
 
     @classmethod
     def get_user(cls, username):

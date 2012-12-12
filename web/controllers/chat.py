@@ -13,7 +13,6 @@ import webapp2
 import logging
 import urllib
 import json
-import re
 import os
 
 
@@ -34,8 +33,9 @@ class Chat(BaseHandler):
         if channelname not in Course.available_course_ids():
             #TODO: doesn't return info
             message = _("Channel not available")
-            self.add_message(message, 'info')
-            return self.redirect(self.request.url)
+            self.add_message(message, 'error')
+            return self.redirect_to(self.request.url)
+
 
         channelname = "#{}".format(channelname)
 

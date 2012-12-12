@@ -1,11 +1,10 @@
 {% extends base_layout %}
 {% block stylesheets %}
 {{ super() }}
-<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css">
 <link rel="stylesheet" href="/css/chat.css">
 {% endblock %}
 {% block usercontent %}
-<div class="span7 containchat">
+<div class="span7 containchat" id="usercontent">
 <div class="row nomargin" id="whole-chatbox">
   <div class="span12 nomargin" id="chatclient">
     <ul class="nav nav-tabs" id="chattabs">
@@ -31,17 +30,13 @@
 </div> <!-- End hero unit -->
 {% endblock usercontent %}
 {% block mediaJS %}
-{#  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>#}
-{#  <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js" type="text/javacript"></script>#}
-  <script src="/_ah/channel/jsapi"></script>
-    <script type="text/javascript">
-        // Begin dealing with communications
-        var username = "{{ username }}";
-        var token = "{{ token }}";
-        var server = "{{ server }}";
-        var identifier = "{{ identifier }}";
-    </script>
-  <script type="text/javascript" src="/js/chat.js">
- /* document.ready() */
-  </script>
+<script src="/_ah/channel/jsapi"></script>
+<script type="text/javascript">
+    // Begin dealing with communications
+    var username = "{{ username }}";
+    var token = "{{ token }}";
+    var server = "{{ server }}";
+    var identifier = "{{ identifier }}";
+</script>
+<script type="text/javascript" src="/js/chat.js"></script>
 {% endblock mediaJS %}

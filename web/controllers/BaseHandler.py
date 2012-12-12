@@ -20,6 +20,7 @@ class BaseHandler(bh):
             user = User.get_by_id(long(self.user_id))
             friends = user.get_friends()
             kwargs['friends'] = friends
+            kwargs['user_courses'] = user.chat_rooms
         except TypeError:
             # home page, not logged in, so no freinds
             pass

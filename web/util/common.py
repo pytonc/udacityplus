@@ -26,7 +26,22 @@ def get_gravatar(email, username):
         gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
 
         # 2 hour expire
-        memcache.set('gravatar', gravatar_url, namespace=username, time=120)
+        memcache.set('gravatar', gravatar_url, namespace=username, time=1)
 
 
     return gravatar_url
+
+def user_key(username):
+    '''user_key function is for key consistency'''
+    return "user/"+username
+
+def channel_key(channelname):
+    '''For consistency'''
+    return "channel/"+channelname
+
+def available_chat_rooms(username, current):
+    rooms = [attempt.course.get().cid for attempt in current]
+    # keep for two weeks
+    memcache.set('chat_rooms', rooms, namespace=username, time=1209600)
+
+    return rooms
