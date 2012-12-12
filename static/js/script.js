@@ -112,3 +112,16 @@ $(document).ready(function() {
 });
 
 
+//$(function() {
+//    $('.chatroom').click( function() {
+//        $.post(
+//            $(this).attr('href'),
+//            $(this).next('input[type=hidden]').serialize(),
+//            function(data) {
+////                    var content = $( data ).find( '#stuff' );
+////                    $( "#otherstuff" ).empty().append( content );
+//            }
+//        );
+//        return false;  // cancel link default action
+//    });
+//});
