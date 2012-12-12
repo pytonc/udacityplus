@@ -1,0 +1,65 @@
+{% import "macros.html" as macros %}
+
+{% macro input(type, name, id, value, placeholder) -%}
+<input type="{{ type }}" name="{{ name }}" id="{{ id }}" required="required" placeholder="{{ placeholder }}"
+       class="input-xlarge focused"
+        {% if value %}
+       value="{{ value }}" readonly="readonly"
+        {% endif %}
+        />
+{%- endmacro %}
+
+
+{% macro friend_list(message_form, friends, sender)-%}
+<form id="form_send_msg_sidebar" class="form-horizontal ajax" action="{{ uri_for('messages') }}" method="post">
+    <div id="filter_friends">
+        <input type="text" class="search span12" placeholder="Find contact">
+        <ul class="list dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
+            {% for friend in friends %}
+            <li class="dropdown-submenu" role="menuitem">
+                <a class="ident" tabindex="-1" href="{{ uri_for('profile', username=friend.username) }}">{{ friend.real_name or friend.username }}</a>
+                <ul class="dropdown-menu opt">
+                    <li><a data-toggle="modal"
+                           href="#responsive-{{ friend.username }}"
+                           role="button">Send Message</a>
+                    </li>
+                    <li><a tabindex="-1" href="#">Chat</a></li>
+                </ul>
+                <div id="responsive-{{ friend.username }}" class="modal hide fade" tabindex="-1" data-width="760">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3>Send Message</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row-fluid">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <fieldset>
+                                <input type="hidden" name="{{ message_form.sender.id }}" value="{{ sender }}">
+                                <input type="hidden" name="{{ message_form.receiver.id }}" value="{{ friend.username }}">
+                                {{ macros.field(message_form.title, label=_("Title"), placeholder=_("Title"),
+                                        class="input-xlarge focused") }}
+                                {{ macros.field(message_form.content, label=_("Content"), placeholder=_("Message"),
+                                        class="input-xlarge focused") }}
+
+                                <div class="control-group">
+                                    <!-- Button -->
+                                    <div class="modal-footer">
+                                        <button type="button" data-dismiss="modal" class="btn">Close</button>
+                                        <input type="submit" name="Send" class="btn btn-primary">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            <div class="divider" role="menuitem"></div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</form>
+{% endmacro -%}
+
+
+
+

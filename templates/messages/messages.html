@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block usercontent %}
+<div class="span7">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>With</th>
+                <th>Started</th>
+            </tr>
+        </thead>
+        {% if conversations %}
+            {% for c in conversations %}
+                <tr class="success">
+                    <td>{{ c.title }}</td>
+                    <td>
+                        {% for r in c.receivers %}
+                            {% if r.username != username %}
+                                {{ r.username }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ c.created.strftime("%B %d, %Y at %I:%M") }}</td>
+                </tr>
+                {% for m in c.messages %}
+                    <tr {% if m.sender != username and not m.read %}class="info"{% endif %}>
+                        <td class="preview" colspan="3">
+                            <a href='{{ uri_for('message', conv_id=c.key.id(), msg_id=m.key.id()) }}'>
+                                {{ m.content|truncate(140) }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+    </table>
+    <a href='{{ uri_for('messages', show="new") }}'>Send new message</a>
+    <button onclick="getPreviousMessages()">Older</button>
+    <button onclick="getNewerMessages()">Newer</button>
+</div>
+{% endblock %}
