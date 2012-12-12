@@ -1,4 +1,4 @@
-application: udacityplusdemo
+application: socialmooc
 version: 2-2
 runtime: python27
 api_version: 1
