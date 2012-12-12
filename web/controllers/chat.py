@@ -29,8 +29,9 @@ class Chat(BaseHandler):
 #            message = _("Username already in use")
 #            self.add_message(message, 'error')
 #            return self.redirect(self.request.url)
-
-        if channelname not in Course.available_course_ids():
+        available_channels = set(Course.available_course_ids())
+        available_channels.add('Global')
+        if channelname not in available_channels:
             #TODO: doesn't return info
             message = _("Channel not available")
             self.add_message(message, 'error')
