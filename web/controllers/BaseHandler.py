@@ -21,8 +21,9 @@ class BaseHandler(bh):
             friends = user.get_friends()
             kwargs['friends'] = friends
             kwargs['user_courses'] = user.chat_rooms
+            kwargs['user_courses'].append('Global')
         except TypeError:
-            # home page, not logged in, so no freinds
+            # home page, not logged in, so no friends
             pass
 
         if hasattr(self, 'message_form'):
