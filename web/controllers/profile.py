@@ -40,6 +40,8 @@ class ProfilePage(BaseHandler):
         if mode != 'edit':
             template = 'profile/profile.html'
         else:
+            if self.username != username:
+                return self.abort(403)
             template = 'profile/edit.html'
 
         if self.user:
@@ -83,6 +85,8 @@ class ProfilePage(BaseHandler):
 
     @user_required
     def post(self, username):
+        if self.username != username:
+            return self.abort(403)
         mode = self.request.get('mode')
 
         if mode == 'edit':
