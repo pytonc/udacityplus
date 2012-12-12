@@ -4,7 +4,7 @@ Application is in `web` directory. Top level directories take precedence over on
 
 Some files are unused, I just didn't get around to cleanup. Some code may crash and be insecure against unauthorized requests.
 
-Users don't get automatically added to search index due to processing required to do that being executed only after user edits their profile. Registration triggers boilerplate User class (in boilerplate/models), profile triggers app specific User (in web/models).
+Users don't get automatically added to search index due to processing required to do that being executed only after user edits their profile. Registration triggers boilerplate User class (in boilerplate/models), profile triggers app specific User (in web/models). this can be fixed editing `'user_model'` in `'webapp2_extras.auth'` in config.
 
 Bulk data
 ---------
