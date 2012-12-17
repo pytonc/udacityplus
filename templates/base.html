@@ -1,0 +1,193 @@
+{% import "macros_uplus.html" as m %}
+{% import "macros.html" as macros %}
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title>{% block title %}{{ site_title }}{% endblock title %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+    {% block stylesheets %}
+        <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="/css/select2.css" rel="stylesheet"/>
+        <style>
+            body {
+                padding-top: 60px;
+            }
+        </style>
+        <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+        <link href="/css/style.css" rel="stylesheet"/>
+    {% endblock stylesheets %}
+    
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/img/favicon.png">
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand span2" href="{{ uri_for('home') }}">{{ site_name }}</a>
+
+
+            <div class="nav-collapse collapse">
+                {% if not user_id %}
+                    <a class="btn btn-primary pull-right space4" href="{{ uri_for("register") }}">Sign up</a>
+                    <form class="navbar-form pull-right" action="{{ uri_for("login") }}" method="post">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input class="span2" type="text"
+                               name="username" placeholder="{{ _("Username or Email") }}" required="required">
+                        <input class="span2" type="password"
+                               name="password" placeholder="{{ _("Password") }}" required="required">
+                        <button type="submit" class="btn">Sign in</button>
+                    </form>
+                {% else %}
+                    <div class="navbar-search pull-left">
+                        <input type="text" id="search" class="bigdrop span4" placeholder="Search for people">
+                    </div>
+                    <p class="navbar-text pull-right">
+                        <a href="{{ logout_url }}" class="navbar-link">Log out {{ username }}</a>
+                    </p>
+                {% endif %}
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+    </div>
+    {% block info %}
+    {% if messages|safe %}
+        {% for message in messages %}
+            <p class="alert alert-{{ message[1]|safe }}">
+                <a class="close" data-dismiss="alert">×</a>
+                {{ message[0]|safe }}
+            </p>
+        {% endfor %}
+    {% endif %}
+    {% endblock info %}
+    {% block content %}
+        <div class="container-fluid">
+
+            <div class="row-fluid">
+
+                <!-- side avatar & navbar
+               ================================================== -->
+                {% block leftsidebar %}
+                    <div class="span2 well sidebar-nav">
+                        {% block profileavatar %}
+
+                        {% endblock profileavatar %}
+                        {% block sidebarnav %}
+                            <ul class="nav nav-list">
+
+                                <li class="active"><a href="{{ uri_for('profile', username=username) }}"><i class="icon-home"></i>Profile</a></li>
+                                <li><a href="{{ uri_for('messages', show='all') }}"><i class="icon-envelope"></i>Messages</a></li>
+                                <li><a href="{{ meetups_url }}"><i class="icon-calendar"></i>Meetups</a></li>
+                                <li><a href="{{ uri_for('settings') }}"><i class="icon-wrench"></i>Settings</a></li>
+
+                                <li class="nav-header">Groups</li>
+                                {% if user_id %}
+                                {% for course in user_courses %}
+                                <li>
+                                    <form method="post" style="margin: 0; padding: 0" action="{{ uri_for('chat', channelname=course) }}">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn btn-link" style="padding: 0; margin-left: 0" type="submit" name="{{ course }}"><i class="icon-user"></i>{{ course }}</button>
+                                    </form>
+                                </li>
+
+{#                                    <li>#}
+{#                                        <a class="chatroom" href="{{ uri_for('chat', channelname=course) }}">#}
+{#                                            <i class="icon-user"></i>{{ course }}#}
+{#                                        </a>#}
+{#                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">#}
+{#                                    </li>#}
+
+                                {% endfor %}
+                                {% endif %}
+                            </ul>
+                        {% endblock sidebarnav %}
+                    </div>
+                {% endblock %}
+
+                <!-- body
+               ================================================== -->
+                {% block usercontent %}
+                {% endblock usercontent %}
+
+                <!-- peers list
+               ================================================== -->
+                {% block peerlist %}
+                <div class="span3 well sidebar-nav">
+                    <h2>Peers</h2>
+                    {% if user_id and friends %}
+                    {{ m.friend_list(message_form, friends, username) }}
+                    {% endif %}
+            {% endblock peerlist %}
+        </div>
+
+    </div>
+{% endblock content %}
+{% block footer %}
+    <footer class="span12 well">
+    <p>Footer</p>
+    </footer>
+{% endblock %}
+</body>
+{% block js %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+    <script>window.jQuery || document.write('<script src="/js/libs/jquery.min.js"><\/script>')</script>
+    <script src="/js/temp.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.dialog2.js"></script>
+    <script type="text/javascript" src="/js/jquery.dialog2.helpers.js"></script>
+    <script src="/js/select2/select2.js"></script>
+    <script src="/js/list.min.js"></script>
+    <script type="text/javascript">var search_csrf_token="{{ csrf_token() }}"</script>
+    <script src="/js/user_lookup.js"></script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/script.js"></script>
+    {% if locale_language_id != "en" %}
+        {% if locale_iso.language and locale_iso.territory %}
+            <script src="/js/libs/jquery_validation/localization/messages_{{ locale_iso.language }}_{{ locale_iso.territory }}.js"></script>
+        {% else %}
+            <script src="/js/libs/jquery_validation/localization/messages_{{ locale_language_id }}.js"></script>
+        {% endif %}
+    {% endif %}
+    <script type="text/javascript">
+        $().ready(function() {
+            $("#form_send_msg_sidebar").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                rules: {
+                    receiver: "required",
+                    title: "required",
+                    content: "required"
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        var options = {
+            valueNames: [ 'ident' ]
+        };
+
+        var featureList = new List('filter_friends', options);
+    </script>
+{% endblock js %}
+{% block mediaJS %}{% endblock %}
+</html>
