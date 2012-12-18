@@ -29,6 +29,22 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/img/favicon.png">
+    
+    <!--css for login signup buttons-->
+    <style type= "text/css">
+        .login-signup{
+            font-weight: bold;
+            color: #CCC !important;
+            text-shadow: none !important;
+            }
+
+        .signup-btn-left{
+            border-left-style: solid;
+            border-left-color: #CCC;
+            }
+    </style>
+    <!--cssend-->
+    
 </head>
 <body>
 <div class="navbar navbar-inverse navbar-fixed-top">
@@ -44,14 +60,14 @@
 
             <div class="nav-collapse collapse">
                 {% if not user_id %}
-                    <a class="btn btn-primary pull-right space4" href="{{ uri_for("register") }}">Sign up</a>
+                    <a class="btn btn-link login-signup signup-btn-left pull-right space4" href="{{ uri_for("register") }}">Sign up</a>
                     <form class="navbar-form pull-right" action="{{ uri_for("login") }}" method="post">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <input class="span2" type="text"
                                name="username" placeholder="{{ _("Username or Email") }}" required="required">
                         <input class="span2" type="password"
                                name="password" placeholder="{{ _("Password") }}" required="required">
-                        <button type="submit" class="btn">Sign in</button>
+                        <button type="submit" class="btn login-signup btn-link">Sign in</button>
                     </form>
                 {% else %}
                     <div class="navbar-search pull-left">
