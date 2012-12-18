@@ -1,0 +1,19 @@
+name,level,cid,number,dept,source,key,description,url
+Introduction to Computer Science,Beginning,CS101,101,CS,Udacity,udacitycs101,Building a Search Engine (CS101),http://udacity.com/course/cs101
+Design of Computer Programs,Advanced,CS212,212,CS,Udacity,udacitycs212,Programming Principles (CS212),http://udacity.com/course/cs212
+Algorithms,Intermediate,CS215,215,CS,Udacity,udacitycs215,Crunching Social Networks (CS215),http://udacity.com/course/cs215
+Differential Equations in Action,Intermediate,CS222,222,CS,Udacity,udacitycs222,Making Math Matter (CS222),http://udacity.com/course/cs222
+Web Development,Intermediate,CS253,253,CS,Udacity,udacitycs253,How to Build a Blog (CS253),http://udacity.com/course/cs253
+Software Testing,Intermediate,CS258,258,CS,Udacity,udacitycs258,How to Make Software Fail (CS258),http://udacity.com/course/cs258
+Software Debugging,Intermediate,CS259,259,CS,Udacity,udacitycs259,Automating the Boring Tasks (CS259),http://udacity.com/course/cs259
+Programming Languages,Intermediate,CS262,262,CS,Udacity,udacitycs262,Building a Web Browser (CS262),http://udacity.com/course/cs262
+Introduction to Theoretical Computer Science,Intermediate,CS313,313,CS,Udacity,udacitycs313,Dealing with Challenging Problems (CS313),http://udacity.com/course/cs313
+Artificial Intelligence,Advanced,CS373,373,CS,Udacity,udacitycs373,Programming A Robotic Car (CS373),http://udacity.com/course/cs317
+Applied Cryptography,Advanced,CS387,387,CS,Udacity,udacitycs387,Science of Secrets (CS387),http://udacity.com/course/cs387
+How to Build a Startup,Intermediate,EP245,245,EP,Udacity,udacityep245,The Lean LaunchPad (EP245),http://udacity.com/course/ep245
+Introduction to Physics,Beginning,PH100,100,PH,Udacity,udacityph100,Landmarks in Physics (PH100),http://udacity.com/course/ph100
+Introduction to Statistics,Beginning,ST101,101,ST,Udacity,udacityst101,Making Decisions Based on Data (ST101),http://udacity.com/course/st101
+Interactive Rendering,Intermediate,CS291,291,CS,Udacity,udacitycs291,Introduction to 3D Computer Graphics (CS291),http://udacity.com/course/cs291
+Introduction to Parallel Programming,Advanced,CS344,344,CS,Udacity,udacitycs344,Using CUDA to Harness the Power of GPUs (CS 344),http://udacity.com/course/cs344
+Functional Hardware Verification,Advanced,CS348,348,CS,Udacity,udacitycs348,How to Verify Chips and Eliminate Bugs (CS348),http://udacity.com/course/cs348
+HTML5 Game Development,Intermediate,CS255,255,CS,Udacity,udacitycs255,Building High Performance Web Applications (CS255),http://udacity.com/course/cs255

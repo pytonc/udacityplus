@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ super() }} Send Message{% endblock %}
+{% block usercontent %}
+    <div class="span7">
+        <h3>Send a message</h3>
+        <form id="form_send_message" method="post" class="form-horizontal">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <fieldset>
+                <input type="hidden" name="{{ form.sender.id }}" id="{{ form.sender.id }}" value="{{ username }}">
+                {% if not form.receiver.data or not form.title.data %}
+                {{ macros.field(form.receiver, label=_("Receiver"), placeholder=_("Receiver"), class="input-xlarge focused") }}
+                {{ macros.field(form.title, label=_("Title"), placeholder=_("Title"), class="input-xlarge focused") }}
+                {{ macros.field(form.content, label=_("Content"), placeholder=_("Message"), class="input-xlarge focused") }}
+                {% else %}
+                {{ macros.field(form.receiver, label=_("Receiver"), readonly="readonly",
+                        placeholder=_("Receiver"), class="input-xlarge focused") }}
+                {{ macros.field(form.title, label=_("Title"), readonly="readonly",
+                        placeholder=_("Title"), class="input-xlarge focused") }}
+                {{ macros.field(form.content, label=_("Content"), placeholder=_("Message"), class="input-xlarge focused") }}
+                {% endif %}
+            <div class="form-actions">
+                <input class="btn btn-primary" name="submit" value="Send Message" type="submit">
+            </div>
+
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
+
+{% block js %}
+    {{ super() }}
+    <script type="text/javascript">
+        $().ready(function() {
+            $("#form_send_message").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                rules: {
+                    receiver: "required",
+                    title: "required",
+                    content: "required"
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+        });
+    </script>
+{% endblock %}

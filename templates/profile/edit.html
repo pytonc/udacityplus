@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block profileavatar %}
+    <img src="{{ gravatar }}" height="100%" width="100%" class="img-polaroid">
+    <a href="http://en.gravatar.com/emails/">Change profile picture</a>
+    <hr>
+{% endblock profileavatar %}
+{% block stylesheets %}
+    {{ super() }}
+    <link href="/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="/css/datepicker.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="/css/chosen.css" media="screen" rel="stylesheet" type="text/css">
+    <link href="/css/pagedown.css" media="screen" rel="stylesheet" type="text/css">
+{% endblock stylesheets %}
+{% block usercontent %}
+    <form id="form_edit_profile" action="{{ url|safe }}" method="post" class="form-horizontal span7 well">
+        <fieldset>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="username" value="{{ form.username.data }}">
+            {{ macros.field(form.name, label=_("Name"), placeholder=_("Enter your")+" "+_("Name"), class="input-xlarge focused") }}
+            {{ macros.field(form.last_name, label=_("Last Name"), placeholder=_("Enter your")+" "+_("Last Name"), class="input-xlarge focused") }}
+            {{ macros.field(form.country, label=_("Country")) }}
+            {{ macros.field(form.dob, label=_("Date of Birth")) }}
+            <div class="control-group">
+                <label class="control-label">{% trans %}Email{% endtrans %}:</label>
+                <div class="controls">
+                    {{ email }} (<a href="{{ uri_for('edit-email') }}">{% trans %}Change your email{% endtrans %}</a>)
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <a href="{{ uri_for("edit-password") }}">{% trans %}Change your password{% endtrans %}</a>
+                </div>
+            </div>
+            {% if enable_federated_login %}
+                {% if used_providers %}
+                    <div id="trird_party_login" class="existing-accociation">
+                        <h4>{% trans %}Existing social association{% endtrans %}:</h4>
+                        <table class=" social-login-icons">
+                            {% for provider in used_providers %}
+                                <tr>
+                                    <td><a href="#" class="social-btn social-btn-{{ provider.name }}" title="{{ provider.label }}"></a></td>
+                                    {% if used_providers|length > 1 or local_account %}
+                                        <td><a href="/social_login/{{ provider.name }}/delete" class="btn btn-danger"><i class="icon-trash icon-white"></i>&nbsp;{% trans %}Remove{% endtrans %}</a></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+                {% if unused_providers %}
+                    <div id="trird_party_login" class="form-actions">
+                        <h4>{% trans %}Associate account with{% endtrans %}:</h4>
+                        <div class="social-login-icons">
+                            {% for provider in unused_providers %}
+                                <a href="{{ provider_uris[provider.name] }}" class="social-btn social-btn-{{ provider.name }}" title="{{ provider.label }}">{{ provider.label }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="control-group">
+                <!-- About -->
+                <div class="control-group">
+                    <label class="control-label" for="wmd-input">About</label>
+                    <div class="controls">
+                        <div class="wmd-panel">
+                            <div id="wmd-button-bar-about"></div>
+                            <textarea class="wmd-input span12"
+                                      name="short_about" id="wmd-input-about">{{ user.short_about }}</textarea>
+                        </div>
+                        <div id="wmd-preview-about" class="wmd-panel wmd-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- tools -->
+            <div class="control-group">
+                <label class="control-label" for="wmd-input">Tools</label>
+                <div class="controls">
+                    <div class="wmd-panel">
+                        <div id="wmd-button-bar"></div>
+                        <textarea name="tools" class="wmd-input span12" id="wmd-input">{{ user.tools }}</textarea>
+                    </div>
+                    <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="classes_inprog">Courses in progress</label>
+                <div class="controls">
+                    <select name="classes_inprog" class="span8" id="classes_inprog" multiple>
+                        {% for level, courses in courses_all.iteritems() %}
+                            {% if courses %}
+                                <optgroup label="{{ level }}">
+                                    {% for course in courses %}
+                                        <option value="{{ course.key.id() }}"
+                                                {% if course in courses_incomplete %}selected{% endif %}>
+                                            {{ course.name }} {{ course.dept }} {{ course.number }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="classes_completed">Courses completed</label>
+                <div class="controls">
+                    <select name="classes_completed" class="span8" id="classes_completed" multiple>
+                        {% for level, courses in courses_all.iteritems() %}
+                            {% if courses %}
+                                <optgroup label="{{ level }}">
+                                    {% for course in courses %}
+                                        <option value="{{ course.key.id() }}"
+                                                {% if course in courses_completed %}selected{% endif %}>
+                                            {{ course.name }} {{ course.dept }} {{ course.number }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {{ macros.field(form.public, label=_("Profile is public")) }}
+            {{ macros.field(form.notify_on_msg, label=_("Notify user on new message")) }}
+            {{ macros.field(form.searchable, label=_("Make profile serachable")) }}
+            {{ macros.field(form.show_friends, label=_("Show friends")) }}
+{#            {{ macros.field(form.show_friends, label=_("Show friends"), checked=user.show_friends) }}#}
+       </fieldset>
+        <div class="control-group">
+            <div class="controls">
+                <a href="{{ uri_for("edit-password") }}">{% trans %}Change your password{% endtrans %}</a>
+            </div>
+        </div>
+
+        <input type="hidden" name="mode" value="edit"/>
+        <div class="control-group">
+            <label class="control-label"></label>
+
+            <!-- Button -->
+            <div class="controls">
+                <input type="submit" class="btn btn-primary" value="Update Profile">
+            </div>
+        </div>
+    </form>
+
+{% endblock usercontent%}
+{% block js %}
+    {{ super() }}
+    <script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $('#dob').datepicker()
+        $('#classes_inprog').chosen({no_results_text: "No results matched"})
+        $('#classes_completed').chosen({no_results_text: "No results matched"})
+    </script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Converter.js"></script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Sanitizer.js"></script>
+    <script type="text/javascript" src="/js/pagedown/Markdown.Editor.js"></script>
+    <script type="text/javascript">
+        (function () {
+            var converter1 = Markdown.getSanitizingConverter();
+            var editor1 = new Markdown.Editor(converter1);
+            editor1.run();
+
+            var editor2 = new Markdown.Editor(converter1, '-about')
+            editor2.run();
+        })();
+    </script>
+{% endblock %}
